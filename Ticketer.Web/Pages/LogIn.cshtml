@@ -1,0 +1,31 @@
+﻿@page
+@model LogInModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <div class="row">
+        <div class="col-md-12">
+            @* only show when there are ongoing events <h2>Ongoing Events</h2> *@
+            <hr class="shadow" style="border-top: 6px solid #ffffff"/>
+            <div class="text-center text-white fw-bolder" style="margin-bottom: 2rem;">
+                <h1 class="display-2">~ Fake login page ~</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <form method="post" id="loginForm">
+                    <select class="form-select" name="userId" onchange="this.form.submit()">
+                        <option value="">Select user</option>
+                        @foreach (var user in Model.Items)
+                        {
+                            <option value="@user.Id">@user.UserName</option>
+                        }
+                    </select>
+                </form>
+            </div>
+            <div class="col-4"></div></div>
+    </div>
+</div>

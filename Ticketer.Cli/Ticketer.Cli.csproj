@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>Ticketer.Cli</AssemblyName>
+        <RootNamespace>Ticketer</RootNamespace>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SpikeCli\SpikeCli.csproj" />
+      <ProjectReference Include="..\Ticketer.Model\Ticketer.Model.csproj" />
+      <ProjectReference Include="..\Ticketer.UseCases\Ticketer.UseCases.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="seedSpikeDb.sh">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Nethereum.Web3" Version="5.8.0" />
+<!--      <PackageReference Include="SpikeCli" Version="0.1.0-alpha" />-->
+        <PackageReference Include="SpikeDb" Version="0.1.0-alpha" />
+    </ItemGroup>
+
+</Project>

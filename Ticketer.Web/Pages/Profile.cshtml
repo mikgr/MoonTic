@@ -1,0 +1,28 @@
+﻿@page
+@using SpikeDb
+@using Ticketer.Model
+@model ProfileModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            
+            <div class="card-body">
+                <p>
+                    Balance: € @Model.Balance
+                </p>
+                <p>
+                    E-mail: @(Model.CurrentUser?.Email??"n/a")
+                </p>
+                <p>
+                    Address: @Model.Address
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+

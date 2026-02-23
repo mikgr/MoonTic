@@ -1,0 +1,94 @@
+﻿@page
+@model EventOrganizerModel
+@{
+    ViewData["Title"] = "Drafts Events";
+}
+<div class="row">
+    <div class="col-md-12">
+        @* only show when there are ongoing events <h2>Ongoing Events</h2> *@
+        <div class="text-center text-white fw-bolder" style="margin-bottom: 1rem;">
+            <h1 class="display-2">~ Event Organizer ~</h1>
+        </div>
+        <hr class="shadow" style="border-top: 6px solid #ffffff"/>
+    </div>
+</div>
+<div class="row">
+    <div class="col-2">
+        <partial name="_EventOrganizerSidemenu"/>
+    </div>
+    <div class="col-10">
+        @* PILLS  *@
+        <div class="row">
+            <div class="col-md-12" style="margin-bottom: 1rem;">
+                <div class="row site-text-shadow">
+                    <nav class="nav nav-pills nav-fill">
+                        <a class="nav-link fw-bolder text-dark active bg-light site-box-shadow" aria-current="page" href="#"
+                           hx-get="/EventOrganizer?handler=DraftEvents" hx-target="#main-content"
+                           hx-on:click="console.log('Button clicked')">
+                            @*todo hook up click to remove all active and set one active *@
+                            ✍️ Event Drafts
+                        </a>
+                        &nbsp;
+                        <a class="nav-link fw-bolder text-light active bg-secondary" aria-current="page" href="#"
+                           hx-get="/EventOrganizer?handler=PublishedEvents" hx-target="#main-content">
+                            🚀 Published Events
+                        </a>
+                        &nbsp;
+                        <a class="nav-link fw-bolder text-light bg-secondary" href="#">
+                            📕 Past Events
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content Area -->
+        <div class="row">
+            <div class="col-md-12">
+                <div id="main-content">
+                    <partial name="_DraftEvents" model="@Model.DraftEvents"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal, Create Event -->
+<div class="modal fade" id="create-event-modal" tabindex="-1" aria-labelledby="createEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="createEventModalLabel">➕ Create Event</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="CreateEvent">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="eventName" class="form-label">Event Name</label>
+                        <input type="text" class="form-control" id="eventName" name="eventName" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="eventDate" class="form-label">Venue Open Time</label>
+                        <input type="datetime-local" class="form-control" id="eventDate" name="venueOpenTime" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="venueCloseTime" class="form-label">Venue Close Time</label>
+                        <input type="datetime-local" class="form-control" id="venueCloseTime" name="venueCloseTime" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ticketCount" class="form-label">Ticket Count</label>
+                        <input type="number" class="form-control" id="ticketCount" name="ticketCount" min="1" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
