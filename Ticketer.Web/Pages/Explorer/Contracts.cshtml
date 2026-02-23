@@ -1,0 +1,121 @@
+@page "/explorer/contracts/{address?}/{ticketSegment?}/{ticketId?}"
+@using Ticketer.Model
+@model Contracts
+
+@{
+    Layout = "_Layout";
+    const int hashCompression = 40;
+}
+
+<div>&nbsp;</div>
+@if(!string.IsNullOrWhiteSpace(Model.ContractAddress))
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="card-title">
+                <h4 class="mb-3">Contract: <code>@Model.ContractAddress</code>
+                    @if (Model.TicketId.HasValue)
+                    {
+                        <span> / Ticket: <code>@Model.TicketId</code></span>
+                    }
+                </h4>
+            </div>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Event</th>
+                <th>Ticket ID</th>
+                <th>Timestamp</th>
+                <th>Address</th>
+                <th>Transaction Hash</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var cp in Model.ContractEvents)
+            {
+                @switch (cp)
+                {
+                    case TicketPurchasedEvent tpe:
+                        <tr>
+                            <td><span class="me-2">💶</span>Purchase</td>
+                            <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@tpe.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@tpe.TicketId</a></td>
+                            <td title="@tpe.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@tpe.TimestampUtc.ToTimeAgo()</td>
+                            <td>@tpe.ToAddress.Compress(20)</td>
+                            <td><code class="small">@tpe.TransactionHash.Compress(hashCompression)</code></td>
+                        </tr>
+                        break;
+
+                    case TicketCheckedInEvent tce:
+                        <tr>
+                            <td><span class="me-2">🏃🏽‍♀️‍➡️🚪</span>Check-In</td>
+                            <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@tce.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@tce.TicketId</a></td>
+                            <td title="@tce.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@tce.TimestampUtc.ToTimeAgo()</td>
+                            <td>@tce.Address.Compress(20)</td>
+                            <td><code class="small">@tce.TransactionHash.Compress(hashCompression)</code></td>
+                        </tr>
+                        break;
+
+                    case TicketCheckedOutEvent tco:
+                        <tr>
+                            <td><span class="me-2">🪂️</span>Check-Out</td>
+                            <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@tco.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@tco.TicketId</a></td>
+                            <td title="@tco.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@tco.TimestampUtc.ToTimeAgo()</td>
+                            <td>@tco.Address.Compress(20)</td>
+                            <td><code class="small">@tco.TransactionHash.Compress(hashCompression)</code></td>
+                        </tr>
+                        break;
+
+                    case TicketTransferredEvent tt:
+                        <tr>
+                            <td><span class="me-2">➡️</span>Transfer</td>
+                            <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@tt.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@tt.TicketId</a></td>
+                            <td title="@tt.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@tt.TimestampUtc.ToTimeAgo()</td>
+                            <td>@tt.FromAddress.Compress(20) ➡️ @tt.ToAddress.Compress(20)</td>
+                            <td><code class="small">@tt.TransactionHash.Compress(hashCompression)</code></td>
+                        </tr>
+                        break;
+                }
+            }
+            </tbody>
+        </table>
+        </div>
+    </div>
+}
+
+@if (Model.ContractCreatedEvents.Count > 0)
+{
+    <div class="card">
+    <div class="card-body">
+            
+        <div class="card-title">
+            <h4> Published Ticket Contracts</h4>
+        </div>
+
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Published</th>
+                <th>Event Name</th>
+                <th>Contract Address</th>
+                <th>Publish Transaction Hash</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var c in Model.ContractCreatedEvents)
+            {
+
+                <tr>
+                    <td title="@c.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss") UTC">@c.TimeStamp.ToTimeAgo()</td>
+                    <td>@c.ContractName</td>
+                    <td><a href="/explorer/contracts/@c.ContractAddress" class="text-decoration-none" style="color: var(--bs-code-color);"><code class="small">@c.ContractAddress</code></a></td>
+                    <td><code class="small">@c.TxHash</code></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    </div>
+}
+

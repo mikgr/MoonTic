@@ -1,0 +1,80 @@
+﻿@page
+@using Ticketer.Model
+@model AllEventsModel
+@{
+    ViewData["Title"] = "Events";
+}
+<div class="row">
+    <div class="col-12">
+        <hr class="shadow" style="border-top: 6px solid #ffffff"/>
+        <div class="text-center text-white fw-bolder" style="margin-bottom: 1rem;">
+            <h1 class="display-2">~ @ViewData["Title"] ~</h1>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    @if (Model.ErrorMessage != "")
+    {
+        <div class="col-md-12">
+            <div class="card bg-danger">
+                <div class="card-body">
+                    @Model.ErrorMessage
+                </div>
+            </div>
+            
+        </div>
+    }
+    
+    @foreach (var c in Model.EventContracts)
+    {
+        <div class="col-md-12">
+            <div class="card" style="box-shadow: 2px 4px 6px 2px rgba(0,0,0,0.2); margin-bottom: 1.5rem; background-color: #6b7353;">
+                <div class="card-body">
+                    <div style="border-bottom-style: dashed; border-bottom-color: aliceblue;">
+                        <h4 class="card-title display-4" style="font-weight: bolder; color: aliceblue;">
+                            ⭐ @c.Name
+                        </h4>
+                    </div>
+                    @* checkout-block time, event end time, publish time, days left bids asks Artwork, description   *@
+                    <div class="card-text fw-bolder" style="color: aliceblue; padding-top: 1rem;">
+                        <p>
+                            🗓️ Venue Open: @c.VenueOpenTime.ToString("MMM d yyyy HH\\:mm")
+                            <br/><small>
+                                Ticket Check-Out is prohipited from @c.GetCheckOutBlockStart().ToString("MMM d yyyy HH\\:mm")
+                            </small>
+                        </p>
+                        <p>🗓️ Venue Close: @c.VenueCloseTime.ToString("MMM d yyyy HH\\:mm")</p>
+                        <p>💰 Price: € @c.TicketPrice.ToString("F2")</p>
+                        <p>Organizer: @c.OwnerId</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <span>🎫 Remaining Tickets: @c.RemainingTickets of @(c.SoldTickets + c.RemainingTickets)</span>
+                            <div class="progress flex-grow-1" style="height: 20px; background-color: #484846">
+                                <div class="progress-bar bg-dark" role="progressbar" style="width: @GetProgress(c)%" aria-valuenow="@GetProgress(c)" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="row align-items-end" style="margin-top: 1rem;">
+                            <div class="col-md-6">
+                                <span class="small" style="color: #363a29;">
+                                    Contract Address: <a target="_blank" style="color: #363a29; text-decoration: none;" href="@($"/explorer/contracts/{@c.ContractAddress}")">@c.ContractAddress</a>
+                                </span>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <form method="post" asp-page-handler="Buy">
+                                    <input type="hidden" name="eventId" value="@c.Id"/>
+                                    <button class="btn btn-light" type="submit">🛒 Buy Ticket</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@{
+    decimal GetProgress(EventContract c) => 
+        (int)System.Math.Round((decimal)c.SoldTickets / (c.RemainingTickets + c.SoldTickets)*100m);
+    
+}

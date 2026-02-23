@@ -1,0 +1,57 @@
+@model  List<Ticketer.Model.EventContract> 
+
+@foreach (var item in Model)
+{
+    <div class="card" style="margin-bottom: 1rem;">
+        <div class="card-body site-box-shadow">
+            <div class="row">
+                <div class="col-12">
+                    <span class="display-4">
+                        🚀 @item.Name
+                    </span>
+                    <hr style="border: 1px dashed #ccc;" />
+                </div>
+            </div>
+            <div class="row fs-4">
+                <div class="col-md-6">
+                    <p><strong>Venue Open Time:</strong> @item.VenueOpenTime.ToString("MMM d yyyy HH\\:mm")</p>
+                    <p><strong>Ticket Price:</strong> @item.TicketPrice.ToString("F2")</p>
+                    <p><strong>Sold Tickets:</strong> @item.SoldTickets</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Venue Close Time:</strong> @item.VenueCloseTime.ToString("MMM d yyyy HH\\:mm")</p>
+                    <p><strong>Balance:</strong> @item.Balance.ToString("F2")</p>
+                    <p><strong>Remaining Tickets:</strong> @item.RemainingTickets</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <hr style="border: 1px dashed #ccc;" />
+                    <div class="btn-group float-end">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            ✨ Action
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="#">📩 Send Ticket From Reserve</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    🫴 Change price
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">🎫 Usher Attendee</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    🤑 Withdrawal money from Contract
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,57 @@
+@model List<Ticketer.Model.EventInfo>
+
+@foreach (var e in Model)
+{
+    <div class="card site-box-shadow" style="margin-bottom: 1rem;">
+        <div class="card-body">
+            <div class="card-title">
+                <h3 class="display-4">
+                    ✍️ @e.Name
+                </h3>
+                <hr style="border: 1px dashed #ccc;" />
+            </div>
+            <div class="row fs-4">
+                <div class="col-md-6">
+                    <p><strong>Venue Open Time:</strong> @e.VenueOpenTime.ToString("MMM d yyyy HH\\:mm")</p>
+                    <p><strong>Price:</strong> € @e.Price.ToString("F2")</p>
+                    <p><strong>Ticket Count:</strong> @e.Tickets</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Venue Close Time:</strong> @e.VenueCloseTime.ToString("MMM d yyyy HH\\:mm")</p>
+                    <p><strong>Check-Out Blocked:</strong> '@e.BlockCheckOutBeforeVenueOpenInHours' hours before Venue Open Time</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <hr style="border: 1px dashed #ccc;" />
+                    <div class="btn-group float-end">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            ✨ Action
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form asp-page-handler="Transfer">
+                                    <button class="dropdown-item" type="submit">✍️ Edit Event</button>
+                                </form>
+                            </li>
+                            <li>
+                                <!-- Button trigger modal -->
+                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#check-in-modal">
+                                    @* data-ticket-id="@e.TicketNo" data-event-name="@t.EventName" data-event-id="@t.EventId"> *@
+                                    🗑️ Delete Draft
+                                </button>
+                            </li>
+                            <li>
+                                <form method="post" asp-page-handler="Publish">
+                                    <input type="hidden" name="eventId" value="@e.Id"/>
+                                    <button class="dropdown-item" type="submit">🚀 Publish</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+}

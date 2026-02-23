@@ -1,0 +1,230 @@
+﻿@page
+@model TicketsModel
+@{
+    ViewData["Title"] = "Tickets";
+}
+<div class="row">
+    <div class="col-md-12">
+        @* only show when there are ongoing events <h2>Ongoing Events</h2> *@
+        <hr class="shadow" style="border-top: 6px solid #ffffff"/>
+        <div class="text-center text-white fw-bolder" style="margin-bottom: 1rem;">
+            <h1 class="display-2">~ Upcoming Events ~</h1>
+        </div>
+    </div>
+</div>
+
+
+@* font user gravitas for display https://fonts.google.com/specimen/Gravitas+One/tester?preview.text=ticket&preview.layout=grid&categoryFilters=Serif:%2FSerif%2F*,%2FSlab%2F* *@
+
+<div class="row">
+    @foreach (var t in Model.Tickets)
+    {
+        <!--Ticket Card -->
+        <div class="col-md-4">
+            <div class="card" style="box-shadow: 2px 4px 6px 2px rgba(0,0,0,0.2); margin-bottom: 1.5rem; background-color: #2c3e50;">
+                <div class="card-body">
+                    <div style="border-bottom-style: dashed; border-bottom-color: aliceblue;">
+                        <h3 class="card-title" style="font-weight: bolder; color: aliceblue;">
+                            ⭐ @t.EventName
+                        </h3>
+                    </div>
+                    <div class="card-text fw-bolder" style="color: aliceblue; padding-top: 1rem;">
+                        <p>#️⃣️ TicketNo: @t.TicketNo</p>
+                        <p>🗓️ VenueOpenTime: @t.Date.ToString("MMM d yyyy HH\\:mm")</p>
+                        @if (t.IsCheckedIn)
+                        {
+                            <span class="badge bg-success">✅️ Checked In </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-light text-dark">Not️ Checked In </span>
+                        }
+                        <div class="btn-group float-end">
+                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                Action
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    @if (@t.IsCheckedIn)
+                                    {
+                                        <li>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="dropdown-item">
+                                                🖨️ Print Boarding Pass
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#check-out-modal"
+                                                    data-ticket-id="@t.TicketNo" data-event-id="@t.EventId">
+                                                🚪️ Check Out
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="disabled dropdown-item">📩 Transfer Ticket</button>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="disabled dropdown-item">
+                                                🖨️ Print Boarding Pass
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#check-in-modal"
+                                                    data-ticket-id="@t.TicketNo" data-event-name="@t.EventName" data-event-id="@t.EventId">
+                                                ✅️ Check In
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#transfer-modal"
+                                                    data-ticket-id="@t.TicketNo" data-event-id="@t.EventId">
+                                                📩 Transfer Ticket
+                                            </button>
+                                        </li>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-12">
+        <hr class="shadow" style="border-top: 6px solid #ffffff"/>
+        <div class="text-center text-white fw-bolder" style="margin-bottom: 1rem;">
+            <h1 class="display-2">~ Past Events ~</h1>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <h1>
+            <p class="text-light text-lg-center"> 🦗 🦗 🦗 </p>
+            
+        </h1>
+    </div>
+</div>
+
+
+<!-- Modal, CheckIn -->
+<div class="modal fade" id="check-in-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                <p>When you check in, you'll get a boarding pass, and the ticket cannot be transfer.</p>
+                <p>You can checkout until the event start time: xx-xx-xxxx xx:xx. If you checkout, the boarding pass will no longer work. You'll get at new boarding once you check in again.</p>
+                <p>You can store the boarding pass in your phone wallet, take a screen shot or print it on paper. Whoever precents this boarding pass gets to enter the event (It's like an ond school pdf ticket)</p>
+                <p>The checkin costs a small transaction fee of ~ xx.xx EURC</p>
+            
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form class="btn btn-primary" asp-page-handler="CheckIn">
+                    <input type="hidden" id="event-id" name="eventId" value="" />
+                    <input type="hidden" id="ticket-id" name="ticketId" value="" />
+                    <button class="dropdown-item" type="submit">Check In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal, CheckOut -->
+<div class="modal fade" id="check-out-modal" tabindex="-1" aria-labelledby="checkOutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="checkOutModalLabel">Check Out</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>When you check out, your boarding pass will no longer work.</p>
+                <p>You can check in again to get a new boarding pass.</p>
+                <p>After checkout, you can transfer the ticket to someone else.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form class="btn btn-warning" asp-page-handler="CheckOut">
+                    <input type="hidden" id="checkout-event-id" name="eventId" value="" />
+                    <input type="hidden" id="checkout-ticket-id" name="ticketId" value="" />
+                    <button class="dropdown-item" type="submit">Check Out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal, Transfer -->
+<div class="modal fade" id="transfer-modal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="transferModalLabel">Transfer Ticket</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Transfer this ticket to another user. Once transferred, you will no longer own this ticket.</p>
+                <div class="mb-3">
+                    <label for="recipient-address" class="form-label">Recipient FromAddress</label>
+                    <input type="text" class="form-control" id="recipient-address" name="recipientFromAddress" placeholder="Enter FromAddress 0x..." />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form class="btn btn-primary" asp-page-handler="Transfer">
+                    <input type="hidden" id="transfer-event-id" name="eventId" value="" />
+                    <input type="hidden" id="transfer-ticket-id" name="ticketId" value="" />
+                    <input type="hidden" id="transfer-to-address" name="recipientAddress" value="" />
+                    <button class="dropdown-item" type="submit">Transfer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('check-in-modal').addEventListener('show.bs.modal', function (event) {
+        let button = event.relatedTarget;
+        let ticketId = button.getAttribute('data-ticket-id');
+        let eventName = button.getAttribute('data-event-name');
+        let eventId = button.getAttribute('data-event-id');
+        document.getElementById('event-id').value = eventId;
+        document.getElementById('ticket-id').value = ticketId;
+        this.querySelector('.modal-title').textContent = 'Check In Ticket No. ' + ticketId + ' for "' +  eventName + '"';
+    });
+    
+    document.getElementById('check-out-modal').addEventListener('show.bs.modal', function (event) {
+        let button = event.relatedTarget;
+        let ticketId = button.getAttribute('data-ticket-id');
+        let eventId = button.getAttribute('data-event-id');
+        document.getElementById('checkout-event-id').value = eventId;
+        document.getElementById('checkout-ticket-id').value = ticketId;
+        this.querySelector('.modal-title').textContent = 'Check Out Ticket No. ' + ticketId;
+    });
+    
+    document.getElementById('transfer-modal').addEventListener('show.bs.modal', function (event) {
+        let button = event.relatedTarget;
+        let ticketId = button.getAttribute('data-ticket-id');
+        let eventId = button.getAttribute('data-event-id');
+        document.getElementById('transfer-event-id').value = eventId;
+        document.getElementById('transfer-ticket-id').value = ticketId;
+        this.querySelector('.modal-title').textContent = 'Transfer Ticket No. ' + ticketId;
+    });
+    
+    // Copy recipient user ID from input to hidden field before submit
+    document.querySelector('#transfer-modal form').addEventListener('submit', function() {
+        document.getElementById('transfer-to-address').value = document.getElementById('recipient-address').value;
+    });
+</script>

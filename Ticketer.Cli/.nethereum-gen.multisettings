@@ -1,0 +1,14 @@
+[
+  {
+    "name": "TicketProject",
+    "output": "/Users/mikkel/Code/Teroxx/buy-back-spike/BuyBackSpike/Ticketer.Cli/GeneratedContracts",
+    "namespace": "MyProject.Contracts",
+    "contracts": [
+      {
+        "name": "Ticket",
+        "abi": "/Users/mikkel/Code/hello_foundry/nft-foundry/out/Ticket.sol/Ticket.abi.json",
+        "byteCode": "/Users/mikkel/Code/hello_foundry/nft-foundry/out/Ticket.sol/Ticket.bin"
+      }
+    ]
+  }
+]
