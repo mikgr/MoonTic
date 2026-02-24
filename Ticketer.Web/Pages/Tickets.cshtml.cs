@@ -1,5 +1,4 @@
-﻿﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SpikeDb;
 using Ticketer.Model;
@@ -7,7 +6,7 @@ using Ticketer.UseCases;
 
 namespace Ticketer.Web.Pages;
 
-public record TicketHolding(int TicketNo, int EventId, string EventName, DateTime Date, bool IsCheckedIn);
+public record TicketHolding(int TicketNo, int EventId, string ContractAddress, string EventName, DateTime Date, bool IsCheckedIn);
 
 public class TicketsModel : PageModel
 {
@@ -41,7 +40,8 @@ public class TicketsModel : PageModel
             from t in ticketPurchases.GetAllTickets()
             join c in contracts on t.EventId equals c.Id
             orderby c.VenueOpenTime, t.TicketId
-            select new TicketHolding(t.TicketId, t.EventId, c.Name, c.VenueOpenTime, t.IsCheckedIn);
+            select new TicketHolding(
+                t.TicketId, t.EventId, c.ContractAddress, c.Name, c.VenueOpenTime, t.IsCheckedIn);
         
         Tickets = tickets;
     }
