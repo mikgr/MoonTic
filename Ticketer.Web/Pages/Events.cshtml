@@ -83,6 +83,25 @@
             </div>
             <div class="modal-body">
                 <p>💰 Price: € <span id="buy-event-price"></span></p>
+                <hr/>
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Card Number</label>
+                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" />
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label small text-muted">Expiry</label>
+                        <input type="text" class="form-control" placeholder="MM / YY" maxlength="7" />
+                    </div>
+                    <div class="col">
+                        <label class="form-label small text-muted">CVC</label>
+                        <input type="text" class="form-control" placeholder="123" maxlength="4" />
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label small text-muted">Name on Card</label>
+                    <input type="text" class="form-control" placeholder="J. Doe" />
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
