@@ -60,10 +60,10 @@
                                 </span>
                             </div>
                             <div class="col-md-6 text-end">
-                                <form method="post" asp-page-handler="Buy">
-                                    <input type="hidden" name="eventId" value="@c.Id"/>
-                                    <button class="btn btn-light" type="submit">🛒 Buy Ticket</button>
-                                </form>
+                                <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#buy-modal"
+                                        data-event-id="@c.Id" data-event-name="@c.Name" data-event-price="@c.TicketPrice.ToString("F2")">
+                                    🛒 Buy Ticket
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -72,6 +72,41 @@
         </div>
     }
 </div>
+
+<!-- Modal, Buy -->
+<div class="modal fade" id="buy-modal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="buyModalLabel">Buy Ticket</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>💰 Price: € <span id="buy-event-price"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form class="btn btn-success" method="post" asp-page-handler="Buy">
+                    <input type="hidden" id="buy-event-id" name="eventId" value="" />
+                    <button class="dropdown-item" type="submit">🛒 Confirm Purchase</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('buy-modal').addEventListener('show.bs.modal', function (event) {
+        let button = event.relatedTarget;
+        let eventId = button.getAttribute('data-event-id');
+        let eventName = button.getAttribute('data-event-name');
+        let eventPrice = button.getAttribute('data-event-price');
+        document.getElementById('buy-event-id').value = eventId;
+        document.getElementById('buy-event-name').textContent = eventName;
+        document.getElementById('buy-event-price').textContent = eventPrice;
+        this.querySelector('.modal-title').textContent = 'Buy Ticket for "' + eventName + '"';
+    });
+</script>
 
 @{
     decimal GetProgress(EventContract c) => 
