@@ -16,8 +16,7 @@ public class PublishEventHandler(DeployContractHandler deployContractHandler)
         if (eventInfo.Owner != currentUser?.Id) throw new DomainInvariant("Not authorized to publish event");
 
         var eventContract = EventContract.New(eventInfo);
-        eventContract.SpikePersistInt();
-        SpikeRepo.Delete<EventInfo>(eventInfoId);
+      
         
         // Constructor arguments
         BigInteger fakeCheckOutBlockedTime = eventContract.GetCheckOutBlockStart().ToUnixTimestamp();
@@ -37,6 +36,9 @@ public class PublishEventHandler(DeployContractHandler deployContractHandler)
                 
         await deployContractHandler.Execute(constructorArgs, eventContract);
 
+        eventContract.SpikePersistInt();
+        SpikeRepo.Delete<EventInfo>(eventInfoId);
+        
         new TicketContractPublishedEvent
         {
             Id = -1,
