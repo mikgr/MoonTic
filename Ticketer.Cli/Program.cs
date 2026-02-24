@@ -51,7 +51,7 @@ public static class Program
             .Cmd("rm", "event-info", "id", (int eventInfoId) => HandleRmEventInfo(eventInfoId, currentUser))
             // todo must deploy 
             .CmdDi("publish", "event", "event-info-id", (IServiceProvider s, int eventInfoId) => 
-                s.GetRequiredService<PublishEventHandler>().Execute(eventInfoId, currentUser))
+                s.GetRequiredService<PublishEventHandler>().Execute(eventInfoId, currentUser).Wait())
             
             // contract
             .CmdDi("print", "event", "id", (IServiceProvider s, int eventId) => 
