@@ -39,7 +39,7 @@ public class EventOrganizerModel : PageModel
         return currentUser;
     }
 
-    public IActionResult OnPostPublish(int eventId)
+    public async Task<IActionResult> OnPostPublish(int eventId)
     {
         var userId = HttpContext.Session.GetInt32("UserId");
         if (userId is null) return RedirectToPage("/LogIn");
@@ -47,7 +47,7 @@ public class EventOrganizerModel : PageModel
         var currentUser = SpikeRepo.ReadIntId<User>(userId.Value);
         
         var publishEventHandler = HttpContext.RequestServices.GetRequiredService<PublishEventHandler>();
-        publishEventHandler.Execute(eventId, currentUser);
+        await publishEventHandler.Execute(eventId, currentUser);
         
         return Redirect("/Events");
     }

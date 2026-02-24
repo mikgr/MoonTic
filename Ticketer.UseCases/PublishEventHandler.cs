@@ -5,16 +5,9 @@ using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class PublishEventHandler
+public class PublishEventHandler(DeployContractHandler deployContractHandler)
 {
-    private readonly DeployContractHandler _deployContractHandler;
-
-    public PublishEventHandler(DeployContractHandler deployContractHandler)
-    {
-        _deployContractHandler = deployContractHandler;
-    }
-
-    public void Execute(int eventInfoId, User? currentUser)
+    public async Task Execute(int eventInfoId, User? currentUser)
     {
         Console.WriteLine("Publishing event");
         // todo prevent the same event from being published twice
@@ -42,7 +35,7 @@ public class PublishEventHandler
             location
         };
                 
-        _deployContractHandler.Execute(constructorArgs, eventContract).Wait();
+        await deployContractHandler.Execute(constructorArgs, eventContract);
 
         new TicketContractPublishedEvent
         {
