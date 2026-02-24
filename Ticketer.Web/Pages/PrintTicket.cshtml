@@ -1,0 +1,21 @@
+@page "/tickets/{ContractAddress}/{TicketId}/print"
+@model Ticketer.Web.Pages.PrintTicket
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Print Ticket</title>
+</head>
+<body>
+<div>
+    <p>@Model.ContractAddress</p>
+    <p>@Model.TicketId</p>
+    <p>@Model.Secret</p>
+</div>
+</body>
+</html>
