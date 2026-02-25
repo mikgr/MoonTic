@@ -39,9 +39,9 @@ public class PrintTicket : PageModel
         var qrValue = $"moontic://usherticket/{ContractAddress}/{TicketId}/{Secret}";
 
         using var qrGenerator = new QRCodeGenerator();
-        using var qrCodeData = qrGenerator.CreateQrCode(qrValue, QRCodeGenerator.ECCLevel.Q);
+        using var qrCodeData = qrGenerator.CreateQrCode(qrValue, QRCodeGenerator.ECCLevel.L);
         var qrCode = new PngByteQRCode(qrCodeData);
-        var qrBytes = qrCode.GetGraphic(20);
+        var qrBytes = qrCode.GetGraphic(5);
         QrCodeBase64 = $"data:image/png;base64,{Convert.ToBase64String(qrBytes)}";
 
         return Page();
