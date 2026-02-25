@@ -13,4 +13,8 @@
       <ProjectReference Include="..\Ticketer.UseCases\Ticketer.UseCases.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="QRCoder" Version="1.7.0" />
+    </ItemGroup>
+
 </Project>
