@@ -10,12 +10,31 @@
 <html lang="en">
 <head>
     <title>Print Ticket</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
 </head>
 <body>
-<div>
-    <p>@Model.ContractAddress</p>
-    <p>@Model.TicketId</p>
-    <p>@Model.Secret</p>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>@Model.Contract.Name</h1>
+            <h2>Venue TODO</h2>
+            <p>Doors open: @Model.Contract.VenueOpenTime</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3 col-sm">&nbsp;</div>
+        <div class="col-6 col-sm-12">
+            <img style="max-width: 600px" src="@Model.QrCodeBase64" alt="Ticket QR Code"/>
+        </div>
+        <div class="col-3 col-sm">&nbsp;</div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <p>Ticket Contract Address: @Model.ContractAddress</p>
+            <p>Ticket ID: @Model.TicketId</p>
+            <p>Check-in Secret: @Model.Secret</p>
+        </div>
+    </div>
 </div>
 </body>
 </html>
