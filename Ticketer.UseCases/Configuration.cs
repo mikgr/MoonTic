@@ -15,7 +15,8 @@ public static class Configuration
             .AddScoped<PublishEventHandler>()
             .AddScoped<TicketContractClient>()
             .AddScoped<TransferTicketHandler>()
-            .AddScoped<MintTicketHandler>();
+            .AddScoped<MintTicketHandler>()
+            .AddScoped<UsherTicketHandler>();
     }
     
 }

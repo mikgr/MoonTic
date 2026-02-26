@@ -66,7 +66,7 @@ void MapPostProcessUsherCheckIn(WebApplication webApplication)
                 return Results.Unauthorized();
 
             var usherTicketHandler = context.RequestServices.GetRequiredService<UsherTicketHandler>();
-            usherTicketHandler.Execute(usherUser, dto.ContractId, dto.TicketId, dto.CheckInSecret);
+            usherTicketHandler.Execute(usherUser, dto.ContractAddress, dto.TicketId, dto.CheckInSecret);
 
             return Results.Ok("EVENT_ENTERED");
         }

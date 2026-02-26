@@ -60,6 +60,7 @@ public class Contracts : PageModel
                 pe => pe.ContractId, 
                 c => c.Id, 
                 (pe, c) => new ContractCreatedViewModel(pe.TimeStamp, pe.ContractAddress, c.Name, c.DeployTxHash))
+            .OrderByDescending(x => x.TimeStamp)
             .ToList();
     }
 }
