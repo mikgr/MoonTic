@@ -80,8 +80,9 @@ public static class Program
             .Cmd("proof", "checkin", "event-id", "ticket-id", "secret", (int eventId, int ticketId, string secret) => 
                 HandleProofCheckin(eventId, ticketId, secret))
             
-            .CmdDi("enter", "event", "event-id", "ticket-id", "secret", (IServiceProvider s, int eventId, int ticketId, string secret) => 
-                s.GetRequiredService<UsherTicketHandler>().Execute(usherUser: currentUser, eventId, ticketId, secret))
+            .CmdDi("enter", "event", "contract-address", "ticket-id", "secret", 
+                (IServiceProvider s, string contractAddress, int ticketId, string secret) => 
+                s.GetRequiredService<UsherTicketHandler>().Execute(usherUser: currentUser, contractAddress, ticketId, secret))
             
             .CmdDi("deploy", "contract", "event-id", (IServiceProvider s, int eventInfoId) =>
             {

@@ -27,7 +27,7 @@ public static class EstimateGasAndEnsureSufficientFundsHandler
         
         // Check balance in user wallet, if not enough, transfer funds from system wallet
         var userBalance = await web3.Eth.GetBalance.SendRequestAsync(toAddress);
-        var requiredBalance = estimatedCostWei * 150 / 100; // 50% buffer for safety
+        var requiredBalance = estimatedCostWei * 200 / 100; // 100% buffer for safety
         
         if (userBalance.Value < requiredBalance)
         {
