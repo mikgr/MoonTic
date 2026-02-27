@@ -1,31 +1,27 @@
 ﻿@page
 @model LogInModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Log in";
 }
 
-<div class="text-center">
-    <div class="row">
-        <div class="col-md-12">
-            @* only show when there are ongoing events <h2>Ongoing Events</h2> *@
-            <hr class="shadow" style="border-top: 6px solid #ffffff"/>
-            <div class="text-center text-white fw-bolder" style="margin-bottom: 2rem;">
-                <h1 class="display-2">~ Fake login page ~</h1>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card bg-light" style="box-shadow: 2px 4px 12px 2px rgba(0,0,0,0.4);">
+            <div class="card-body p-4">
+                <h2 class="text-center text-dark disp mb-4">Log in</h2>
+                <form method="post" id="loginForm">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="username" placeholder="Username" required />
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" name="password" placeholder="Password" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Log in</button>
+                </form>
+                <div class="text-center my-3 text-dark">———————————— or ————————————</div>
+                <button class="btn btn-dark w-100 mb-2">Sign in with Apple</button>
+                <button class="btn btn-danger w-100">Sign in with Google</button>
             </div>
         </div>
-        <div class="row">
-            <div class="col-4"></div>
-            <div class="col-4">
-                <form method="post" id="loginForm">
-                    <select class="form-select" name="userId" onchange="this.form.submit()">
-                        <option value="">Select user</option>
-                        @foreach (var user in Model.Items)
-                        {
-                            <option value="@user.Id">@user.UserName</option>
-                        }
-                    </select>
-                </form>
-            </div>
-            <div class="col-4"></div></div>
     </div>
 </div>
