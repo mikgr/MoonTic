@@ -17,12 +17,11 @@ public class LogInModel : PageModel
         Items.AddRange(users);
     }
     
-    public IActionResult OnPost(string userId)
+    public IActionResult OnPost(string userName)
     {
-        var userIdInt = Convert.ToInt32(userId);
-        var user = SpikeRepo.ReadIntId<User>(userIdInt);
+        var user = SpikeRepo.ReadSingle<User>(x => x.UserName.ToLower() == userName.ToLower());
         
-        HttpContext.Session.SetInt32("UserId", userIdInt);
+        HttpContext.Session.SetInt32("UserId", user.Id);
         HttpContext.Session.SetString("UserName", user.UserName);
         
         return RedirectToPage("/Events");
