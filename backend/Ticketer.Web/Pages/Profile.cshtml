@@ -7,18 +7,41 @@
 
 <div class="row">
     <div class="col-12">
-        <div class="card">
-            
+        <div class="card site-box-shadow" style="margin-top: 2rem">
             <div class="card-body">
-                <p>
-                    Balance: € @Model.Balance
-                </p>
+                <span class="display-4">Profile</span>
                 <p>
                     E-mail: @(Model.CurrentUser?.Email??"n/a")
                 </p>
                 <p>
                     Address: @Model.Address
                 </p>
+                
+                <span class="display-4">Ticket Purchases</span>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Event</th>
+                        <th>Price</th>
+                        <th>Contract Address</th>
+                        <th>Ticket Id</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                @foreach (var item in Model.Purchases)
+                {
+                    <tr>
+                        <td>@item.TimeStamp</td>
+                        <td>@item.EventName</td>
+                        <td>@item.Price</td>
+                        <td>@item.ContractAddress</td>
+                        <td>@item.TicketId</td>
+                    </tr>
+                }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

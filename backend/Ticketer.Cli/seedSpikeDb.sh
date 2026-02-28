@@ -7,11 +7,6 @@ rm -r ~/ticketer/s_p_i_k_e/
 ./bin/Debug/net10.0/Ticketer.Cli new user Bob bob@gmail.com
 ./bin/Debug/net10.0/Ticketer.Cli new user Mak mak@gmail.com
 
-#Fund Users
-./bin/Debug/net10.0/Ticketer.Cli set user 0 + send money 1000 Ada + set user 1 + print balance
-./bin/Debug/net10.0/Ticketer.Cli set user 0 + send money 1000 Bob + set user 2 + print balance
-./bin/Debug/net10.0/Ticketer.Cli set user 0 + send money 1000 Mak + set user 3 + print balance
-
 #Create Events
 ./bin/Debug/net10.0/Ticketer.Cli set user 1 + new event "Rock Concert 1" "2026-04-01 20:00" "2026-04-01 23:59" 100 50.0
 ./bin/Debug/net10.0/Ticketer.Cli set user 1 + publish event 0

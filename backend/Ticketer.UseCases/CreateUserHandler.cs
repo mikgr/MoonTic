@@ -32,12 +32,6 @@ public class CreateUserHandler
             Address = address,
             PrivateKey = privateKey
         }.SpikePersistInt();
-
-        new Account
-        {
-            Id = -1,
-            UserId = newUser.Id
-        }.SpikePersistInt();
         
         new UserTicketContainer
         {

@@ -29,15 +29,6 @@ public static class Program
             
             .Cmd("ls", "user", HandleListUsers)
             .Cmd("set", "user", "user-id", (int id) => currentUser = HandleSetUser(id))
-
-            // current user
-            .Cmd("print", "balance", () => HandlePrintBalance(currentUser))
-            
-            // todo rename to CmdBld or BldCmd
-            .BldCmd("send", "money", 
-                (decimal amt, string name) => HandleSendMoney(currentUser, amt, name))
-                .Arg<decimal>("amount").Arg<string>("to-user-name")
-                .Enter()
                 
             .CmdDi("print", "secret", "contract-id", "ticket-id", (IServiceProvider s, int contractId, int ticketId) => 
                 s.GetRequiredService<PrintSecretHandler>().Execute(currentUser, contractId, ticketId))
@@ -61,8 +52,6 @@ public static class Program
                 s.GetRequiredService<BuyTicketHandler>().Execute(eventContractId, currentUser).Wait())
             
             .Cmd("ls", "event", HandleLsEvent)
-            
-            .Cmd("ls", "ticket", "eventId", (int eventId) => HandleLsTicket(eventId, currentUser))
             
             .CmdDi("transfer", "ticket", "event-id", "ticket-id", "to-address", (IServiceProvider s, int eventId, int ticketId, string toAddress) => 
                 s.GetRequiredService<TransferTicketHandler>().Execute(currentUser, eventId, ticketId, toAddress).Wait())
@@ -181,17 +170,6 @@ public static class Program
             Console.WriteLine("Proof failed");
     }
 
-    private static void HandleLsTicket(int eventId, User? currentUser)
-    {
-        // var contract = SpikeRepo.ReadIntId<EventContract>(eventId);
-        // if (currentUser is not {} usr) throw new Exception("User not set");
-        // var tickets = contract.GetTicketAllocation(usr.Id);
-        //         
-        // Console.WriteLine(JsonSerializer.Serialize(tickets,
-        //     new JsonSerializerOptions { WriteIndented = true }));
-        throw new NotImplementedException("get from chain"); // todo
-    }
-
     private static void HandleLsEvent()
     {
         var events = SpikeRepo.ReadCollection<EventContract>();
@@ -220,45 +198,6 @@ public static class Program
         SpikeRepo.ReadCollection<EventInfo>(x => x.Owner == currentUser.Id)
             .ToList()
             .ForEach(e => Console.WriteLine($"{e.Id} {e.Name} Start:{e.VenueOpenTime} End:{e.VenueCloseTime} {e.Tickets} {e.Price}"));
-    }
-
-
-    private static void HandleSendMoney(User? currentUser, decimal amount, string recipientUserName)
-    {
-        Console.WriteLine($"Sending {amount} to {recipientUserName}");
-        
-        // Validate pre conditions
-        var user = currentUser ?? throw new Exception("User not set");
-                    
-        // var tran = todo Spike.BeginOptimisticTransaction(); timestamp up front - also support Spike.BeginPessimisticTransaction(); locks up front
-        // Read state
-        var sendAccount = SpikeRepo.ReadSingle<Account>(by: x => x.UserId == user.Id);
-        var recipientAccount = SpikeRepo
-            .ReadSingle<User>(by: x => x.UserName == recipientUserName)
-            .Then2<User, int, Account>(u => u.Id, (a, id) => a.UserId == id);
-                    
-        // Execute
-        sendAccount.SendMoney(amount, to: recipientAccount);
-                    
-        // Persist
-        // todo Spike.Persist(sendAccount, recipientAccount);
-        // todo dbTransaction.Commit(sendAccount, recipientAccount);
-        sendAccount.SpikePersistInt();
-        recipientAccount.SpikePersistInt();
-    }
-
-    private static void HandlePrintBalance(User? currentUser)
-    {
-        if (currentUser is not {} user)
-            throw new Exception("User not set");
-
-        var account = SpikeRepo
-            .ReadCollection<Account>(x => x.UserId == user.Id)
-            .SingleOrDefault();
-                    
-        if (account is null) throw new Exception("No account found");
-                    
-        Console.WriteLine($"{user.UserName}, Account Balance: {account.Balance}");
     }
 
     private static User? HandleSetUser(int userId)
