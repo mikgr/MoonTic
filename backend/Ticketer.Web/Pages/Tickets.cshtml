@@ -139,6 +139,17 @@
         </div>
     </div>
 </div>
+<script>
+    document.getElementById('check-in-modal').addEventListener('show.bs.modal', function (event) {
+        let button = event.relatedTarget;
+        let ticketId = button.getAttribute('data-ticket-id');
+        let eventName = button.getAttribute('data-event-name');
+        let eventId = button.getAttribute('data-event-id');
+        document.getElementById('event-id').value = eventId;
+        document.getElementById('ticket-id').value = ticketId;
+        this.querySelector('.modal-title').textContent = 'Check In Ticket No. ' + ticketId + ' for "' +  eventName + '"';
+    });
+</script>
 
 <!-- Modal, CheckOut -->
 <div class="modal fade" id="check-out-modal" tabindex="-1" aria-labelledby="checkOutModalLabel" aria-hidden="true">
@@ -164,6 +175,16 @@
         </div>
     </div>
 </div>
+<script>
+    document.getElementById('check-out-modal').addEventListener('show.bs.modal', function (event) {
+        let button = event.relatedTarget;
+        let ticketId = button.getAttribute('data-ticket-id');
+        let eventId = button.getAttribute('data-event-id');
+        document.getElementById('checkout-event-id').value = eventId;
+        document.getElementById('checkout-ticket-id').value = ticketId;
+        this.querySelector('.modal-title').textContent = 'Check Out Ticket No. ' + ticketId;
+    });
+</script> 
 
 <!-- Modal, Transfer -->
 <div class="modal fade" id="transfer-modal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
@@ -192,27 +213,7 @@
         </div>
     </div>
 </div>
-
 <script>
-    document.getElementById('check-in-modal').addEventListener('show.bs.modal', function (event) {
-        let button = event.relatedTarget;
-        let ticketId = button.getAttribute('data-ticket-id');
-        let eventName = button.getAttribute('data-event-name');
-        let eventId = button.getAttribute('data-event-id');
-        document.getElementById('event-id').value = eventId;
-        document.getElementById('ticket-id').value = ticketId;
-        this.querySelector('.modal-title').textContent = 'Check In Ticket No. ' + ticketId + ' for "' +  eventName + '"';
-    });
-    
-    document.getElementById('check-out-modal').addEventListener('show.bs.modal', function (event) {
-        let button = event.relatedTarget;
-        let ticketId = button.getAttribute('data-ticket-id');
-        let eventId = button.getAttribute('data-event-id');
-        document.getElementById('checkout-event-id').value = eventId;
-        document.getElementById('checkout-ticket-id').value = ticketId;
-        this.querySelector('.modal-title').textContent = 'Check Out Ticket No. ' + ticketId;
-    });
-    
     document.getElementById('transfer-modal').addEventListener('show.bs.modal', function (event) {
         let button = event.relatedTarget;
         let ticketId = button.getAttribute('data-ticket-id');
