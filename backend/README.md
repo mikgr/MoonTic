@@ -5,15 +5,13 @@
 ### Must have
 
 #### Tech stuff
-- [ ] Dynamo DB, switch to
 - [ ] Off-load onchain jobs to background worker
-- [ ] Use proper logging with structured data
+- [ ] Dynamo DB, switch to
 - [ ] Use proper google login https://developers.google.com/identity/sign-in/web/sign-in
-- [ ] **user** **aws** **kms** for stroing all the private keys
+- [ ] Deploy to AWS 
 - [x] Payment, Remove first dummy, and track fiat payments 
 
 #### User Stories
-- [ ] As a **ticket holder**, I want a **phone-app**, Such that i can hold my ticket in my phone.
 - [ ] As a **ticket holder**, I want to be able to **put my ticket up for sale**, Such that i can recover my money when im not able to attend the event.
 
 - [ ] As an **organizer**, i want to **export list of tickets/secrets** Such that i can integrate with my own ushering system and have an offline backup of the data.
@@ -22,6 +20,7 @@
 
 
 ### Should have
+- [ ] As a **ticket holder**, I want a **phone-app**, Such that i can hold my ticket in my phone.
 - [ ] As **moontic.net**, i want pictures on tickets, such that the tickets look nice and feel more like a real ticket.
 - [ ] As **moontic.net**, i want a nice **landing page**, such that the page feels complete and nice .
 - [ ] As a **ticket holder/reseller**, I want to **kyc easily**, such that i can receive money legally, 
@@ -35,6 +34,9 @@
 - [ ] As an **organizer**, I want to be able to **change the venue+address** of a published event, such that i can change the venue if the venue becomes unavailable.
 - [ ] As an **organizer**, I want to be able to **manage orgainzation users**, such that i can multiple event manager / Ushers etc.
 
+#### Tech stuff
+- [ ] **user** **aws** **kms** for stroing all the private keys
+- [ ] Use proper logging with structured data
 
 ### Could have
 - [ ] As a **ticket holder**, I want to see an indicator on my wicket when i hav entered the event.

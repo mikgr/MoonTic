@@ -5,6 +5,7 @@ using Ticketer.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddLogging(logging => logging.AddConsole());
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
@@ -14,6 +15,10 @@ builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AddPageRoute("/Events", "");
 });
+
+builder.Services.AddSingleton<IJobQueue>(_ => new JobQueue(100));
+builder.Services.AddHostedService<WorkerService>();
+
 builder.Services.AddAllUseCases();
 
 

@@ -45,15 +45,24 @@ public class TicketsModel : PageModel
         
         Tickets = tickets;
     }
-
-
+    
     public async Task<IActionResult> OnPostCheckIn(int eventId, int ticketId)
     {
         var userId = HttpContext.Session.GetInt32("UserId");
         if (userId == null) return RedirectToPage("/LogIn");
         var user = SpikeRepo.ReadIntId<User>(userId.Value);
-        var checkInTicketHandler = HttpContext.RequestServices.GetRequiredService<CheckInTicketHandler>();
-        await checkInTicketHandler.Execute(user, eventId, ticketId);
+        
+        var jobQueue = HttpContext.RequestServices.GetRequiredService<IJobQueue>();
+        var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+        
+        await jobQueue.EnqueueAsync(async ct =>
+        {
+            using var scope = scopeFactory.CreateScope();
+            var checkInTicketHandler = scope.ServiceProvider.GetRequiredService<CheckInTicketHandler>();
+            await checkInTicketHandler.Execute(user, eventId, ticketId);
+        });
+        
+        // todo i need to return at job id here so i can poll for status
         return RedirectToPage("/Tickets");
         // todo feedback ok or failed or already checked in
     }
@@ -64,8 +73,17 @@ public class TicketsModel : PageModel
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToPage("/LogIn");
             var user = SpikeRepo.ReadIntId<User>(userId.Value);
-            var checkOutTicketHandler = HttpContext.RequestServices.GetRequiredService<CheckOutTicketHandler>();
-            await checkOutTicketHandler.Execute(user, eventId, ticketId);
+            
+            var jobQueue = HttpContext.RequestServices.GetRequiredService<IJobQueue>();
+            var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+
+            await jobQueue.EnqueueAsync(async ct =>
+            {
+                using var scope = scopeFactory.CreateScope();
+                var checkOutTicketHandler = scope.ServiceProvider.GetRequiredService<CheckOutTicketHandler>();
+                await checkOutTicketHandler.Execute(user, eventId, ticketId);
+            });
+            
             return RedirectToPage("/Tickets");
             // todo feedback ok or failed or already checked in
         }
