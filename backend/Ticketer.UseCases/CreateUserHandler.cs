@@ -25,7 +25,7 @@ public class CreateUserHandler
             Email = email
         }.SpikePersistInt();
         
-        var userWallet = new UserWallet 
+        _ = new UserWallet 
         {
             Id = -1,
             UserId = newUser.Id,

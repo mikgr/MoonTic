@@ -7,10 +7,10 @@
 #### Tech stuff
 - [ ] Dynamo DB, switch to
 - [ ] Off-load onchain jobs to background worker
-- [ ] Payment, Remove first dummy, and track fiat payments 
 - [ ] Use proper logging with structured data
 - [ ] Use proper google login https://developers.google.com/identity/sign-in/web/sign-in
 - [ ] **user** **aws** **kms** for stroing all the private keys
+- [x] Payment, Remove first dummy, and track fiat payments 
 
 #### User Stories
 - [ ] As a **ticket holder**, I want a **phone-app**, Such that i can hold my ticket in my phone.
@@ -44,3 +44,18 @@
 ### Won't have (this time)
 - [ ] As a **ticket buyer**, I want to be able to bid on tickets that are not for sale, such that i can maybe pursuede a holder to sell.
 - [ ] As a **ticket buyer**, I want to be able to **connect my wallet**, such that i don't have to log in with email/google/apple and i can pay with stable conin.
+
+
+
+
+// proof checkin event-id ticket-id secret
+// [x] todo prevent transfer after checkin
+// [x] todo allow check out
+// todo prevent check out after cutoff time
+// todo re-allow transfer after event end time
+// todo withdraw funds (only owner)
+// todo enable marketplace after contract sells out
+// todo sell ticket (create ask) - Buyer pays in Fiat, must KYC to get money
+// todo cancel ask
+// todo accept ask
+// todo support presale - allocation to owner 
