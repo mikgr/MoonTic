@@ -12,4 +12,5 @@ public class TicketPurchasedEvent : ISpikeObjIntKey, IContractEvent
     public required string TransactionHash { get; init; }
     public required string ContractAddress { get; init; }
     public required string ToAddress { get; init; }
+    public required decimal TicketPrice { get; init; }
 }

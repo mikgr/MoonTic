@@ -12,13 +12,12 @@ public class BuyTicketHandler(MintTicketHandler mintTicketHandler)
         if (currentUser is not {} usr) throw new Exception("User not set");
         
         var contract = SpikeRepo.ReadIntId<EventContract>(eventContractId);
-        var userAccount = SpikeRepo.ReadSingle<Account>(x => x.UserId == usr.Id);
         var userWallet = SpikeRepo.ReadSingle<UserWallet>(x => x.UserId == usr.Id);
         
-        var mintResult = await mintTicketHandler.Execute(contract.ContractAddress, userWallet.Address);
-         
+        var mintResult = await mintTicketHandler.Execute(
+            contract.ContractAddress, 
+            toAddress: userWallet.Address);
         
-        userAccount.SpikePersistInt();
         contract.SpikePersistInt();
 
         var @event = new TicketPurchasedEvent
@@ -30,7 +29,8 @@ public class BuyTicketHandler(MintTicketHandler mintTicketHandler)
             TicketId = mintResult.tokenId,
             ContractAddress = contract.ContractAddress,
             TransactionHash = mintResult.transactionHash,
-            ToAddress = userWallet.Address
+            ToAddress = userWallet.Address,
+            TicketPrice = contract.TicketPrice
         }.SpikePersistInt();
         
         contract.ApplyEvent(@event);

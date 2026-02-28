@@ -22,7 +22,8 @@ namespace Ticketer.Test
                 TicketId = 1,
                 TransactionHash = "123",
                 ContractAddress = "0xasdf",
-                ToAddress = "0x1234"
+                ToAddress = "0x1234",
+                TicketPrice = 100
             }).SpikePersistInt();
 
             var actual = userTicketContainer.GetAllTickets();
@@ -62,7 +63,8 @@ namespace Ticketer.Test
                 TicketId = 1,
                 TransactionHash = "123",
                 ContractAddress = "0xasdf",
-                ToAddress = "0x1234"
+                ToAddress = "0x1234",
+                TicketPrice = 100
             }).SpikePersistInt();
 
             var actual = userTicketContainer.GetAllTickets();
@@ -104,7 +106,8 @@ namespace Ticketer.Test
                 TicketId = 1,
                 TransactionHash = "123",
                 ContractAddress = "0xasdf",
-                ToAddress = "0x1234"
+                ToAddress = "0x1234",
+                TicketPrice = 100
             }).SpikePersistInt();
             
             userTicketContainer.ApplyEvent(new TicketCheckedInEvent
