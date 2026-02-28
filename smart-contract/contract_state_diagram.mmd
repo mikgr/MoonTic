@@ -1,0 +1,14 @@
+stateDiagram-v2
+
+    [*] --> NotMinted
+
+    NotMinted --> Minted : Buy / Mint
+
+    Minted --> Minted : Transfer
+    Minted --> ForSale : Create Ask
+    Minted --> CheckedIn : Check-In
+
+    ForSale --> Minted : Accept Ask
+    ForSale --> Minted : Cancel Ask
+
+    CheckedIn --> Minted : Check-Out
