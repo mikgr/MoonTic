@@ -22,9 +22,12 @@
 
 
 ### Should have
+- [ ] As **moontic.net**, i want pictures on tickets, such that the tickets look nice and feel more like a real ticket.
+- [ ] As **moontic.net**, i want a nice **landing page**, such that the page feels complete and nice .
 - [ ] As a **ticket holder/reseller**, I want to **kyc easily**, such that i can receive money legally, 
 - [ ] As a **ticket holder**, I want a **notification when venue changes**, such that i can be aware of the change and plan accordingly.
 - [ ] As a **ticket holder**, I want to be able to **transfer ticket by email address**, such that i don't have to mess with blockchain addresses. 
+- [ ] As a **ticket holder**, I want to always use fresh addresses, such that i will not be doxed!
 - [ ] As a **ticket buyer**, I want to be able to buy more than 1 ticket at the time, such that i can bring my friends.
 
 - [ ] As an **organizer**, I want to **kyc easily**, Such that i can receive money legally.
