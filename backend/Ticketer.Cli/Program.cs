@@ -1,4 +1,4 @@
-﻿﻿using System.Numerics;
+﻿using System.Numerics;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Nethereum.Util;
@@ -103,21 +103,6 @@ public static class Program
                 (IServiceProvider s, string contractAddress, string toAddress) =>
                     s.GetRequiredService<MintTicketHandler>()
                         .Execute(contractAddress, toAddress).Wait())
-            
-            // proof checkin event-id ticket-id secret
-            // [x] todo prevent transfer after checkin
-            // [x] todo allow check out
-            // todo prevent check out after cutoff time
-            // todo re allow transfer after event end time
-            // todo withdraw funds (only owner)
-            // todo enable marketplace after contract sells out
-            // todo sell ticket (create ask) - Buyer pays in Fiat, must KYC to get money
-            // todo cancel ask
-            // todo accept ask
-            // todo create bid
-            // todo cancel bid
-            // todo accept bid
-            // todo support presale - allocation to owner 
             
             .Build();
     
