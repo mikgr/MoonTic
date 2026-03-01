@@ -22,7 +22,7 @@
                          data-bs-target="#check-out-modal"
                          data-ticket-id="@Model.TicketNo" 
                          data-event-id="@Model.EventId"
-                         hx-get="/Test?handler=CheckOutModal&eventId=@Model.EventId&ticketId=@Model.TicketNo" 
+                         hx-get="/Tickets?handler=CheckOutModal&eventId=@Model.EventId&ticketId=@Model.TicketNo" 
                          hx-target="#modal-container" 
                          hx-swap="innerHTML"
                          >
@@ -50,7 +50,7 @@
                          data-ticket-id="@Model.TicketNo" 
                          data-event-name="@Model.EventName" 
                          data-event-id="@Model.EventId"
-                         hx-get="/Test?handler=CheckInModal&eventId=@Model.EventId&ticketId=@Model.TicketNo"
+                         hx-get="/Tickets?handler=CheckInModal&eventId=@Model.EventId&ticketId=@Model.TicketNo"
                          hx-target="#modal-container"
                          hx-swap="innerHTML">
                         ✅️ Check In
@@ -61,7 +61,7 @@
                          class="dropdown-item"
                          data-bs-toggle="modal" 
                          data-bs-target="#check-in-modal"
-                         hx-get="@($"/Test?handler=TransferModal&eventId={Model.EventId}&ticketId={Model.TicketNo}")"
+                         hx-get="@($"/Tickets?handler=TransferModal&eventId={Model.EventId}&ticketId={Model.TicketNo}")"
                          hx-target="#modal-container"
                          hx-swap="innerHTML"
                          >
