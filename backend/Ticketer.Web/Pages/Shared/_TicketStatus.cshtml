@@ -1,4 +1,4 @@
-@model Ticketer.Web.Pages.TicketInfo
+@model Ticketer.Web.Pages.TicketActionStatus
 
 @if ((Model.Action == "check-in" && Model.Status != "checked-in") 
  || (Model.Action == "check-out" && Model.Status != "not-checked-in")
@@ -23,7 +23,7 @@ else if (Model.Status == "checked-in")
     <span class="badge bg-success">
         ✅️ Checked In
     </span>
-    <div hx-get="@($"/Tickets?handler=ActionButton&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+    <div hx-get="@($"/Test?handler=ActionButton&eventId={Model.EventId}&ticketId={Model.TicketId}")"
          hx-trigger="load"
          hx-target="@($"#ticket_actions_{Model.EventId}_{Model.TicketId}")"
          hx-swap="outerHTML"
@@ -34,7 +34,7 @@ else if (Model.Status == "not-checked-in")
     <span class="badge bg-secondary">
         Not Checked In
     </span>
-    <div hx-get="@($"/Tickets?handler=ActionButton&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+    <div hx-get="@($"/Test?handler=ActionButton&eventId={Model.EventId}&ticketId={Model.TicketId}")"
          hx-trigger="load"
          hx-target="@($"#ticket_actions_{Model.EventId}_{Model.TicketId}")"
          hx-swap="outerHTML"
