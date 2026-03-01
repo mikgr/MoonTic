@@ -15,7 +15,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form class="d-inline"
-                      hx-post="/Test?handler=CheckOut"
+                      hx-post="/Tickets?handler=CheckOut"
                       hx-target="@($"#status_{Model.EventId}_{Model.TicketId}")"
                       hx-swap="innerHTML">
                     @Html.AntiForgeryToken()

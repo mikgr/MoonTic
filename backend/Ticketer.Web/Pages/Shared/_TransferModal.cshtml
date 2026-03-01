@@ -1,7 +1,7 @@
 @model TicketActionStatus
 
 <form class="d-inline"
-      hx-post="/Test?handler=Transfer"
+      hx-post="/Tickets?handler=Transfer"
       hx-target="@($"#status_{Model.EventId}_{Model.TicketId}")"
       hx-swap="innerHTML">
 <div class="modal fade" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
