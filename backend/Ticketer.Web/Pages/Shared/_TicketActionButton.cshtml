@@ -57,10 +57,16 @@
                     </div>
                 </li>
                 <li>
-                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#transfer-modal"
-                            data-ticket-id="@Model.TicketNo" data-event-id="@Model.EventId">
+                    <div type="button"
+                         class="dropdown-item"
+                         data-bs-toggle="modal" 
+                         data-bs-target="#check-in-modal"
+                         hx-get="@($"/Test?handler=TransferModal&eventId={Model.EventId}&ticketId={Model.TicketNo}")"
+                         hx-target="#modal-container"
+                         hx-swap="innerHTML"
+                         >
                         📩 Transfer Ticket
-                    </button>
+                    </div>
                 </li>
             }
         </li>

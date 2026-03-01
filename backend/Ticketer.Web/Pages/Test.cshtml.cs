@@ -55,6 +55,11 @@ public class Test : PageModel
     {
         return Partial("_CheckOutModal", new TestStatus(eventId, ticketId, "post acitonOne"));    
     }
+
+    public IActionResult OnGetTransferModal(int eventId, int ticketId)
+    {
+        return Partial("_TransferModal", new TestStatus(eventId, ticketId, "transfer"));
+    }
     
     
     public async Task<IActionResult> OnPostCheckIn(int eventId, int ticketId)
@@ -108,7 +113,26 @@ public class Test : PageModel
     }
     
     
-    // todo post transfer
+    public async Task<IActionResult> OnPostTransfer(int eventId, int ticketId, string recipientAddress)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(recipientAddress);
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return HtmxRedirect("/LogIn");
+            var user = SpikeRepo.ReadIntId<User>(userId.Value);
+            var transferTicketHandler = HttpContext.RequestServices.GetRequiredService<TransferTicketHandler>();
+            await transferTicketHandler.Execute(user, eventId, ticketId, recipientAddress);
+            return HtmxRedirect("/test");
+        }
+        catch (DomainInvariant)
+        {
+            // todo show error in modal
+            return Partial("_TransferModal", new TestStatus(eventId, ticketId, "error"));
+        }
+    }
+    
     
     private IActionResult HtmxRedirect(string page)
     {
