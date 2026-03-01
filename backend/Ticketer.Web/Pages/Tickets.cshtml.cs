@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SpikeDb;
 using Ticketer.Model;
@@ -7,6 +7,8 @@ using Ticketer.UseCases;
 namespace Ticketer.Web.Pages;
 
 public record TicketHolding(int TicketNo, int EventId, string ContractAddress, string EventName, DateTime Date, bool IsCheckedIn);
+public record TicketInfo(int EventId, int TicketId, string Status, string Action);
+
 
 public class TicketsModel : PageModel
 {
@@ -22,6 +24,62 @@ public class TicketsModel : PageModel
         return Page();
     }
 
+    public IActionResult OnGetPopModal()
+    {
+        return Partial("_Modal");
+    }
+
+    public IActionResult OnGetActionButton(int? eventId, int? ticketId)
+    {
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null) return RedirectToPage("/LogIn");
+        
+        var contracts = SpikeRepo.ReadSingleOrDefault<EventContract>(x => x.Id == eventId);
+        var ticketContainer = SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId);
+        
+        if (contracts is null || ticketContainer is null) return new NotFoundResult();
+
+        var xx = ticketContainer.GetAllTickets().SingleOrDefault(x =>
+            x.EventId == eventId && x.TicketId == ticketId)
+            ?? throw new Exception("No ticket found");
+        
+        var x = new TicketHolding(
+            ticketId!.Value, 
+            eventId!.Value, 
+            contracts.ContractAddress, 
+            contracts.Name, 
+            contracts.VenueOpenTime, 
+            xx.IsCheckedIn
+             );
+        
+        return Partial("_TicketActionButton", x);
+    }
+
+    public IActionResult OnGetTicketStatus(string action, int eventId, int ticketId)
+    {
+        // todo - handle expect check in
+        // todo - handle expect check out
+        
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null) return RedirectToPage("/LogIn");
+        
+        var ticketPurchases = SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId)
+            ?? throw new Exception("No user ticket container found");
+
+        var status = (action, ticketPurchases.IsCheckedIn(eventId, ticketId)) switch
+        {
+            ("check-in", false) => "pending",
+            ("check-in", true) => "checked-in",
+            ("check-out", true) => "pending",
+            ("check-out", false) => "not-checked-in",
+            (_, null) => "unknown",
+            (_,_) => "unknown"
+        };
+        
+        Console.WriteLine($"action:{action} Status: {status}");
+        return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, status, action)); 
+    }
+    
     private void LoadUserTickets(int userId)
     {
         var ticketPurchases = SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId);
@@ -45,6 +103,7 @@ public class TicketsModel : PageModel
         
         Tickets = tickets;
     }
+
     
     public async Task<IActionResult> OnPostCheckIn(int eventId, int ticketId)
     {
@@ -61,11 +120,12 @@ public class TicketsModel : PageModel
             var checkInTicketHandler = scope.ServiceProvider.GetRequiredService<CheckInTicketHandler>();
             await checkInTicketHandler.Execute(user, eventId, ticketId);
         });
-        
-        // todo i need to return at job id here so i can poll for status
-        return RedirectToPage("/Tickets");
+
+        return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, "pending", "check-in")); //new OkResult(); //RedirectToPage("/Tickets");
+
         // todo feedback ok or failed or already checked in
     }
+    
     public async Task<IActionResult> OnPostCheckOut(int eventId, int ticketId)
     {
         try

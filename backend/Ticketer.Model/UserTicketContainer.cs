@@ -74,4 +74,15 @@ public class UserTicketContainer : ISpikeObjIntKey
     {
         return _baseStateTickets.Select(x => x.EventId).ToHashSet().ToArray();
     }
+
+    public bool? IsCheckedIn(int eventId, int ticketId)
+    {
+        var ticket = _baseStateTickets.SingleOrDefault(x => 
+            x.EventId == eventId && x.TicketId == ticketId);
+        
+        if (ticket is null) 
+            return null;
+
+        return ticket.IsCheckedIn;
+    }
 }

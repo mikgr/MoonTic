@@ -1,0 +1,30 @@
+@model TestStatus
+
+<div class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Check In Ticket No. @Model.TicketId</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>When you check in, you'll get a boarding pass, and the ticket cannot be transfer.</p>
+                <p>You can checkout until the event start time: xx-xx-xxxx xx:xx. If you checkout, the boarding pass will no longer work. You'll get at new boarding once you check in again.</p>
+                <p>You can store the boarding pass in your phone wallet, take a screen shot or print it on paper. Whoever precents this boarding pass gets to enter the event (It's like an ond school pdf ticket)</p>
+                <p>The checkin costs a small transaction fee of ~ xx.xx EURC</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form class="d-inline"
+                      hx-post="/Test?handler=CheckIn"
+                      hx-target="@($"#status_{Model.EventId}_{Model.TicketId}")"
+                      hx-swap="innerHTML">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="eventId" value="@Model.EventId" />
+                    <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                    <button type="submit" class="btn btn-primary">Check In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

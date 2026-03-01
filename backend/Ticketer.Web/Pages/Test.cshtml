@@ -1,0 +1,44 @@
+@page "/test"
+@model Ticketer.Web.Pages.Test
+
+@{
+    Layout = "_Layout";
+}
+<br/>
+
+<div>
+    @foreach (var t in Model.Tickets)
+    {
+        <div class="card" style="margin-bottom: 1rem;">
+            <div class="card-body site-box-shadow">
+                <div class="row">
+                    <div class="col-12">
+                        <span class="display-4">
+                            🎟️ @t.EventName
+                        </span>
+                        <hr style="border: 1px dashed #ccc;" />
+                    </div>
+                </div>
+                <div class="row fs-4">
+                    <div class="col-md-6">
+                        <p><strong>Ticket No:</strong> @t.TicketNo</p>
+                        <p><strong>Event ID:</strong> @t.EventId</p>
+                        <p><strong>Date:</strong> @t.Date.ToString("MMM d yyyy HH\\:mm")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong></p>
+                        <div id="@($"status_{t.EventId}_{t.TicketNo}")">
+                            <partial name="_TicketStatus" model="@(new TicketInfo(t.EventId, t.TicketNo, (t.IsCheckedIn ? "checked-in" : "not-checked-in"), "nil"))"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <hr style="border: 1px dashed #ccc;" />
+                        <partial name="_TicketActionButton" model="@(new TicketHolding(t.TicketNo, t.EventId, t.ContractAddress, t.EventName, t.Date, t.IsCheckedIn))"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
