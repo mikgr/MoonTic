@@ -33,7 +33,7 @@
                         <a class="nav-link text-light fw-bolder" asp-area="" asp-page="/Events">🗓️ Events</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-light fw-bolder" asp-area="" asp-page="/Tickets">🎟 Tickets</a>
+                        <a class="nav-link text-light fw-bolder" asp-area="" asp-page="/Test">🎟 Tickets</a>
                     </li>
                 </ul>
                 <div class="float-end">
@@ -151,6 +151,17 @@ new FinisherHeader({
         modalEl.addEventListener('hidden.bs.modal', () => {
             modalEl.remove();
         });
+    });
+
+    // Fade out and remove card when transfer completes (HX-Trigger: fadeOutCard)
+    document.body.addEventListener('fadeOutCard', function(evt) {
+        var eventId = evt.detail.eventId;
+        var ticketId = evt.detail.ticketId;
+        var el = document.getElementById('card_' + eventId + '_' + ticketId);
+        if (el) {
+            el.classList.add('card-fade-out');
+            el.addEventListener('transitionend', function() { el.remove(); }, { once: true });
+        }
     });
 </script>
 </body>

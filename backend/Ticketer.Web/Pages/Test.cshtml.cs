@@ -121,16 +121,54 @@ public class Test : PageModel
 
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return HtmxRedirect("/LogIn");
+            
             var user = SpikeRepo.ReadIntId<User>(userId.Value);
-            var transferTicketHandler = HttpContext.RequestServices.GetRequiredService<TransferTicketHandler>();
-            await transferTicketHandler.Execute(user, eventId, ticketId, recipientAddress);
-            return HtmxRedirect("/test");
+            var jobQueue = HttpContext.RequestServices.GetRequiredService<IJobQueue>();
+            var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+
+            await jobQueue.EnqueueAsync(async ct =>
+            {
+                using var scope = scopeFactory.CreateScope();
+                var transferTicketHandler = scope.ServiceProvider.GetRequiredService<TransferTicketHandler>();
+                await transferTicketHandler.Execute(user, eventId, ticketId, recipientAddress);
+            });
+            
+            return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, "pending", "transfer"));
         }
         catch (DomainInvariant)
         {
             // todo show error in modal
             return Partial("_TransferModal", new TestStatus(eventId, ticketId, "error"));
         }
+    }
+    
+    
+    public IActionResult OnGetTicketStatus(string action, int eventId, int ticketId)
+    {
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null) return RedirectToPage("/LogIn");
+        
+        var ticketPurchases = SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId)
+            ?? throw new Exception("No user ticket container found");
+
+        var hasTicket = ticketPurchases.GetAllTickets().Any(t => t.EventId == eventId && t.TicketId == ticketId);
+        var status = (action, ticketPurchases.IsCheckedIn(eventId, ticketId), hasTicket) switch
+        {
+            ("check-in", false, _) => "pending",
+            ("check-in", true, _) => "checked-in",
+            ("check-out", true, _) => "pending",
+            ("check-out", false, _) => "not-checked-in",
+            ("transfer", _, true) => "pending",
+            ("transfer", _, false) => "transferred",
+            (_, _, _) => "unknown"
+        };
+
+        if (action == "transfer" && status == "transferred" && Request.Headers.ContainsKey("HX-Request"))
+        {
+            Response.Headers.Append("HX-Trigger", $"{{\"fadeOutCard\": {{\"eventId\": {eventId}, \"ticketId\": {ticketId}}}}}");
+        }
+        
+        return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, status, action)); 
     }
     
     
