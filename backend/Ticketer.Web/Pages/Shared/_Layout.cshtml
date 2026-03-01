@@ -1,4 +1,4 @@
-﻿@using SpikeDb
+@using SpikeDb
 @using Ticketer.Model
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -129,6 +129,29 @@ new FinisherHeader({
     "c"
   ]
 });
+</script>
+
+<!-- Container for dynamically injected modals -->
+<div id="modal-container"></div>
+
+<script>
+    // Generic HTMX modal handler
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        // Only act if content was injected into modal-container
+        if (evt.detail.target.id !== 'modal-container') return;
+
+        const modalEl = evt.detail.target.querySelector('.modal');
+        if (!modalEl) return;
+
+        // Initialize and show the modal
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+
+        // Optional: remove modal from DOM after closing to prevent duplicates
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            modalEl.remove();
+        });
+    });
 </script>
 </body>
 </html>

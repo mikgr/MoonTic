@@ -31,63 +31,21 @@
                     <div class="card-text fw-bolder" style="color: aliceblue; padding-top: 1rem;">
                         <p>#️⃣️ TicketNo: @t.TicketNo</p>
                         <p>🗓️ VenueOpenTime: @t.Date.ToString("MMM d yyyy HH\\:mm")</p>
-                        @if (t.IsCheckedIn)
-                        {
-                            <span class="badge bg-success">✅️ Checked In </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-light text-dark">Not️ Checked In </span>
-                        }
-                        <div class="btn-group float-end">
-                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                Action
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    @if (@t.IsCheckedIn)
-                                    {
-                                        <li>
-                                            <!-- Button trigger modal -->
-                                            <a type="button" class="dropdown-item" href="/tickets/@t.ContractAddress/@t.TicketNo/print" target="_blank">
-                                                🖨️ Print Boarding Pass
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <!-- Button trigger modal -->
-                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#check-out-modal"
-                                                    data-ticket-id="@t.TicketNo" data-event-id="@t.EventId">
-                                                🚪️ Check Out
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button type="button" class="disabled dropdown-item">📩 Transfer Ticket</button>
-                                        </li>
-                                    }
-                                    else
-                                    {
-                                        <li>
-                                            <!-- Button trigger modal -->
-                                            <button type="button" class="disabled dropdown-item">
-                                                🖨️ Print Boarding Pass
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <!-- Button trigger modal -->
-                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#check-in-modal"
-                                                    data-ticket-id="@t.TicketNo" data-event-name="@t.EventName" data-event-id="@t.EventId">
-                                                ✅️ Check In
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#transfer-modal"
-                                                    data-ticket-id="@t.TicketNo" data-event-id="@t.EventId">
-                                                📩 Transfer Ticket
-                                            </button>
-                                        </li>
-                                    }
-                                </li>
-                            </ul>
+                        <div id="@($"ticket_status_container")">
+                            @if (t.IsCheckedIn)
+                            {
+                                <span class="badge bg-success">✅️ Checked In </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-dark">Not️ Checked In </span>
+                            }
+                            @* ACTION BUTTON *@
+                        </div>
+                        <div id="ticket-action-button-container">
+                            <partial 
+                                name="_TicketActionButton" 
+                                model="@(new TicketHolding(t.TicketNo, t.EventId, t.ContractAddress, t.EventName, t.Date, t.IsCheckedIn))" />
                         </div>
                     </div>
                 </div>
@@ -111,28 +69,33 @@
     </div>
 </div>
 
-
+@* todo extract this modal to a partial that is returnd by htmx *@
 <!-- Modal, CheckIn -->
-<div class="modal fade" id="check-in-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="check-in-modal" tabindex="-1"  aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                <h1 class="modal-title fs-5">Modal title</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                
                 <p>When you check in, you'll get a boarding pass, and the ticket cannot be transfer.</p>
                 <p>You can checkout until the event start time: xx-xx-xxxx xx:xx. If you checkout, the boarding pass will no longer work. You'll get at new boarding once you check in again.</p>
                 <p>You can store the boarding pass in your phone wallet, take a screen shot or print it on paper. Whoever precents this boarding pass gets to enter the event (It's like an ond school pdf ticket)</p>
                 <p>The checkin costs a small transaction fee of ~ xx.xx EURC</p>
-            
             </div>
+           
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form class="btn btn-primary" asp-page-handler="CheckIn">
-                    <input type="hidden" id="event-id" name="eventId" value="" />
-                    <input type="hidden" id="ticket-id" name="ticketId" value="" />
+                <form class="btn btn-primary"
+                      hx-post="/Tickets?handler=CheckIn"
+                      hx-target="#ticket_status_container"
+                      hx-swap="innerHTML">
+                    
+                    @Html.AntiForgeryToken()
+                    
+                    <input type="hidden" id="event-id" name="eventId" value=""/>
+                    <input type="hidden" id="ticket-id" name="ticketId" value=""/>
                     <button class="dropdown-item" type="submit">Check In</button>
                 </form>
             </div>
@@ -228,3 +191,13 @@
         document.getElementById('transfer-to-address').value = document.getElementById('recipient-address').value;
     });
 </script>
+
+@* <div class="btn btn-light" *@
+@*      hx-get="/Tickets?handler=PopModal" *@
+@*      hx-target="#modal-container" *@
+@*      hx-swap="innerHTML"> *@
+@*      Pop Model *@
+@* </div> *@
+@* <div id="modal-container"> *@
+@*     <partial name="_Modal" /> *@
+@* </div> *@

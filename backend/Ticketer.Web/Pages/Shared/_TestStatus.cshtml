@@ -1,0 +1,9 @@
+@model string
+
+<span class="badge bg-dark">
+    @Model
+</span>
+<script>
+    var modalEl = document.querySelector('.modal.show');
+    if (modalEl) bootstrap.Modal.getInstance(modalEl).hide();
+</script>

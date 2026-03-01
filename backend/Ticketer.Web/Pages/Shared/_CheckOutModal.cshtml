@@ -1,0 +1,29 @@
+@model TestStatus
+
+<div class="modal fade" tabindex="-1" aria-labelledby="checkOutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="checkOutModalLabel">Check Out Ticket No. @Model.TicketId</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>When you check out, your boarding pass will no longer work.</p>
+                <p>You can check in again to get a new boarding pass.</p>
+                <p>After checkout, you can transfer the ticket to someone else.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form class="d-inline"
+                      hx-post="/Test?handler=CheckOut"
+                      hx-target="@($"#status_{Model.EventId}_{Model.TicketId}")"
+                      hx-swap="innerHTML">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="eventId" value="@Model.EventId" />
+                    <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                    <button type="submit" class="btn btn-warning">Check Out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

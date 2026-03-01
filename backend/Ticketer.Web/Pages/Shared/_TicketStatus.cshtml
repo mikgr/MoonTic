@@ -1,0 +1,47 @@
+@model Ticketer.Web.Pages.TicketInfo
+
+@if ((Model.Action == "check-in" && Model.Status != "checked-in") 
+ || (Model.Action == "check-out" && Model.Status != "not-checked-in"))
+{
+    <div class="badge bg-warning"
+          hx-get="@($"/Tickets?handler=TicketStatus&action={Model.Action}&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+          hx-swap="innerHTML"
+          hx-target="@($"#status_{@Model.EventId}_{Model.TicketId}")"
+          hx-trigger="every 1s">
+        <div class="spinner-grow spinner-grow-sm text-dark" role="status">
+            <span class="visually-hidden">
+                Loading...
+            </span>
+        </div>
+        @Model.Status
+    </div>
+    <!-- Spinner element -->
+}
+else if (Model.Status == "checked-in")
+{
+    <span class="badge bg-success">
+        ✅️ Checked In
+    </span>
+    <div hx-get="@($"/Tickets?handler=ActionButton&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+         hx-trigger="load"
+         hx-target="@($"#ticket_actions_{Model.EventId}_{Model.TicketId}")"
+         hx-swap="outerHTML"
+         style="display: none;"></div>
+}
+else if (Model.Status == "not-checked-in")
+{
+    <span class="badge bg-secondary">
+        Not Checked In
+    </span>
+    <div hx-get="@($"/Tickets?handler=ActionButton&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+         hx-trigger="load"
+         hx-target="@($"#ticket_actions_{Model.EventId}_{Model.TicketId}")"
+         hx-swap="outerHTML"
+         style="display: none;"></div>
+}
+
+
+<script>
+    var modalEl = document.querySelector('.modal.show');
+    if(modalEl) bootstrap.Modal.getInstance(modalEl).hide();
+</script>

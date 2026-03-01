@@ -1,0 +1,68 @@
+@model TicketHolding
+
+<div class="btn-group float-end" id="@($"ticket_actions_{@Model.EventId}_{@Model.TicketNo}")">
+    <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Action
+    </button>
+    <ul class="dropdown-menu">
+        <li>
+            @if (@Model.IsCheckedIn)
+            {
+                <li>
+                    <!-- Button trigger modal -->
+                    <a type="button" class="dropdown-item" href="/tickets/@Model.ContractAddress/@Model.TicketNo/print" target="_blank">
+                        🖨️ Print Boarding Pass
+                    </a>
+                </li>
+                <li>
+                    <!-- Button trigger modal -->
+                    <div type="button" 
+                         class="dropdown-item" 
+                         data-bs-toggle="modal" 
+                         data-bs-target="#check-out-modal"
+                         data-ticket-id="@Model.TicketNo" 
+                         data-event-id="@Model.EventId"
+                         hx-get="/Test?handler=CheckOutModal&eventId=@Model.EventId&ticketId=@Model.TicketNo" 
+                         hx-target="#modal-container" 
+                         hx-swap="innerHTML"
+                         >
+                        🚪️ Check Out
+                    </div>
+                </li>
+                <li>
+                    <button type="button" class="disabled dropdown-item">📩 Transfer Ticket</button>
+                </li>
+            }
+            else
+            {
+                <li>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="disabled dropdown-item">
+                        🖨️ Print Boarding Pass
+                    </button>
+                </li>
+                <li>
+                    <!-- Button trigger modal -->
+                    <div type="button"
+                         class="dropdown-item" 
+                         data-bs-toggle="modal" 
+                         data-bs-target="#check-in-modal"
+                         data-ticket-id="@Model.TicketNo" 
+                         data-event-name="@Model.EventName" 
+                         data-event-id="@Model.EventId"
+                         hx-get="/Test?handler=CheckInModal&eventId=@Model.EventId&ticketId=@Model.TicketNo"
+                         hx-target="#modal-container"
+                         hx-swap="innerHTML">
+                        ✅️ Check In
+                    </div>
+                </li>
+                <li>
+                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#transfer-modal"
+                            data-ticket-id="@Model.TicketNo" data-event-id="@Model.EventId">
+                        📩 Transfer Ticket
+                    </button>
+                </li>
+            }
+        </li>
+    </ul>
+</div>
