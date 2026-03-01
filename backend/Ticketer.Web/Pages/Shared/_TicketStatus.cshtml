@@ -1,10 +1,11 @@
 @model Ticketer.Web.Pages.TicketInfo
 
 @if ((Model.Action == "check-in" && Model.Status != "checked-in") 
- || (Model.Action == "check-out" && Model.Status != "not-checked-in"))
+ || (Model.Action == "check-out" && Model.Status != "not-checked-in")
+ || (Model.Action == "transfer" && Model.Status == "pending"))
 {
     <div class="badge bg-warning"
-          hx-get="@($"/Tickets?handler=TicketStatus&action={Model.Action}&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+          hx-get="@($"/Test?handler=TicketStatus&action={Model.Action}&eventId={Model.EventId}&ticketId={Model.TicketId}")"
           hx-swap="innerHTML"
           hx-target="@($"#status_{@Model.EventId}_{Model.TicketId}")"
           hx-trigger="every 1s">
@@ -38,6 +39,15 @@ else if (Model.Status == "not-checked-in")
          hx-target="@($"#ticket_actions_{Model.EventId}_{Model.TicketId}")"
          hx-swap="outerHTML"
          style="display: none;"></div>
+}
+else if (Model.Action == "transfer")
+{
+    @* Server sends HX-Trigger: fadeOutCard so layout script fades out and removes the card *@
+    <span class="badge bg-info">Transferred</span>
+}
+else
+{
+    <span class="badge bg-danger">nil</span>
 }
 
 

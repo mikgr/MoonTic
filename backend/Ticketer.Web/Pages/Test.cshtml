@@ -5,11 +5,19 @@
     Layout = "_Layout";
 }
 <br/>
-
+<div class="row">
+    <div class="col-md-12">
+        @* only show when there are ongoing events <h2>Ongoing Events</h2> *@
+        <hr class="shadow" style="border-top: 6px solid #ffffff"/>
+        <div class="text-center text-white fw-bolder" style="margin-bottom: 1rem;">
+            <h1 class="display-2">~ Tickets ~</h1>
+        </div>
+    </div>
+</div>
 <div>
     @foreach (var t in Model.Tickets)
     {
-        <div class="card" style="margin-bottom: 1rem;">
+        <div class="card" style="margin-bottom: 1rem;" id="@($"card_{t.EventId}_{t.TicketNo}")" data-event-id="@t.EventId" data-ticket-no="@t.TicketNo">
             <div class="card-body site-box-shadow">
                 <div class="row">
                     <div class="col-12">
@@ -42,3 +50,8 @@
         </div>
     }
 </div>
+
+@if (!Model.Tickets.Any())
+{
+    <partial name="Shared/_Crickets"/>
+}

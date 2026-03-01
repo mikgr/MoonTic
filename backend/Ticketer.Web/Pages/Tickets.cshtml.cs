@@ -121,7 +121,7 @@ public class TicketsModel : PageModel
             await checkInTicketHandler.Execute(user, eventId, ticketId);
         });
 
-        return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, "pending", "check-in")); //new OkResult(); //RedirectToPage("/Tickets");
+        return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, "pending", "check-in"));
 
         // todo feedback ok or failed or already checked in
     }
