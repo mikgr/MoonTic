@@ -36,7 +36,7 @@
                     <div class="col-md-6">
                         <p><strong>Status:</strong></p>
                         <div id="@($"status_{t.EventId}_{t.TicketNo}")">
-                            <partial name="_TicketStatus" model="@(new TicketInfo(t.EventId, t.TicketNo, (t.IsCheckedIn ? "checked-in" : "not-checked-in"), "nil"))"/>
+                            <partial name="_TicketStatus" model="@(new TicketActionStatus(t.EventId, t.TicketNo, (t.IsCheckedIn ? "checked-in" : "not-checked-in"), "nil"))"/>
                         </div>
                     </div>
                 </div>

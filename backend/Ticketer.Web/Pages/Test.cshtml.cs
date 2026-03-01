@@ -7,8 +7,8 @@ using Ticketer.UseCases;
 namespace Ticketer.Web.Pages;
 
 
-public record TestStatus(int EventId, int TicketId, string Status); 
-
+public record TicketHolding(int TicketNo, int EventId, string ContractAddress, string EventName, DateTime Date, bool IsCheckedIn);
+public record TicketActionStatus(int EventId, int TicketId, string Status, string Action);
 
 public class Test : PageModel
 {
@@ -47,18 +47,19 @@ public class Test : PageModel
 
     public IActionResult OnGetCheckInModal(int eventId, int ticketId)
     {
-        return Partial("_CheckInModal", new TestStatus(eventId, ticketId, "post acitonOne"));    
+        return Partial("_CheckInModal", new TicketActionStatus(eventId, ticketId, "",""));    
     }
 
     
     public IActionResult OnGetCheckOutModal(int eventId, int ticketId)
     {
-        return Partial("_CheckOutModal", new TestStatus(eventId, ticketId, "post acitonOne"));    
+        return Partial("_CheckOutModal", new TicketActionStatus(eventId, ticketId, "", ""));    
     }
 
+    
     public IActionResult OnGetTransferModal(int eventId, int ticketId)
     {
-        return Partial("_TransferModal", new TestStatus(eventId, ticketId, "transfer"));
+        return Partial("_TransferModal", new TicketActionStatus(eventId, ticketId, "", ""));
     }
     
     
@@ -78,7 +79,7 @@ public class Test : PageModel
             await checkInTicketHandler.Execute(user, eventId, ticketId);
         });
 
-        return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, "pending", "check-in"));
+        return Partial("_TicketStatus", new TicketActionStatus(eventId, ticketId, "pending", "check-in"));
     }
     
     
@@ -101,7 +102,7 @@ public class Test : PageModel
                 await checkOutTicketHandler.Execute(user, eventId, ticketId);
             });
             
-            return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, "pending", "check-out")); 
+            return Partial("_TicketStatus", new TicketActionStatus(eventId, ticketId, "pending", "check-out")); 
         
             // todo feedback ok or failed or already checked in
         }
@@ -133,12 +134,12 @@ public class Test : PageModel
                 await transferTicketHandler.Execute(user, eventId, ticketId, recipientAddress);
             });
             
-            return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, "pending", "transfer"));
+            return Partial("_TicketStatus", new TicketActionStatus(eventId, ticketId, "pending", "transfer"));
         }
         catch (DomainInvariant)
         {
             // todo show error in modal
-            return Partial("_TransferModal", new TestStatus(eventId, ticketId, "error"));
+            return Partial("_TransferModal", new TicketActionStatus(eventId, ticketId, "", ""));
         }
     }
     
@@ -168,7 +169,34 @@ public class Test : PageModel
             Response.Headers.Append("HX-Trigger", $"{{\"fadeOutCard\": {{\"eventId\": {eventId}, \"ticketId\": {ticketId}}}}}");
         }
         
-        return Partial("_TicketStatus", new TicketInfo(eventId, ticketId, status, action)); 
+        return Partial("_TicketStatus", new TicketActionStatus(eventId, ticketId, status, action)); 
+    }
+    
+    
+    public IActionResult OnGetActionButton(int? eventId, int? ticketId)
+    {
+        var userId = HttpContext.Session.GetInt32("UserId");
+        if (userId == null) return RedirectToPage("/LogIn");
+        
+        var contracts = SpikeRepo.ReadSingleOrDefault<EventContract>(x => x.Id == eventId);
+        var ticketContainer = SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId);
+        
+        if (contracts is null || ticketContainer is null) return new NotFoundResult();
+
+        var xx = ticketContainer.GetAllTickets().SingleOrDefault(x =>
+            x.EventId == eventId && x.TicketId == ticketId) 
+                 ?? throw new Exception("No ticket found");
+        
+        var x = new TicketHolding(
+            ticketId!.Value, 
+            eventId!.Value, 
+            contracts.ContractAddress, 
+            contracts.Name, 
+            contracts.VenueOpenTime, 
+            xx.IsCheckedIn
+        );
+        
+        return Partial("_TicketActionButton", x);
     }
     
     
