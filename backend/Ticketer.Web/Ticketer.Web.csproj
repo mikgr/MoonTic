@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SpikeDb\SpikeDb.csproj" />
       <ProjectReference Include="..\Ticketer.Model\Ticketer.Model.csproj" />
+      <ProjectReference Include="..\Ticketer.Repository\Ticketer.Repository.csproj" />
       <ProjectReference Include="..\Ticketer.UseCases\Ticketer.UseCases.csproj" />
     </ItemGroup>
 

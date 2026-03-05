@@ -1,12 +1,13 @@
+using Amazon.DynamoDBv2.DataModel;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
-using SpikeDb;
+
 using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
 // todo move to own project
-public class TicketContractClient
+public class TicketContractClient(IDynamoDBContext dynamo)
 {
     public async Task<(TransactionReceipt receipt, DateTime blockTimestamp)> OnChainCheckIn(
         User currentUser, 
@@ -30,7 +31,7 @@ public class TicketContractClient
          """;
         
         // User private key
-        var userWallet = SpikeRepo.ReadSingle<UserWallet>(x => x.UserId == currentUser.Id);
+        var userWallet = await dynamo.LoadAsync<UserWallet>(currentUser.Id);
         var userPrivateKey = userWallet.PrivateKey;
         var functionName = "checkIn";
         // Convert hex string to bytes32
@@ -67,7 +68,7 @@ public class TicketContractClient
                      """;
         
         // User private key
-        var userWallet = SpikeRepo.ReadSingle<UserWallet>(x => x.UserId == currentUser.Id);
+        var userWallet = await dynamo.LoadAsync<UserWallet>(currentUser.Id);
         var userPrivateKey = userWallet.PrivateKey;
         var functionName = "transfer";
         // Convert hex string to bytes32
@@ -98,7 +99,7 @@ public class TicketContractClient
                      """;
         
         // User private key
-        var userWallet = SpikeRepo.ReadSingle<UserWallet>(x => x.UserId == currentUser.Id);
+        var userWallet = await dynamo.LoadAsync<UserWallet>(currentUser.Id);
         var userPrivateKey = userWallet.PrivateKey;
         var functionName = "checkOut";
         // Convert hex string to bytes32

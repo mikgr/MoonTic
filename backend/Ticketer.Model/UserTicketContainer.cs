@@ -1,21 +1,34 @@
-using SpikeDb;
+
+using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
-public record UserTicket(int TicketId, int EventId, bool IsCheckedIn);
-
-public class UserTicketContainer : ISpikeObjIntKey
+public class UserTicket
 {
-    // todo rename to UserTickets
-    private readonly List<UserTicket> _baseStateTickets = [];
-    
-    public int Id { get; set; }
-    public required int UserId { get; init; }
+    public required int TicketId { get; init; } 
+    public required string ContractAddress { get; init; }
+    public required bool IsCheckedIn { get; init; }
+}
 
-    public IEnumerable<UserTicket> GetAllTickets()
-    {
-        return _baseStateTickets;
-    }
+[DynamoDBTable("UserTicketContainerState")]
+public class UserTicketContainerState
+{
+    [DynamoDBHashKey] 
+    public required string UserId { get; init; }
+    // todo rename to UserTickets
+
+    public List<UserTicket> BaseStateTickets { get; set; } = new(); // todo fix ther is a 400kb size limit on the doc
+}
+
+
+public class UserTicketContainer(UserTicketContainerState state)
+{
+    public UserTicketContainerState GetState() => state;
+    
+    public string UserId => state.UserId;
+    
+    public IEnumerable<UserTicket> GetAllTickets() => 
+        state.BaseStateTickets;
     
     // get past tickets
     // get ongoing tickets
@@ -24,7 +37,13 @@ public class UserTicketContainer : ISpikeObjIntKey
     {
         if (evnt.OwnerId != UserId) throw new InvalidOperationException("Can only purchase tickets for yourself");
         RemoveTicketStateIfExists(evnt.EventContractId, evnt.TicketId);
-        _baseStateTickets.Add(new UserTicket(evnt.TicketId, evnt.EventContractId, IsCheckedIn: false));
+        state.BaseStateTickets.Add(new UserTicket
+            {
+                TicketId = evnt.TicketId,
+                ContractAddress = evnt.EventContractId,
+                IsCheckedIn = false
+            }
+        );
         return this;
     }
 
@@ -37,7 +56,13 @@ public class UserTicketContainer : ISpikeObjIntKey
         }
         else if (evnt.ToUserId == UserId)
         {
-            _baseStateTickets.Add(new UserTicket(evnt.TicketId, evnt.ContractId, IsCheckedIn: false));
+            state.BaseStateTickets.Add(new UserTicket
+            {
+                TicketId = evnt.TicketId,
+                ContractAddress = evnt.ContractId,
+                IsCheckedIn = false
+            });
+                
             return this;
         }
         
@@ -48,7 +73,13 @@ public class UserTicketContainer : ISpikeObjIntKey
     {
         if (evnt.UserId != UserId) throw new InvalidOperationException("Can only check in tickets for yourself");
         RemoveTicketStateIfExists(evnt.EventContractId, evnt.TicketId);
-        _baseStateTickets.Add(new UserTicket(evnt.TicketId, evnt.EventContractId, IsCheckedIn: true));
+        state.BaseStateTickets.Add(
+            new UserTicket
+            {
+                TicketId = evnt.TicketId,
+                ContractAddress = evnt.EventContractId,
+                IsCheckedIn = true
+            });
         return this;
     }
 
@@ -56,29 +87,34 @@ public class UserTicketContainer : ISpikeObjIntKey
     {
         if (evnt.UserId != UserId) throw new InvalidOperationException("Can only check out tickets for yourself");
         RemoveTicketStateIfExists(evnt.EventContractId, evnt.TicketId);
-        _baseStateTickets.Add(new UserTicket(evnt.TicketId, evnt.EventContractId, IsCheckedIn: false));
+        state.BaseStateTickets.Add(new UserTicket
+        {
+            TicketId = evnt.TicketId,
+            ContractAddress = evnt.EventContractId,
+            IsCheckedIn = false
+        });
         return this;
     }
     
-    private void RemoveTicketStateIfExists(int eventContractId, int ticketId)
+    private void RemoveTicketStateIfExists(string eventContractId, int ticketId)
     {
-        var maybe = _baseStateTickets
-            .SingleOrDefault(x => x.EventId == eventContractId && x.TicketId == ticketId);
+        var maybe = state.BaseStateTickets
+            .SingleOrDefault(x => x.ContractAddress == eventContractId && x.TicketId == ticketId);
 
         if (maybe is { } ut)
-            _baseStateTickets.Remove(ut);
+            state.BaseStateTickets.Remove(ut);
     }
 
     
-    public int[] GetContractIds()
+    public string[] GetContractIds()
     {
-        return _baseStateTickets.Select(x => x.EventId).ToHashSet().ToArray();
+        return state.BaseStateTickets.Select(x => x.ContractAddress).ToHashSet().ToArray();
     }
 
-    public bool? IsCheckedIn(int eventId, int ticketId)
+    public bool? IsCheckedIn(string eventId, int ticketId)
     {
-        var ticket = _baseStateTickets.SingleOrDefault(x => 
-            x.EventId == eventId && x.TicketId == ticketId);
+        var ticket = state.BaseStateTickets.SingleOrDefault(x => 
+            x.ContractAddress == eventId && x.TicketId == ticketId);
         
         if (ticket is null) 
             return null;

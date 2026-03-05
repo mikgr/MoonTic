@@ -1,11 +1,15 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
-public class UserWallet : ISpikeObjIntKey
+[DynamoDBTable("UserWallet")]
+public class UserWallet
 {
-    public required int Id { get; set; }
-    public required int UserId { get; init; }
+    [DynamoDBHashKey]  
+    public required string UserId { get; init; }
+    
+    [DynamoDBGlobalSecondaryIndexHashKey("AddressIndex")]
     public required string Address { get; init; }
+    
     public required string PrivateKey { get; init; }
 }

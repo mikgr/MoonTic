@@ -1,15 +1,22 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
 using Ticketer.Model;
 using Nethereum.Signer;
 using Nethereum.Hex.HexConvertors.Extensions;
 
 namespace Ticketer.UseCases;
 
-public class CreateUserHandler
+public class CreateUserHandler(IDynamoDBContext dynamo)
 {
-    public void Execute(string username, string email)
+    public async Task Execute(string username, string email)
     {
-        var maybeUser = SpikeRepo.ReadFirstOrDefault<User>(x => x.UserName == username);
+        var userSearch = dynamo.QueryAsync<UserState>(
+            username.ToLower(),
+            new QueryConfig
+            {
+                IndexName = "UserNameIndex"
+            });
+        
+        var maybeUser = (await userSearch.GetRemainingAsync()).SingleOrDefault();
         if (maybeUser is not null) throw new DomainInvariant("Username already exists");
         
         if (!System.Text.RegularExpressions.Regex.IsMatch(email, 
@@ -18,26 +25,28 @@ public class CreateUserHandler
     
         var (address, privateKey) = CreateNewWallet();
         
-        var newUser = new User
+        var newUser = new UserState
         {
-            Id = -1,
-            UserName = username,
-            Email = email
-        }.SpikePersistInt();
-        
-        _ = new UserWallet 
+            Id = username.ToLower(),
+            UserName = username.ToLower(),
+            Email = email.ToLower()
+        };
+        await dynamo.SaveAsync(newUser);
+
+        var userWallet = new UserWallet
         {
-            Id = -1,
             UserId = newUser.Id,
-            Address = address,
+            Address = address.ToLower(),
             PrivateKey = privateKey
-        }.SpikePersistInt();
+        };
+        await dynamo.SaveAsync(userWallet);
         
-        new UserTicketContainer
+        var userContainerState = new UserTicketContainerState
         {
-            Id = -1,
             UserId = newUser.Id
-        }.SpikePersistInt();
+        };
+        
+        await dynamo.SaveAsync(userContainerState);
     }
     
     private static (string Address, string PrivateKey) CreateNewWallet()

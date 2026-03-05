@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using QRCoder;
-using SpikeDb;
+
 using Ticketer.Model;
 
 namespace Ticketer.Web.Pages;
@@ -21,19 +21,20 @@ public class PrintTicket : PageModel
     public EventContract Contract => _contract!;
     private EventContract? _contract = null;
     
-    public IActionResult OnGet()
+    public async Task<IActionResult> OnGet()
     {
-        var userId = HttpContext.Session.GetInt32("UserId");
-        if (userId is null or -1) return RedirectToPage("/LogIn");
+        var userId = HttpContext.Session.GetString("UserId");
+        if (string.IsNullOrWhiteSpace(userId)) return RedirectToPage("/LogIn");
         
         if (TicketId is null) return NotFound();
+        if (ContractAddress is null) return NotFound();
         
-        _contract = SpikeRepo.ReadFirstOrDefault<EventContract>(x =>
-            x.ContractAddress.ToLower() == ContractAddress?.ToLower());
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        _contract = await repo.LoadContractBy(contractAddress: ContractAddress);
 
         if (_contract is null) return NotFound();
-        
-        var user = SpikeRepo.ReadSingle<User>(x => x.Id == userId);
+
+        var user = await repo.LoadUserAsync(userId);
         Secret = user.GetSecret(_contract.Id, TicketId.Value) ?? "n/a";
 
         var qrValue = $"moontic://usherticket/{ContractAddress}/{TicketId}/{Secret}";

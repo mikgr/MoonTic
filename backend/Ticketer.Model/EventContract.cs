@@ -1,62 +1,106 @@
-
 using System.Security.Cryptography;
 using System.Text;
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
 // todo spike repo support auto property like this - no inint or setter break read
 // public DateTime VenueOpenTime { get; }
 
-public class EventContract : ISpikeObjIntKey, IAccount
+[DynamoDBTable("EventContractState")]
+public class EventContractState
 {
-    public int Id { get; set; } // todo se if Id can be init-only
-    public int OwnerId { get; private set;}
+    [DynamoDBHashKey]
+    public string ContractAddress { get; set; } = "";
+    [DynamoDBGlobalSecondaryIndexHashKey("OwnerIdIndex")]
+    public required string OwnerId { get; init; }
     // private readonly int _eventId;
     // todo turn intp range 
     // todo enforce explicit timezones on times
-    public DateTime VenueOpenTime { get; private set; } 
-    public DateTime VenueCloseTime { get; private set; }
-    private uint BlockCheckOutBeforeVenueOpenInHours { get; set; }
-
-    private int _ticketCounter = 0;
-    private readonly int _totalTickets;
-    public decimal TicketPrice { get; private set; }
-
-    public int SoldTickets => _ticketCounter;
-    public int RemainingTickets => _totalTickets - _ticketCounter;
-    public int TotalTickets => _totalTickets;
-    public string Name { get; private set; }
-    public string ContractAddress { get; set; } = "";
-
-    public decimal Balance { get; private set; } = 0m;
+    [DynamoDBGlobalSecondaryIndexRangeKey("OwnerIdVenueOpenTimeIndex")]
+    public DateTime VenueOpenTimeUtc { get; set; }
+    public DateTime VenueCloseTimeUtc { get; set; }
+    public uint BlockCheckOutBeforeVenueOpenInHours { get; set; }
+    public int TicketCounter = 0;
+    public int TotalTickets { get; set; }
+    public decimal TicketPrice { get; set; }
+    public string Name { get; set; } = "";
+    public decimal Balance { get; set; } = 0m;
     public string DeployTxHash { get; set; } = "";
+    public Dictionary<string, string> TicketAllocation = new();
+}
 
-    private EventContract(EventInfo eventInfo)
+
+public class EventContract(EventContractState state) : IAccount
+{
+    public EventContractState GetState() => state;
+    public string Id => state.ContractAddress;
+    public string OwnerId => state.OwnerId;
+    // private readonly int _eventId;
+    // todo turn intp range 
+    // todo enforce explicit timezones on times
+    public DateTime VenueOpenTime => state.VenueOpenTimeUtc;
+    public DateTime VenueCloseTime => state.VenueCloseTimeUtc;
+    public decimal TicketPrice => state.TicketPrice;
+    public string Name => state.Name;
+    public string ContractAddress
     {
-        Id = -1;
-        OwnerId = eventInfo.Owner;
-        // _eventId = eventInfo.Id;
-        Name = eventInfo.Name;
-        VenueOpenTime = eventInfo.VenueOpenTime;
-        VenueCloseTime = eventInfo.VenueCloseTime;
-        BlockCheckOutBeforeVenueOpenInHours = eventInfo.BlockCheckOutBeforeVenueOpenInHours;
-        _totalTickets = eventInfo.Tickets;
-        TicketPrice = eventInfo.Price;
+        get => state.ContractAddress;
+        set => state.ContractAddress = value.ToLower();
+    }
+
+    public decimal Balance => state.Balance;
+
+    public string DeployTxHash
+    {
+        get => state.DeployTxHash;
+        set => state.DeployTxHash = value;    
     }
     
-    public static EventContract New(EventInfo eventInfo) => new (eventInfo);
+    public int SoldTickets => state.TicketCounter;
+    public int RemainingTickets => state.TotalTickets - state.TicketCounter;
+    public int TotalTickets => state.TotalTickets;
+
+    // private EventContract(EventInfo eventInfo)
+    // {
+    //     Id = -1;
+    //     OwnerId = eventInfo.Owner;
+    //     // _eventId = eventInfo.Id;
+    //     Name = eventInfo.Name;
+    //     VenueOpenTime = eventInfo.VenueOpenTime;
+    //     VenueCloseTimeUtc = eventInfo.VenueCloseTimeUtc;
+    //     BlockCheckOutBeforeVenueOpenInHours = eventInfo.BlockCheckOutBeforeVenueOpenInHours;
+    //     _totalTickets = eventInfo.Tickets;
+    //     TicketPrice = eventInfo.Price;
+    // }
     
+    public static EventContract New(EventInfo eventInfo)
+    {
+        var blockCheckOutBeforeVenueOpenInHours = eventInfo.BlockCheckOutBeforeVenueOpenInHours;
+        if (blockCheckOutBeforeVenueOpenInHours < 5) throw new DomainInvariant($"{nameof(blockCheckOutBeforeVenueOpenInHours)} Cannot be less than 5 hours");
+        
+        return new EventContract(new EventContractState
+        {
+            OwnerId = eventInfo.Owner,
+            Name = eventInfo.Name,
+            VenueOpenTimeUtc = eventInfo.VenueOpenTime,
+            VenueCloseTimeUtc = eventInfo.VenueCloseTime,
+            BlockCheckOutBeforeVenueOpenInHours = blockCheckOutBeforeVenueOpenInHours,
+            TotalTickets = eventInfo.Tickets,
+            TicketPrice = eventInfo.Price,
+        });
+    }
+
     // sell ticket, crate ask, cancel ask, when ticket has ask it cannot be transferred
     void IAccount.ReceiveMoney(decimal amount) =>
-        Balance += amount;
+        state.Balance += amount;
     
-    private readonly Dictionary<int, string> _ticketAllocation = new();
+    
     
     
     public string? GetHolderOfTicket(int ticketId)
     {
-        if(_ticketAllocation.TryGetValue(ticketId, out var userId))
+        if(state.TicketAllocation.TryGetValue(ticketId.ToString(), out var userId))
             return userId;
         
         return null;
@@ -79,7 +123,7 @@ public class EventContract : ISpikeObjIntKey, IAccount
     }
 
     public DateTime GetCheckOutBlockStart() => 
-        VenueOpenTime.AddHours(-BlockCheckOutBeforeVenueOpenInHours);
+        VenueOpenTime.AddHours(-state.BlockCheckOutBeforeVenueOpenInHours);
 
     
     public bool CheckOutBlockIsActive(TimeProvider clock)=>
@@ -92,8 +136,8 @@ public class EventContract : ISpikeObjIntKey, IAccount
     
     public void ApplyEvent(TicketPurchasedEvent @event)
     {
-        _ticketAllocation[@event.TicketId] = @event.ToAddress;
-        _ticketCounter = _ticketAllocation.Count;
+        state.TicketAllocation[@event.TicketId.ToString()] = @event.ToAddress;
+        state.TicketCounter = state.TicketAllocation.Count;
     }
 
 
@@ -102,5 +146,5 @@ public class EventContract : ISpikeObjIntKey, IAccount
 
     
     public void ApplyEvent(TicketTransferredEvent newCheckOutEvent) => 
-        _ticketAllocation[newCheckOutEvent.TicketId] = newCheckOutEvent.ToAddress;
+        state.TicketAllocation[newCheckOutEvent.TicketId.ToString()] = newCheckOutEvent.ToAddress;
 }

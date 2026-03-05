@@ -1,12 +1,13 @@
 using System.Text.Json;
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
+
 using Ticketer.Model;
 using Nethereum.Util;
 
 
 namespace Ticketer.UseCases;
 
-public class DeployContractHandler
+public class DeployContractHandler(IDynamoDBContext dynamo)
 {
     public async Task Execute(object[] constructorArgs, EventContract eventContract)
     {
@@ -44,7 +45,8 @@ public class DeployContractHandler
                     
         eventContract.ContractAddress = contractAddress;
         eventContract.DeployTxHash = deploymentReceipt.TransactionHash;
-        eventContract.SpikePersistInt();
+
+        await dynamo.SaveAsync(eventContract.GetState());
                     
         Console.WriteLine("Contract deployed at: " + contractAddress);
     }

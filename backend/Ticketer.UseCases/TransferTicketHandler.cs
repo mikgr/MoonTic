@@ -1,14 +1,18 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
+using Nethereum.Util;
 using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class TransferTicketHandler(TicketContractClient ticketContractClient)
+public class TransferTicketHandler(
+    TicketContractClient ticketContractClient,
+    IDynamoDBContext dynamo,
+    IRepository repo)
 {
     // todo handle time of RPC CALL
     // todo long running, better ux with pending -> failed / completed
     // todo handle already seen 
-    public async Task Execute(User? currentUser, int eventId, int ticketId, string toAddress)
+    public async Task Execute(User? currentUser, string eventId, int ticketId, string toAddress)
     {
         Console.WriteLine($"{nameof(TransferTicketHandler)} {nameof(Execute)}");
         // todo validate address cannot be self + address format
@@ -16,18 +20,28 @@ public class TransferTicketHandler(TicketContractClient ticketContractClient)
         ArgumentNullException.ThrowIfNull(toAddress);
         
         if (currentUser is null) throw new Exception("User not set");
-        var contract = SpikeRepo.ReadIntId<EventContract>(eventId);
-        var fromUserTicketContainer = SpikeRepo.ReadSingle<UserTicketContainer>(x => x.UserId == currentUser.Id);
+        var contractState = await dynamo.LoadAsync<EventContractState>(eventId); // SpikeRepo.ReadIntId<EventContract>(eventId);
+        var contract = new EventContract(contractState);
+        var fromUserTicketContainerState = await dynamo.LoadAsync<UserTicketContainerState>(currentUser.Id);
+        var fromUserTicketContainer = new UserTicketContainer(fromUserTicketContainerState);
         
         // todo must be transferrable to non MoonTic addresses!!
-        var userWallet = SpikeRepo.ReadSingle<UserWallet>(x => x.Address.ToLower() == toAddress.ToLower());
+        var search = dynamo.QueryAsync<UserWallet>(
+            toAddress.ToLower(),
+            new QueryConfig
+            {
+                IndexName = "AddressIndex"
+            });
+
+        var userWallet = (await search.GetRemainingAsync())
+            .SingleOrDefault() ?? throw new Exception("User wallet not found");
         
         var transferResult = await ticketContractClient.OnChainTransferTicket
             (currentUser, contract, ticketId, toAddress);
         
         //contract.Transfer(ticketId, from: currentUser.Id, to: userWallet.UserId);
         
-        var toUserTicketContainer = SpikeRepo.ReadSingle<UserTicketContainer>(x => x.UserId == userWallet.UserId);
+        var toUserTicketContainer = await repo.LoadUserTicketContainer(userWallet.UserId);
         
         var transferredEvent = new TicketTransferredEvent
         {
@@ -39,16 +53,16 @@ public class TransferTicketHandler(TicketContractClient ticketContractClient)
             TransactionHash = transferResult.receipt.TransactionHash,
             FromAddress = transferResult.receipt.From,
             ToAddress = toAddress,
-            TimestampUtc = transferResult.blockTimestamp
+            TimestampUtc = transferResult.blockTimestamp.ToUnixTimestamp()
         };
         
         fromUserTicketContainer.ApplyEvent(transferredEvent);
         toUserTicketContainer.ApplyEvent(transferredEvent);
         contract.ApplyEvent(transferredEvent);
         
-        transferredEvent.SpikePersistInt();
-        contract.SpikePersistInt();
-        fromUserTicketContainer.SpikePersistInt();
-        toUserTicketContainer.SpikePersistInt();
+        await dynamo.SaveAsync(transferredEvent);
+        await dynamo.SaveAsync(contract.GetState());
+        await dynamo.SaveAsync(fromUserTicketContainer.GetState());
+        await dynamo.SaveAsync(toUserTicketContainer.GetState());
     }
 }

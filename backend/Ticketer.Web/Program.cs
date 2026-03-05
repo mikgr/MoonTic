@@ -1,5 +1,8 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
+using Microsoft.AspNetCore.Mvc;
+
 using Ticketer.Model;
+using Ticketer.Repository;
 using Ticketer.UseCases;
 using Ticketer.Web;
 
@@ -11,6 +14,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddRepository();
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AddPageRoute("/Events", "");
@@ -18,6 +22,7 @@ builder.Services.AddRazorPages(options =>
 
 builder.Services.AddSingleton<IJobQueue>(_ => new JobQueue(100));
 builder.Services.AddHostedService<WorkerService>();
+builder.Services.AddRepository();
 
 builder.Services.AddAllUseCases();
 
@@ -45,14 +50,17 @@ app.MapStaticAssets();
 app.MapRazorPages()
     .WithStaticAssets();
 
-SpikeDbConfig.GetInstance().SetRootFolder("/Users/mikkel/ticketer");
+// SpikeDbConfig.GetInstance().SetRootFolder("/Users/mikkel/ticketer");
 
 app.Run();
 
 
 void MapPostProcessUsherCheckIn(WebApplication webApplication)
 {
-    webApplication.MapPost("/organizer/event/usher-ticket", (HttpContext context, UsherTicketDtoV1 dto) =>
+    webApplication.MapPost("/organizer/event/usher-ticket", async (
+        HttpContext context, 
+        UsherTicketDtoV1 dto,
+        [FromServices] IDynamoDBContext dynamo) =>
     {
         try
         {
@@ -64,14 +72,16 @@ void MapPostProcessUsherCheckIn(WebApplication webApplication)
                 authHeader = token;
             }
 
-            if (!int.TryParse(authHeader, out var fakeTokeIsReallyUserId))
-                return Results.BadRequest();
+            // if (!int.TryParse(authHeader, out var fakeTokeIsReallyUserId))
+            //     return Results.BadRequest();
+            
+            var maybeUserState = await dynamo.LoadAsync<UserState>(authHeader);
 
-            if (SpikeRepo.ReadOrNullByInt<User>(fakeTokeIsReallyUserId) is not { } usherUser)
+            if (maybeUserState is not { } usherUserState)
                 return Results.Unauthorized();
 
             var usherTicketHandler = context.RequestServices.GetRequiredService<UsherTicketHandler>();
-            usherTicketHandler.Execute(usherUser, dto.ContractAddress, dto.TicketId, dto.CheckInSecret);
+            await usherTicketHandler.Execute(new User(usherUserState), dto.ContractAddress, dto.TicketId, dto.CheckInSecret);
 
             return Results.Ok("EVENT_ENTERED");
         }

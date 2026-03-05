@@ -6,25 +6,33 @@ namespace Ticketer.Test
 {
     public class UserTicketContainerTest
     {
+        private const string ownerId = "owner-id";
+        private const string eventContractId = "event-contract-id";
+        private const string ticketId = "ticket-id";
+        private const string transactionHash = "transaction-hash";
+        private const string contractAddress = "contract-address";
+        private const string toAddress = "to-address";
+        private const int ticketPrice = 100;
+        
         [Fact]
         public void When_ticket_is_transferred_it_is_removed_from_the_container()
         {
-            SpikeRepo.Truncate<UserTicketContainer>();
-            
-            var userTicketContainer = new UserTicketContainer { Id = -1, UserId = 1 };
+            // todo SpikeRepo.Truncate<UserTicketContainer>();
+            var userId = Guid.NewGuid().ToString();
+            var userTicketContainer = new UserTicketContainer(new UserTicketContainerState());
 
             userTicketContainer.ApplyEvent(new TicketPurchasedEvent
             {
-                Id = 1,
                 TimestampUtc = DateTime.UtcNow,
-                OwnerId = 1,
-                EventContractId = 1,
+                OwnerId = ownerId,
+                EventContractId = eventContractId,
                 TicketId = 1,
-                TransactionHash = "123",
-                ContractAddress = "0xasdf",
-                ToAddress = "0x1234",
+                TransactionHash = transactionHash,
+                ContractAddress = contractAddress,
+                ToAddress = toAddress,
                 TicketPrice = 100
-            }).SpikePersistInt();
+            });
+            // todo save dynamo context
 
             var actual = userTicketContainer.GetAllTickets();
             Assert.Single(actual);

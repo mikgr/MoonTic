@@ -1,41 +1,50 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
+using Nethereum.Util;
 using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class CheckInTicketHandler(TicketContractClient ticketContractClient)
+public class CheckInTicketHandler(
+    TicketContractClient ticketContractClient,
+    IDynamoDBContext dynamo,
+    IRepository repo
+    )
 {
-    public async Task Execute(User? currentUser, int eventId, int ticketId)
+    public async Task Execute(User currentUser, string contractAddress, int ticketId)
     {
-        if (currentUser is null) throw new Exception("User not set");
-                
-        var contract = SpikeRepo.ReadIntId<EventContract>(eventId);
+        ArgumentNullException.ThrowIfNull(currentUser);
+        ArgumentNullException.ThrowIfNull(contractAddress);
+        
+        var contract = await repo.LoadContractBy(contractAddress);
         
         var checkInSecretHash = currentUser.CreateSecretHashed(contract.Id, ticketId);
-        currentUser.SpikePersistInt();
+        await dynamo.SaveAsync(currentUser.GetState());
         
         var (receipt, blockTimestamp) = await ticketContractClient.OnChainCheckIn(
             currentUser, ticketId, contract, checkInSecretHash);
         
-        contract.SpikePersistInt();
-
         var @event = new TicketCheckedInEvent
         {
-            Id = -1,
             EventContractId = contract.Id,
             TicketId = ticketId,
             UserId = currentUser.Id,
-            TimestampUtc = blockTimestamp,
+            TimestampUtc = blockTimestamp.ToUnixTimestamp(),
             ContractAddress = contract.ContractAddress,
             TransactionHash = receipt.TransactionHash,
             Address = receipt.From,
             CheckInSecretHash = checkInSecretHash
-        }.SpikePersistInt();
+        };
         
-        var userTickets = SpikeRepo.ReadSingle<UserTicketContainer>(x => x.UserId == currentUser.Id);
+        await dynamo.SaveAsync(@event);
+
+        var userTicketsState = await dynamo.LoadAsync<UserTicketContainerState>(currentUser.Id);
+        var userTickets = new UserTicketContainer(userTicketsState);
         userTickets.ApplyEvent(@event);
-        userTickets.SpikePersistInt();
+        // userTickets.SpikePersistInt();
+        await dynamo.SaveAsync(userTickets.GetState());
+        
         contract.ApplyEvent(@event);
-        contract.SpikePersistInt();
+        // contract.SpikePersistInt();
+        await dynamo.SaveAsync(contract.GetState());
     }
 }

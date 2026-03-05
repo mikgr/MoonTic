@@ -1,11 +1,11 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
 using Ticketer.Model;
 
 namespace Ticketer;
 
-public static class NewEventInfoHandler
+public class NewEventInfoHandler(IDynamoDBContext dynamo)
 {
-    public static void Execute(
+    public async Task Execute(
         User? currentUser,
         string name,
         DateTime venueOpenTime,
@@ -15,10 +15,9 @@ public static class NewEventInfoHandler
     {
         if (currentUser is null) throw new Exception("User not set");
 
-        new EventInfo
+        var eventInfo = new EventInfo
         {
             Owner = currentUser.Id,
-            Id = -1,
             Name = name,
             VenueOpenTime = venueOpenTime,
             VenueCloseTime = venueCloseTime,
@@ -26,6 +25,9 @@ public static class NewEventInfoHandler
             Price = price,
             Description = "",
             BlockCheckOutBeforeVenueOpenInHours = 5 // todo dont default
-        }.SpikePersistInt();
+        };
+        
+        await dynamo.SaveAsync(eventInfo);
+        
     }
 }

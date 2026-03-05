@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Amazon.DynamoDBv2.DataModel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SpikeDb;
+
 using Ticketer.Model;
 using Ticketer.UseCases;
 
@@ -11,20 +12,23 @@ public class AllEventsModel : PageModel
     public IEnumerable<EventContract> EventContracts { get; private set; } = [];
     public string ErrorMessage { get; set; } = "";
     
-    public void OnGet()
+    public async Task OnGet()
     {
-        EventContracts = SpikeRepo.ReadCollection<EventContract>();
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        EventContracts = await repo.LoadAllContracts();// SpikeRepo.ReadCollection<EventContract>();
     }
     
-    public async Task<IActionResult> OnPostBuy(int eventId)
+    public async Task<IActionResult> OnPostBuy(string eventId)
     {
         try
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId is null or -1) return RedirectToPage("/LogIn");
-            var user = SpikeRepo.ReadOrNullByInt<User>((int)userId);
+            var dynamo = HttpContext.RequestServices.GetRequiredService<IDynamoDBContext>();
+            
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrWhiteSpace(userId)) return RedirectToPage("/LogIn");
+            var userState = await dynamo.LoadAsync<UserState>(userId);
             var buyTicketHandler = HttpContext.RequestServices.GetRequiredService<BuyTicketHandler>();
-            await buyTicketHandler.Execute(eventId, user);
+            await buyTicketHandler.Execute(eventId, new User(userState));
 
             return RedirectToPage("/Tickets");
         }

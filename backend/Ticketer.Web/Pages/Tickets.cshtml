@@ -17,7 +17,7 @@
 <div>
     @foreach (var t in Model.Tickets)
     {
-        <div class="card" style="margin-bottom: 1rem;" id="@($"card_{t.EventId}_{t.TicketNo}")" data-event-id="@t.EventId" data-ticket-no="@t.TicketNo">
+        <div class="card" style="margin-bottom: 1rem;" id="@($"card_{t.ContractAddress}_{t.TicketNo}")" data-event-id="@t.ContractAddress" data-ticket-no="@t.TicketNo">
             <div class="card-body site-box-shadow">
                 <div class="row">
                     <div class="col-12">
@@ -30,20 +30,20 @@
                 <div class="row fs-4">
                     <div class="col-md-6">
                         <p><strong>Ticket No:</strong> @t.TicketNo</p>
-                        <p><strong>Event ID:</strong> @t.EventId</p>
+                        <p><strong>Event Id:</strong> @t.ContractAddress</p>
                         <p><strong>Date:</strong> @t.Date.ToString("MMM d yyyy HH\\:mm")</p>
                     </div>
                     <div class="col-md-6">
                         <p><strong>Status:</strong></p>
-                        <div id="@($"status_{t.EventId}_{t.TicketNo}")">
-                            <partial name="_TicketStatus" model="@(new TicketActionStatus(t.EventId, t.TicketNo, (t.IsCheckedIn ? "checked-in" : "not-checked-in"), "nil"))"/>
+                        <div id="@($"status_{t.ContractAddress}_{t.TicketNo}")">
+                            <partial name="_TicketStatus" model="@(new TicketActionStatus(t.ContractAddress, t.TicketNo, (t.IsCheckedIn ? "checked-in" : "not-checked-in"), "nil"))"/>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <hr style="border: 1px dashed #ccc;" />
-                        <partial name="_TicketActionButton" model="@(new TicketHolding(t.TicketNo, t.EventId, t.ContractAddress, t.EventName, t.Date, t.IsCheckedIn))"/>
+                        <partial name="_TicketActionButton" model="@(new TicketHolding(t.TicketNo, t.ContractAddress, t.EventName, t.Date, t.IsCheckedIn))"/>
                     </div>
                 </div>
             </div>

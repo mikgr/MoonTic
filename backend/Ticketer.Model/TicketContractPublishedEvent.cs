@@ -1,11 +1,22 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
-public class TicketContractPublishedEvent : ISpikeObjIntKey
+
+[DynamoDBTable("ContractEvents")]
+public class TicketContractPublishedEvent
 {
-    public required int Id { get; set; }
-    public required int ContractId { get; init; }
+    [DynamoDBHashKey]
     public required string ContractAddress { get; init; }
+    
+    [DynamoDBRangeKey]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    
+    [DynamoDBRangeKey] 
     public required DateTime TimeStamp { get; init; }
+    
+    [DynamoDBProperty("EventType")]
+    public string EventType { get; set; } = "ContractPublished";
+    
+    public required string ContractId { get; init; }
 }
