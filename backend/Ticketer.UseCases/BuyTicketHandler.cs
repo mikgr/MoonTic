@@ -26,7 +26,7 @@ public class BuyTicketHandler(
         
         var @event = new TicketPurchasedEvent
         {
-            TimestampUtc = DateTime.UtcNow.ToUnixTimestamp(),
+            TimestampUtc = DateTime.UtcNow,
             OwnerId = currentUser.Id,
             EventContractId = contract.Id,
             TicketId = mintResult.tokenId,

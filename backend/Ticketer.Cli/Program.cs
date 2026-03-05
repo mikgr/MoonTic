@@ -2,6 +2,7 @@
 using Amazon.DynamoDBv2;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using SpikeCli;
 using Ticketer.Model;
 using Ticketer.Repository;
@@ -31,7 +32,7 @@ public static class Program
             .CmdDi("new", "user", "user-name", "email", (IServiceProvider s, string userName, string email) => 
                 s.GetRequiredService<CreateUserHandler>().Execute(userName, email).Wait())
             
-            .Cmd("create", "table", ()=> new SetUpDynamoTables().Execute())
+            .Cmd("create", "table", ()=> new SetUpDynamoTables().Execute(services.GetRequiredService<IOptions<DynamoDbSettings>>()))
             
             .Cmd("ls", "table", () =>
             {

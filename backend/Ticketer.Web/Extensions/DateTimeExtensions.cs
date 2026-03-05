@@ -2,9 +2,9 @@ namespace Ticketer.Web.Extensions;
 
 public static class DateTimeExtensions
 {
-    public static string ToTimeAgo(this DateTimeOffset dateTimeUtc)
+    public static string ToTimeAgo(this DateTime dateTimeUtc)
     {
-        var timeSpan = DateTimeOffset.UtcNow - dateTimeUtc;
+        var timeSpan = DateTime.UtcNow - dateTimeUtc;
 
         return timeSpan switch
         {

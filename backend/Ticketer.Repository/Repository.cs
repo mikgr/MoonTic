@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using Ticketer.Model;
 
 namespace Ticketer.Repository;
@@ -64,5 +65,22 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
     {
         var events = await dynamo.QueryAsync<TicketPurchasedEvent>(contractAddress).GetRemainingAsync();
         throw new NotImplementedException();
+    }
+
+    public async Task<List<IContractEvent>> LoadContractEvents(string contractAddress)
+    {
+        var purchasedTask = dynamo.QueryAsync<TicketPurchasedEvent>(contractAddress).GetRemainingAsync(); // ScanAsync<TicketPurchasedEvent>([]).GetRemainingAsync();
+        var checkedInTask = dynamo.QueryAsync<TicketCheckedInEvent>(contractAddress).GetRemainingAsync();   //.ScanAsync<TicketCheckedInEvent>([]).GetRemainingAsync();
+        var checkedOutTask = dynamo.QueryAsync<TicketCheckedOutEvent>(contractAddress).GetRemainingAsync();  //.ScanAsync<TicketCheckedOutEvent>([]).GetRemainingAsync();
+        var transferredTask = dynamo.QueryAsync<TicketTransferredEvent>(contractAddress).GetRemainingAsync(); //.ScanAsync<TicketTransferredEvent>([]).GetRemainingAsync();
+
+        await Task.WhenAll(purchasedTask, checkedInTask, checkedOutTask, transferredTask);
+
+        return purchasedTask.Result.Cast<IContractEvent>()
+            .Concat(checkedInTask.Result)
+            .Concat(checkedOutTask.Result)
+            .Concat(transferredTask.Result)
+            .OrderByDescending(e => e.TimestampUtc)
+            .ToList();
     }
 }

@@ -26,6 +26,7 @@ public class PublishEventHandler(
         BigInteger venueOpenTime = eventContract.VenueOpenTime.ToUnixTimestamp();
         BigInteger venueCloseTime = eventContract.VenueCloseTime.ToUnixTimestamp();
         BigInteger totalTicketCount = eventContract.TotalTickets; // uint64 can be BigInteger in Nethereum
+        
         string location = "Store VEGA, Enghavevej 40, 1674 Copenhagen V, Denmark"; // todo fix
 
         var constructorArgs = new object[]
@@ -38,17 +39,7 @@ public class PublishEventHandler(
         };
                 
         await deployContractHandler.Execute(constructorArgs, eventContract);
-
-        await dynamo.SaveAsync(eventContract.GetState());
+        
         await dynamo.DeleteAsync<EventInfo>(eventInfo.Owner, eventInfoId);
-        
-        var ticketContractPublishedEvent = new TicketContractPublishedEvent
-        {
-            ContractId = eventContract.Id,
-            ContractAddress = eventContract.ContractAddress,
-            TimeStamp = DateTime.UtcNow
-        };
-        
-        await dynamo.SaveAsync(ticketContractPublishedEvent);
     }
 }

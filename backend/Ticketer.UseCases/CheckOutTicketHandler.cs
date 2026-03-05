@@ -24,7 +24,7 @@ public class CheckOutTicketHandler(
             EventContractId = eventContract.Id,
             TicketId = ticketId,
             UserId = currentUser.Id,
-            TimestampUtc = checkoutResult.blockTimestamp.ToUnixTimestamp(),
+            TimestampUtc = checkoutResult.blockTimestamp,
             ContractAddress = eventContract.ContractAddress,
             TransactionHash = checkoutResult.receipt.TransactionHash,
             Address = checkoutResult.receipt.From
