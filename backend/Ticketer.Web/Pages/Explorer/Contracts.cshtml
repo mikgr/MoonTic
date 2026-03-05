@@ -10,7 +10,7 @@
 <div>&nbsp;</div>
 @if(!string.IsNullOrWhiteSpace(Model.ContractAddress))
 {
-    <div class="card">
+    <div class="card site-box-shadow">
         <div class="card-body">
             <div class="card-title">
                 <h4 class="mb-3">Contract: <code>@Model.ContractAddress</code>
@@ -85,14 +85,13 @@
 
 @if (Model.ContractCreatedEvents.Count > 0)
 {
-    <div class="card">
+    <div class="card site-box-shadow">
     <div class="card-body">
             
         <div class="card-title">
             <h4> Published Ticket Contracts</h4>
         </div>
-
-
+        
         <table class="table table-striped">
             <thead>
             <tr>
@@ -105,7 +104,6 @@
             <tbody>
             @foreach (var c in Model.ContractCreatedEvents)
             {
-
                 <tr>
                     <td title="@c.TimeStampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@c.TimeStampUtc.ToTimeAgo()</td>
                     <td>@c.ContractName</td>

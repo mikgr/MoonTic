@@ -41,7 +41,7 @@ public class Contracts : PageModel
         var contracts = await repo.LoadAllContracts();
         
         ContractCreatedEvents =
-            contracts.Select(x => new ContractCreatedViewModel(x.VenueOpenTime, x.ContractAddress, x.Name, x.DeployTxHash)) // todo sort by publish time, not open time
+            contracts.Select(x => new ContractCreatedViewModel(x.DeployedAtUtc, x.ContractAddress, x.Name, x.DeployTxHash)) // todo sort by publish time, not open time
             .OrderByDescending(x => x.TimeStampUtc)
             .ToList();
     }
