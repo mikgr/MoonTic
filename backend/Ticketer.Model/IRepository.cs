@@ -4,6 +4,7 @@ namespace Ticketer.Model;
 
 public interface IRepository
 {
+    IDynamoDBContext DbContext { get; }
     Task<User> LoadUserAsync(string userId);
     Task Persist<T>(T obj);
     Task<List<EventInfo>> EventInfo(string ownerId);

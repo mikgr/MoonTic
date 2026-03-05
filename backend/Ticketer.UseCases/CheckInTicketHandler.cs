@@ -1,14 +1,9 @@
 using Amazon.DynamoDBv2.DataModel;
-using Nethereum.Util;
 using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class CheckInTicketHandler(
-    TicketContractClient ticketContractClient,
-    IDynamoDBContext dynamo,
-    IRepository repo
-    )
+public class CheckInTicketHandler(TicketContractClient ticketContractClient, IRepository repo)
 {
     public async Task Execute(User currentUser, string contractAddress, int ticketId)
     {
@@ -18,7 +13,7 @@ public class CheckInTicketHandler(
         var contract = await repo.LoadContractBy(contractAddress);
         
         var checkInSecretHash = currentUser.CreateSecretHashed(contract.Id, ticketId);
-        await dynamo.SaveAsync(currentUser.GetState());
+        await repo.DbContext.SaveAsync(currentUser.GetState());
         
         var (receipt, blockTimestamp) = await ticketContractClient.OnChainCheckIn(
             currentUser, ticketId, contract, checkInSecretHash);
@@ -35,16 +30,16 @@ public class CheckInTicketHandler(
             CheckInSecretHash = checkInSecretHash
         };
         
-        await dynamo.SaveAsync(@event);
+        await repo.DbContext.SaveAsync(@event);
 
-        var userTicketsState = await dynamo.LoadAsync<UserTicketContainerState>(currentUser.Id);
-        var userTickets = new UserTicketContainer(userTicketsState);
+        var userTickets = await repo.LoadUserTicketContainer(currentUser.Id);
+        
         userTickets.ApplyEvent(@event);
         // userTickets.SpikePersistInt();
-        await dynamo.SaveAsync(userTickets.GetState());
+        await repo.DbContext.SaveAsync(userTickets.GetState());
         
         contract.ApplyEvent(@event);
         // contract.SpikePersistInt();
-        await dynamo.SaveAsync(contract.GetState());
+        await repo.DbContext.SaveAsync(contract.GetState());
     }
 }
