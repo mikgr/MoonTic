@@ -1,24 +1,18 @@
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using Microsoft.Extensions.Options;
+using Ticketer.Repository;
 
 namespace Ticketer;
 
 public class SetUpDynamoTables
 {
-    public void Execute()
+    public void Execute(IOptions<DynamoDbSettings> awsOptions)
     {
-        // var endpoint = "http://localhost:8000";
-        // var config = new AmazonDynamoDBConfig
-        // {
-        //     ServiceURL = endpoint,
-        //     AuthenticationRegion = "eu-north-1"
-        // };
-        // using var client = new AmazonDynamoDBClient("dummy", "dummy", config);
         using var client = new AmazonDynamoDBClient(
-            "", "", RegionEndpoint.EUWest1);
-
-
+            awsOptions.Value.AwsAccessKeyId, awsOptions.Value.AwsSecretAccessKey, RegionEndpoint.EUWest1); // todo check region
+        
         var tables = new List<CreateTableRequest>
         {
             new CreateTableRequest
@@ -140,11 +134,56 @@ public class SetUpDynamoTables
             },
             new CreateTableRequest
             {
-                TableName = "TicketContractEvent",
+                TableName = "TicketPurchasedEvent",
                 AttributeDefinitions = new List<AttributeDefinition>
                 {
                     new("ContractAddress", ScalarAttributeType.S),
-                    new("TimestampUtc", ScalarAttributeType.N)
+                    new("TimestampUtc", ScalarAttributeType.S)
+                },
+                KeySchema = new List<KeySchemaElement>
+                {
+                    new("ContractAddress", KeyType.HASH),
+                    new("TimestampUtc", KeyType.RANGE)
+                },
+                BillingMode = BillingMode.PAY_PER_REQUEST
+            },
+            new CreateTableRequest
+            {
+                TableName = "TicketCheckedOutEvent",
+                AttributeDefinitions = new List<AttributeDefinition>
+                {
+                    new("ContractAddress", ScalarAttributeType.S),
+                    new("TimestampUtc", ScalarAttributeType.S)
+                },
+                KeySchema = new List<KeySchemaElement>
+                {
+                    new("ContractAddress", KeyType.HASH),
+                    new("TimestampUtc", KeyType.RANGE)
+                },
+                BillingMode = BillingMode.PAY_PER_REQUEST
+            },
+            new CreateTableRequest
+            {
+                TableName = "TicketCheckedInEvent",
+                AttributeDefinitions = new List<AttributeDefinition>
+                {
+                    new("ContractAddress", ScalarAttributeType.S),
+                    new("TimestampUtc", ScalarAttributeType.S)
+                },
+                KeySchema = new List<KeySchemaElement>
+                {
+                    new("ContractAddress", KeyType.HASH),
+                    new("TimestampUtc", KeyType.RANGE)
+                },
+                BillingMode = BillingMode.PAY_PER_REQUEST
+            },
+            new CreateTableRequest
+            {
+                TableName = "TicketTransferredEvent",
+                AttributeDefinitions = new List<AttributeDefinition>
+                {
+                    new("ContractAddress", ScalarAttributeType.S),
+                    new("TimestampUtc", ScalarAttributeType.S)
                 },
                 KeySchema = new List<KeySchemaElement>
                 {

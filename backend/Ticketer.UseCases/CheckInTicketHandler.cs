@@ -28,7 +28,7 @@ public class CheckInTicketHandler(
             EventContractId = contract.Id,
             TicketId = ticketId,
             UserId = currentUser.Id,
-            TimestampUtc = blockTimestamp.ToUnixTimestamp(),
+            TimestampUtc = blockTimestamp,
             ContractAddress = contract.ContractAddress,
             TransactionHash = receipt.TransactionHash,
             Address = receipt.From,

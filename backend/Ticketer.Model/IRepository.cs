@@ -13,4 +13,5 @@ public interface IRepository
     Task<UserWallet> LoadUserWallet(string userId);
     Task<UserTicketContainer> LoadUserTicketContainer(string userId);
     Task<TicketPurchasedEvent> LoadEventsBy(string contractAddress);
+    Task<List<IContractEvent>> LoadContractEvents(string contractAddress);
 }

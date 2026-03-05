@@ -52,7 +52,7 @@ public class TransferTicketHandler(
             TransactionHash = transferResult.receipt.TransactionHash,
             FromAddress = transferResult.receipt.From,
             ToAddress = toAddress,
-            TimestampUtc = transferResult.blockTimestamp.ToUnixTimestamp()
+            TimestampUtc = transferResult.blockTimestamp
         };
         
         fromUserTicketContainer.ApplyEvent(transferredEvent);

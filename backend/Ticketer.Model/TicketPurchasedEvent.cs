@@ -4,15 +4,14 @@ using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
-[DynamoDBTable("TicketContractEvent")]
+[DynamoDBTable("TicketPurchasedEvent")]
 public class TicketPurchasedEvent :  IContractEvent
 {
     [DynamoDBHashKey]
     public required string ContractAddress { get; init; }
     
     [DynamoDBRangeKey] 
-    public required long TimestampUtc { get; init; }
-    public string EventType => "TicketPurchased";
+    public required DateTime TimestampUtc { get; init; }
     
     public required string OwnerId { get; init; }
     public required string EventContractId { get; init; }

@@ -27,6 +27,7 @@ public class EventContractState
     public string Name { get; set; } = "";
     public decimal Balance { get; set; } = 0m;
     public string DeployTxHash { get; set; } = "";
+    public DateTime DeployedAtUtc { get; set; } = default;
     public Dictionary<string, string> TicketAllocation = new();
 }
 
@@ -56,23 +57,16 @@ public class EventContract(EventContractState state) : IAccount
         get => state.DeployTxHash;
         set => state.DeployTxHash = value;    
     }
+    public DateTime DeployedAtUtc
+    {
+        get => state.DeployedAtUtc;
+        set => state.DeployedAtUtc = value;    
+    }
     
     public int SoldTickets => state.TicketCounter;
     public int RemainingTickets => state.TotalTickets - state.TicketCounter;
     public int TotalTickets => state.TotalTickets;
-
-    // private EventContract(EventInfo eventInfo)
-    // {
-    //     Id = -1;
-    //     OwnerId = eventInfo.Owner;
-    //     // _eventId = eventInfo.Id;
-    //     Name = eventInfo.Name;
-    //     VenueOpenTime = eventInfo.VenueOpenTime;
-    //     VenueCloseTimeUtc = eventInfo.VenueCloseTimeUtc;
-    //     BlockCheckOutBeforeVenueOpenInHours = eventInfo.BlockCheckOutBeforeVenueOpenInHours;
-    //     _totalTickets = eventInfo.Tickets;
-    //     TicketPrice = eventInfo.Price;
-    // }
+    
     
     public static EventContract New(EventInfo eventInfo)
     {

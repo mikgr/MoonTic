@@ -45,6 +45,7 @@ public class DeployContractHandler(IDynamoDBContext dynamo)
                     
         eventContract.ContractAddress = contractAddress;
         eventContract.DeployTxHash = deploymentReceipt.TransactionHash;
+        eventContract.DeployedAtUtc = DateTime.UtcNow;
 
         await dynamo.SaveAsync(eventContract.GetState());
                     
