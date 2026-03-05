@@ -4,10 +4,7 @@ using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class BuyTicketHandler(
-    MintTicketHandler mintTicketHandler, 
-    IDynamoDBContext dynamo,
-    IRepository repo)
+public class BuyTicketHandler(MintTicketHandler mintTicketHandler, IRepository repo)
 {
     // todo brug https://www.mollie.com/ til payments. can support user resell -> user receive proceeds
     
@@ -15,9 +12,9 @@ public class BuyTicketHandler(
     {
         if (currentUser is not {} usr) throw new Exception("User not set");
 
-        var contract = await repo.LoadContractBy(contractAddress); // dynamo.LoadAsync<EventContract>(eventContractId);
+        var contract = await repo.LoadContractBy(contractAddress); 
         
-        var userWallet = await dynamo.LoadAsync<UserWallet>(currentUser.Id);
+        var userWallet = await repo.LoadUserWallet(currentUser.Id);
            
         var mintResult = await mintTicketHandler.Execute(
             contract.ContractAddress, 
@@ -37,15 +34,15 @@ public class BuyTicketHandler(
         };
         
         // todo transaction
-        await dynamo.SaveAsync(@event);
+        await repo.Persist(@event);
         
         contract.ApplyEvent(@event);
-        await dynamo.SaveAsync<EventContractState>(contract.GetState());
+        await repo.Persist(contract.GetState());
 
         var userTickets = await repo.LoadUserTicketContainer(currentUser.Id);
         
         userTickets.ApplyEvent(@event);
         
-        await dynamo.SaveAsync(userTickets.GetState());
+        await repo.Persist(userTickets.GetState());
     }
 }
