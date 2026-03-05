@@ -1,5 +1,6 @@
 ﻿using Amazon;
 using Amazon.DynamoDBv2;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpikeCli;
 using Ticketer.Model;
@@ -16,9 +17,13 @@ public static class Program
         
         User? currentUser = null;
 
+        var config = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
+            .Build();
+        
         var services = new ServiceCollection()
             .AddAllUseCases()
-            .AddRepository()
+            .AddRepository(config)
             .BuildServiceProvider();
         
         var runner = new CliBuilder(services)
