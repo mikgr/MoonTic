@@ -24,6 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.3" />
       <PackageReference Include="Nethereum.Web3" Version="5.8.0" />
 <!--      <PackageReference Include="SpikeCli" Version="0.1.0-alpha" />-->
         <PackageReference Include="SpikeDb" Version="0.1.0-alpha" />

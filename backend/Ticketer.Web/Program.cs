@@ -1,12 +1,13 @@
 using Amazon.DynamoDBv2.DataModel;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.Extensions.Options;
 using Ticketer.Model;
 using Ticketer.Repository;
 using Ticketer.UseCases;
 using Ticketer.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddLogging(logging => logging.AddConsole());
 // Add services to the container.
@@ -14,7 +15,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddRepository();
+
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AddPageRoute("/Events", "");
@@ -22,12 +23,13 @@ builder.Services.AddRazorPages(options =>
 
 builder.Services.AddSingleton<IJobQueue>(_ => new JobQueue(100));
 builder.Services.AddHostedService<WorkerService>();
-builder.Services.AddRepository();
 
+builder.Services.AddRepository(builder.Configuration);
 builder.Services.AddAllUseCases();
 
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -47,10 +49,7 @@ app.UseSession();
 app.UseAuthorization();
 
 app.MapStaticAssets();
-app.MapRazorPages()
-    .WithStaticAssets();
-
-// SpikeDbConfig.GetInstance().SetRootFolder("/Users/mikkel/ticketer");
+app.MapRazorPages().WithStaticAssets();
 
 app.Run();
 

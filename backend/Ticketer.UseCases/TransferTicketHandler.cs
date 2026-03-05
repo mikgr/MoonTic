@@ -20,8 +20,7 @@ public class TransferTicketHandler(
         ArgumentNullException.ThrowIfNull(toAddress);
         
         if (currentUser is null) throw new Exception("User not set");
-        var contractState = await dynamo.LoadAsync<EventContractState>(eventId); // SpikeRepo.ReadIntId<EventContract>(eventId);
-        var contract = new EventContract(contractState);
+        var contract = await repo.LoadContractBy(eventId); // SpikeRepo.ReadIntId<EventContract>(eventId);
         var fromUserTicketContainerState = await dynamo.LoadAsync<UserTicketContainerState>(currentUser.Id);
         var fromUserTicketContainer = new UserTicketContainer(fromUserTicketContainerState);
         
