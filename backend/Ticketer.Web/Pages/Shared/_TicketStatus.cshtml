@@ -5,9 +5,9 @@
  || (Model.Action == "transfer" && Model.Status == "pending"))
 {
     <div class="badge bg-warning"
-          hx-get="@($"/Tickets?handler=TicketStatus&action={Model.Action}&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+          hx-get="@($"/Tickets?handler=TicketStatus&action={Model.Action}&contractAddress={Model.ContractAddress}&ticketId={Model.TicketId}")"
           hx-swap="innerHTML"
-          hx-target="@($"#status_{@Model.EventId}_{Model.TicketId}")"
+          hx-target="@($"#status_{@Model.ContractAddress}_{Model.TicketId}")"
           hx-trigger="every 1s">
         <div class="spinner-grow spinner-grow-sm text-dark" role="status">
             <span class="visually-hidden">
@@ -23,9 +23,9 @@ else if (Model.Status == "checked-in")
     <span class="badge bg-success">
         ✅️ Checked In
     </span>
-    <div hx-get="@($"/Tickets?handler=ActionButton&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+    <div hx-get="@($"/Tickets?handler=ActionButton&contractAddress={Model.ContractAddress}&ticketId={Model.TicketId}")"
          hx-trigger="load"
-         hx-target="@($"#ticket_actions_{Model.EventId}_{Model.TicketId}")"
+         hx-target="@($"#ticket_actions_{Model.ContractAddress}_{Model.TicketId}")"
          hx-swap="outerHTML"
          style="display: none;"></div>
 }
@@ -34,9 +34,9 @@ else if (Model.Status == "not-checked-in")
     <span class="badge bg-secondary">
         Not Checked In
     </span>
-    <div hx-get="@($"/Tickets?handler=ActionButton&eventId={Model.EventId}&ticketId={Model.TicketId}")"
+    <div hx-get="@($"/Tickets?handler=ActionButton&contractAddress={Model.ContractAddress}&ticketId={Model.TicketId}")"
          hx-trigger="load"
-         hx-target="@($"#ticket_actions_{Model.EventId}_{Model.TicketId}")"
+         hx-target="@($"#ticket_actions_{Model.ContractAddress}_{Model.TicketId}")"
          hx-swap="outerHTML"
          style="display: none;"></div>
 }

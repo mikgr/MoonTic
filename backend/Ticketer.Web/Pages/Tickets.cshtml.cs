@@ -1,43 +1,49 @@
+using Amazon.DynamoDBv2.DataModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SpikeDb;
+
 using Ticketer.Model;
 using Ticketer.UseCases;
 
 namespace Ticketer.Web.Pages;
 
 
-public record TicketHolding(int TicketNo, int EventId, string ContractAddress, string EventName, DateTime Date, bool IsCheckedIn);
-public record TicketActionStatus(int EventId, int TicketId, string Status, string Action);
+public record TicketHolding(int TicketNo, string ContractAddress, string EventName, DateTimeOffset Date, bool IsCheckedIn);
+public record TicketActionStatus(string ContractAddress, int TicketId, string Status, string Action);
 
 public class Test : PageModel
 {
     public IEnumerable<TicketHolding> Tickets { get; set; } = new List<TicketHolding>();
     
     
-    public IActionResult OnGet()
+    public async Task<IActionResult> OnGet()
     {
-        var userId = HttpContext.Session.GetInt32("UserId");
+        var userId = HttpContext.Session.GetString("UserId");
         if (userId == null) return RedirectToPage("/LogIn");
-        
-        var ticketPurchases = SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId);
-        if (ticketPurchases == null)
+
+        var dynamo = HttpContext.RequestServices.GetRequiredService<IDynamoDBContext>();
+
+        var userTicketContainerState = await dynamo.LoadAsync<UserTicketContainerState>(userId); // SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId);
+        var ticketPurchases = new UserTicketContainer(userTicketContainerState);
+        if (userTicketContainerState == null)
         {
             Console.Error.WriteLine($"No user ticket container found for {userId}");
             return Page();
         }
         
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        
         var contractIds = ticketPurchases.GetContractIds();
-        var contracts = SpikeRepo
-            .ReadCollection<EventContract>(x => contractIds.Contains(x.Id))
+        var contracts = (await repo.LoadAllContracts()) // todo fix this query
+            .Where(x => contractIds.Contains(x.Id))
             .ToList();
         
         var tickets = 
             from t in ticketPurchases.GetAllTickets()
-            join c in contracts on t.EventId equals c.Id
+            join c in contracts on t.ContractAddress equals c.Id
             orderby c.VenueOpenTime, t.TicketId
             select new TicketHolding(
-                t.TicketId, t.EventId, c.ContractAddress, c.Name, c.VenueOpenTime, t.IsCheckedIn);
+                t.TicketId, c.ContractAddress, c.Name, c.VenueOpenTime, t.IsCheckedIn);
         
         Tickets = tickets;
         
@@ -45,29 +51,31 @@ public class Test : PageModel
     }
 
 
-    public IActionResult OnGetCheckInModal(int eventId, int ticketId)
+    public IActionResult OnGetCheckInModal(string eventId, int ticketId)
     {
         return Partial("_CheckInModal", new TicketActionStatus(eventId, ticketId, "",""));    
     }
 
     
-    public IActionResult OnGetCheckOutModal(int eventId, int ticketId)
+    public IActionResult OnGetCheckOutModal(string eventId, int ticketId)
     {
         return Partial("_CheckOutModal", new TicketActionStatus(eventId, ticketId, "", ""));    
     }
 
     
-    public IActionResult OnGetTransferModal(int eventId, int ticketId)
+    public IActionResult OnGetTransferModal(string eventId, int ticketId)
     {
         return Partial("_TransferModal", new TicketActionStatus(eventId, ticketId, "", ""));
     }
     
     
-    public async Task<IActionResult> OnPostCheckIn(int eventId, int ticketId)
+    public async Task<IActionResult> OnPostCheckIn(string contractAddress, int ticketId)
     {
-        var userId = HttpContext.Session.GetInt32("UserId");
+        var userId = HttpContext.Session.GetString("UserId");
         if (userId == null) return HtmxRedirect("/LogIn");
-        var user = SpikeRepo.ReadIntId<User>(userId.Value);
+        
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        var user = await repo.LoadUserAsync(userId);
         
         var jobQueue = HttpContext.RequestServices.GetRequiredService<IJobQueue>();
         var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
@@ -76,21 +84,23 @@ public class Test : PageModel
         {
             using var scope = scopeFactory.CreateScope();
             var checkInTicketHandler = scope.ServiceProvider.GetRequiredService<CheckInTicketHandler>();
-            await checkInTicketHandler.Execute(user, eventId, ticketId);
+            await checkInTicketHandler.Execute(user, contractAddress, ticketId);
         });
 
-        return Partial("_TicketStatus", new TicketActionStatus(eventId, ticketId, "pending", "check-in"));
+        return Partial("_TicketStatus", new TicketActionStatus(contractAddress, ticketId, "pending", "check-in"));
     }
     
     
-    public async Task<IActionResult> OnPostCheckOut(int eventId, int ticketId)
+    public async Task<IActionResult> OnPostCheckOut(string contractAddress, int ticketId)
     {
         try
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
+            var userId = HttpContext.Session.GetString("UserId");
             if (userId is not {} uid) return HtmxRedirect("/LogIn");
             
-            var user = SpikeRepo.ReadIntId<User>(uid);
+            var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+            
+            var user = await repo.LoadUserAsync(uid);
             
             var jobQueue = HttpContext.RequestServices.GetRequiredService<IJobQueue>();
             var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
@@ -99,10 +109,10 @@ public class Test : PageModel
             {
                 using var scope = scopeFactory.CreateScope();
                 var checkOutTicketHandler = scope.ServiceProvider.GetRequiredService<CheckOutTicketHandler>();
-                await checkOutTicketHandler.Execute(user, eventId, ticketId);
+                await checkOutTicketHandler.Execute(user, contractAddress, ticketId);
             });
             
-            return Partial("_TicketStatus", new TicketActionStatus(eventId, ticketId, "pending", "check-out")); 
+            return Partial("_TicketStatus", new TicketActionStatus(contractAddress, ticketId, "pending", "check-out")); 
         
             // todo feedback ok or failed or already checked in
         }
@@ -114,16 +124,18 @@ public class Test : PageModel
     }
     
     
-    public async Task<IActionResult> OnPostTransfer(int eventId, int ticketId, string recipientAddress)
+    public async Task<IActionResult> OnPostTransfer(string contractAddress, int ticketId, string recipientAddress)
     {
         try
         {
             ArgumentNullException.ThrowIfNull(recipientAddress);
 
-            var userId = HttpContext.Session.GetInt32("UserId");
+            var userId = HttpContext.Session.GetString("UserId");
             if (userId == null) return HtmxRedirect("/LogIn");
             
-            var user = SpikeRepo.ReadIntId<User>(userId.Value);
+            var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+            var user = await repo.LoadUserAsync(userId);
+            
             var jobQueue = HttpContext.RequestServices.GetRequiredService<IJobQueue>();
             var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
 
@@ -131,29 +143,30 @@ public class Test : PageModel
             {
                 using var scope = scopeFactory.CreateScope();
                 var transferTicketHandler = scope.ServiceProvider.GetRequiredService<TransferTicketHandler>();
-                await transferTicketHandler.Execute(user, eventId, ticketId, recipientAddress);
+                await transferTicketHandler.Execute(user, contractAddress, ticketId, recipientAddress);
             });
             
-            return Partial("_TicketStatus", new TicketActionStatus(eventId, ticketId, "pending", "transfer"));
+            return Partial("_TicketStatus", new TicketActionStatus(contractAddress, ticketId, "pending", "transfer"));
         }
         catch (DomainInvariant)
         {
             // todo show error in modal
-            return Partial("_TransferModal", new TicketActionStatus(eventId, ticketId, "", ""));
+            return Partial("_TransferModal", new TicketActionStatus(contractAddress, ticketId, "", ""));
         }
     }
     
     
-    public IActionResult OnGetTicketStatus(string action, int eventId, int ticketId)
+    public async Task<IActionResult> OnGetTicketStatus(string action, string contractAddress, int ticketId)
     {
-        var userId = HttpContext.Session.GetInt32("UserId");
+        var userId = HttpContext.Session.GetString("UserId");
         if (userId == null) return RedirectToPage("/LogIn");
         
-        var ticketPurchases = SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId)
-            ?? throw new Exception("No user ticket container found");
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
 
-        var hasTicket = ticketPurchases.GetAllTickets().Any(t => t.EventId == eventId && t.TicketId == ticketId);
-        var status = (action, ticketPurchases.IsCheckedIn(eventId, ticketId), hasTicket) switch
+        var ticketPurchases = await repo.LoadUserTicketContainer(userId); 
+
+        var hasTicket = ticketPurchases.GetAllTickets().Any(t => t.ContractAddress == contractAddress && t.TicketId == ticketId);
+        var status = (action, ticketPurchases.IsCheckedIn(contractAddress, ticketId), hasTicket) switch
         {
             ("check-in", false, _) => "pending",
             ("check-in", true, _) => "checked-in",
@@ -166,33 +179,35 @@ public class Test : PageModel
 
         if (action == "transfer" && status == "transferred" && Request.Headers.ContainsKey("HX-Request"))
         {
-            Response.Headers.Append("HX-Trigger", $"{{\"fadeOutCard\": {{\"eventId\": {eventId}, \"ticketId\": {ticketId}}}}}");
+            Response.Headers.Append("HX-Trigger", $"{{\"fadeOutCard\": {{\"eventId\": {contractAddress}, \"ticketId\": {ticketId}}}}}");
         }
         
-        return Partial("_TicketStatus", new TicketActionStatus(eventId, ticketId, status, action)); 
+        return Partial("_TicketStatus", new TicketActionStatus(contractAddress, ticketId, status, action)); 
     }
     
     
-    public IActionResult OnGetActionButton(int? eventId, int? ticketId)
+    public async Task<IActionResult> OnGetActionButton(string contractAddress, int ticketId)
     {
-        var userId = HttpContext.Session.GetInt32("UserId");
+        var userId = HttpContext.Session.GetString("UserId");
         if (userId == null) return RedirectToPage("/LogIn");
         
-        var contracts = SpikeRepo.ReadSingleOrDefault<EventContract>(x => x.Id == eventId);
-        var ticketContainer = SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId);
+       
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
         
-        if (contracts is null || ticketContainer is null) return new NotFoundResult();
+      
+        var contract = await repo.LoadContractBy(contractAddress); 
+       
+        var ticketContainer = await repo.LoadUserTicketContainer(userId); 
 
         var xx = ticketContainer.GetAllTickets().SingleOrDefault(x =>
-            x.EventId == eventId && x.TicketId == ticketId) 
+            x.ContractAddress == contractAddress && x.TicketId == ticketId) 
                  ?? throw new Exception("No ticket found");
         
         var x = new TicketHolding(
-            ticketId!.Value, 
-            eventId!.Value, 
-            contracts.ContractAddress, 
-            contracts.Name, 
-            contracts.VenueOpenTime, 
+            ticketId, 
+            contract.ContractAddress, 
+            contract.Name, 
+            contract.VenueOpenTime, 
             xx.IsCheckedIn
         );
         

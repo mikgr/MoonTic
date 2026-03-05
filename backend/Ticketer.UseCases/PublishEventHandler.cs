@@ -1,17 +1,20 @@
 using System.Numerics;
+using Amazon.DynamoDBv2.DataModel;
 using Nethereum.Util;
-using SpikeDb;
+
 using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class PublishEventHandler(DeployContractHandler deployContractHandler)
+public class PublishEventHandler(
+    DeployContractHandler deployContractHandler,
+    IDynamoDBContext dynamo)
 {
-    public async Task Execute(int eventInfoId, User? currentUser)
+    public async Task Execute(string eventInfoId, User currentUser)
     {
         Console.WriteLine("Publishing event");
         // todo prevent the same event from being published twice
-        var eventInfo = SpikeRepo.ReadOrNullByInt<EventInfo>(eventInfoId);
+        var eventInfo = await dynamo.LoadAsync<EventInfo>(currentUser.Id, eventInfoId);
         if (eventInfo is null) throw new InvalidOperationException("Event not found");
         if (eventInfo.Owner != currentUser?.Id) throw new DomainInvariant("Not authorized to publish event");
 
@@ -36,15 +39,16 @@ public class PublishEventHandler(DeployContractHandler deployContractHandler)
                 
         await deployContractHandler.Execute(constructorArgs, eventContract);
 
-        eventContract.SpikePersistInt();
-        SpikeRepo.Delete<EventInfo>(eventInfoId);
+        await dynamo.SaveAsync(eventContract.GetState());
+        await dynamo.DeleteAsync<EventInfo>(eventInfo.Owner, eventInfoId);
         
-        new TicketContractPublishedEvent
+        var ticketContractPublishedEvent = new TicketContractPublishedEvent
         {
-            Id = -1,
             ContractId = eventContract.Id,
             ContractAddress = eventContract.ContractAddress,
             TimeStamp = DateTime.UtcNow
-        }.SpikePersistInt();
+        };
+        
+        await dynamo.SaveAsync(ticketContractPublishedEvent);
     }
 }

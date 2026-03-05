@@ -1,15 +1,21 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
-public class TicketCheckedOutEvent : ISpikeObjIntKey, IContractEvent
+[DynamoDBTable("TicketContractEvent")]
+public class TicketCheckedOutEvent : IContractEvent
 {
-    public required int Id { get; set; }
-    public required int EventContractId { get; init; }
-    public required int TicketId { get; init; }
-    public required int UserId { get; init; }
+    [DynamoDBHashKey]
     public required string ContractAddress { get; init; }
-    public required DateTimeOffset TimestampUtc { get; init; }
+    
+    [DynamoDBRangeKey] 
+    public required long TimestampUtc { get; init; }
+    
+    public string EventType => "TicketCheckedOut";
+    
+    public required string EventContractId { get; init; }
+    public required int TicketId { get; init; }
+    public required string UserId { get; init; }
     public required string TransactionHash { get; init; }
     public required string Address { get; init; }
 }

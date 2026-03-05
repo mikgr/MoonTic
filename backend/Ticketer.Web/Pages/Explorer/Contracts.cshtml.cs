@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SpikeDb;
+
 using Ticketer.Model;
 
 namespace Ticketer.Web.Pages.Explorer;
@@ -27,40 +27,43 @@ public class Contracts : PageModel
 
         if (!string.IsNullOrEmpty(ContractAddress))
         {
-            var ticketPurchasedEvents = SpikeRepo.ReadCollection<TicketPurchasedEvent>(e =>
-                e.ContractAddress == ContractAddress && (e.TicketId == ticketId || ticketId == null))
-                .AsEnumerable<IContractEvent>();
-
-            var ticketCheckedInEvents = SpikeRepo.ReadCollection<TicketCheckedInEvent>(x => 
-                x.ContractAddress == ContractAddress && (x.TicketId == ticketId || ticketId == null))
-                .AsEnumerable<IContractEvent>();
-            
-            var ticketCheckedOutEvents = SpikeRepo.ReadCollection<TicketCheckedOutEvent>(x => 
-                x.ContractAddress == ContractAddress && (x.TicketId == ticketId || ticketId == null))
-                .AsEnumerable<IContractEvent>();
-
-            var ticketTransferredEvents = SpikeRepo.ReadCollection<TicketTransferredEvent>(x =>
-                x.ContractAddress == ContractAddress && (x.TicketId == ticketId || ticketId == null));
-
-            ContractEvents = ticketPurchasedEvents
-                .Union(ticketCheckedInEvents)
-                .Union(ticketCheckedOutEvents)
-                .Union(ticketTransferredEvents)
-                .OrderByDescending(x => x.TimestampUtc)
-                .ToList();
-            
-            return;
+            throw new NotImplementedException();
+            // var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+            //
+            // var ticketPurchasedEvents = await repo.LoadEventsBy(ContractAddress); // SpikeRepo.ReadCollection<TicketPurchasedEvent>(e =>
+            //     e.ContractAddress == ContractAddress && (e.TicketId == ticketId || ticketId == null))
+            //     .AsEnumerable<IContractEvent>();
+            //
+            // var ticketCheckedInEvents = SpikeRepo.ReadCollection<TicketCheckedInEvent>(x => 
+            //     x.ContractAddress == ContractAddress && (x.TicketId == ticketId || ticketId == null))
+            //     .AsEnumerable<IContractEvent>();
+            //
+            // var ticketCheckedOutEvents = SpikeRepo.ReadCollection<TicketCheckedOutEvent>(x => 
+            //     x.ContractAddress == ContractAddress && (x.TicketId == ticketId || ticketId == null))
+            //     .AsEnumerable<IContractEvent>();
+            //
+            // var ticketTransferredEvents = SpikeRepo.ReadCollection<TicketTransferredEvent>(x =>
+            //     x.ContractAddress == ContractAddress && (x.TicketId == ticketId || ticketId == null));
+            //
+            // ContractEvents = ticketPurchasedEvents
+            //     .Union(ticketCheckedInEvents)
+            //     .Union(ticketCheckedOutEvents)
+            //     .Union(ticketTransferredEvents)
+            //     .OrderByDescending(x => x.TimestampUtc)
+            //     .ToList();
+            //
+            // return;
         }
         
-        var publishedEvents = SpikeRepo.ReadCollection<TicketContractPublishedEvent>();
-        var contracts = SpikeRepo.ReadCollection<EventContract>();
+        // var publishedEvents = SpikeRepo.ReadCollection<TicketContractPublishedEvent>();
+        // var contracts = SpikeRepo.ReadCollection<EventContract>();
         
-        ContractCreatedEvents = publishedEvents
-            .Join(contracts, 
-                pe => pe.ContractId, 
-                c => c.Id, 
-                (pe, c) => new ContractCreatedViewModel(pe.TimeStamp, pe.ContractAddress, c.Name, c.DeployTxHash))
-            .OrderByDescending(x => x.TimeStamp)
-            .ToList();
+        // ContractCreatedEvents = publishedEvents
+        //     .Join(contracts, 
+        //         pe => pe.ContractId, 
+        //         c => c.Id, 
+        //         (pe, c) => new ContractCreatedViewModel(pe.TimeStamp, pe.ContractAddress, c.Name, c.DeployTxHash))
+        //     .OrderByDescending(x => x.TimeStamp)
+        //     .ToList();
     }
 }

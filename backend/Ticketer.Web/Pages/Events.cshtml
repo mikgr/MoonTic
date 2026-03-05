@@ -61,7 +61,7 @@
                             </div>
                             <div class="col-md-6 text-end">
                                 <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#buy-modal"
-                                        data-event-id="@c.Id" data-event-name="@c.Name" data-event-price="@c.TicketPrice.ToString("F2")">
+                                        data-event-id="@c.ContractAddress" data-event-name="@c.Name" data-event-price="@c.TicketPrice.ToString("F2")">
                                     🛒 Buy Ticket
                                 </button>
                             </div>
@@ -73,6 +73,7 @@
     }
 </div>
 
+@* TODO MOVE TO PARTIAL *@
 <!-- Modal, Buy -->
 <div class="modal fade" id="buy-modal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -114,10 +115,11 @@
     </div>
 </div>
 
+@* data-event-id todo rename to contract address *@
 <script>
     document.getElementById('buy-modal').addEventListener('show.bs.modal', function (event) {
         let button = event.relatedTarget;
-        let eventId = button.getAttribute('data-event-id');
+        let eventId = button.getAttribute('data-event-id'); 
         let eventName = button.getAttribute('data-event-name');
         let eventPrice = button.getAttribute('data-event-price');
         document.getElementById('buy-event-id').value = eventId;

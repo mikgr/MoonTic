@@ -40,7 +40,7 @@
                         <tr>
                             <td><span class="me-2">💶</span>Purchase</td>
                             <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@tpe.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@tpe.TicketId</a></td>
-                            <td title="@tpe.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@tpe.TimestampUtc.ToTimeAgo()</td>
+                            <td title="@tpe.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@(DateTimeOffset.FromUnixTimeSeconds(tpe.TimestampUtc).ToTimeAgo())</td>
                             <td>@tpe.ToAddress.Compress(20)</td>
                             <td><code class="small">@tpe.TransactionHash.Compress(hashCompression)</code></td>
                         </tr>
@@ -50,7 +50,7 @@
                         <tr>
                             <td><span class="me-2">🏃🏽‍♀️‍➡️🚪</span>Check-In</td>
                             <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@tce.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@tce.TicketId</a></td>
-                            <td title="@tce.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@tce.TimestampUtc.ToTimeAgo()</td>
+                            <td title="@tce.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@(DateTimeOffset.FromUnixTimeSeconds(@tce.TimestampUtc).ToTimeAgo())</td>
                             <td>@tce.Address.Compress(20)</td>
                             <td><code class="small">@tce.TransactionHash.Compress(hashCompression)</code></td>
                         </tr>
@@ -60,7 +60,7 @@
                         <tr>
                             <td><span class="me-2">🪂️</span>Check-Out</td>
                             <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@tco.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@tco.TicketId</a></td>
-                            <td title="@tco.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@tco.TimestampUtc.ToTimeAgo()</td>
+                            <td title="@tco.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@(DateTimeOffset.FromUnixTimeSeconds(@tco.TimestampUtc).ToTimeAgo())</td>
                             <td>@tco.Address.Compress(20)</td>
                             <td><code class="small">@tco.TransactionHash.Compress(hashCompression)</code></td>
                         </tr>
@@ -70,7 +70,7 @@
                         <tr>
                             <td><span class="me-2">➡️</span>Transfer</td>
                             <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@tt.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@tt.TicketId</a></td>
-                            <td title="@tt.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@tt.TimestampUtc.ToTimeAgo()</td>
+                            <td title="@tt.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@(DateTimeOffset.FromUnixTimeSeconds(@tt.TimestampUtc).ToTimeAgo())</td>
                             <td>@tt.FromAddress.Compress(20) ➡️ @tt.ToAddress.Compress(20)</td>
                             <td><code class="small">@tt.TransactionHash.Compress(hashCompression)</code></td>
                         </tr>

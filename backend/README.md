@@ -5,14 +5,14 @@
 ### Must have
 
 #### Tech stuff
-- [ ] Off-load onchain jobs to background worker
+- [x] Off-load onchain jobs to background worker
 - [ ] Dynamo DB, switch to
 - [ ] Use proper google login https://developers.google.com/identity/sign-in/web/sign-in
 - [ ] Deploy to AWS 
 - [x] Payment, Remove first dummy, and track fiat payments 
 
 #### User Stories
-- [ ] As a **ticket holder**, I want to be able to **put my ticket up for sale**, Such that i can recover my money when im not able to attend the event.
+- [ ] #1 As a **ticket holder**, I want to be able to **put my ticket up for sale**, Such that i can recover my money when im not able to attend the event.
 
 - [ ] As an **organizer**, i want to **export list of tickets/secrets** Such that i can integrate with my own ushering system and have an offline backup of the data.
 - [ ] As a **organizer**, I want to be able to **usher tickets**, in the web UI, as a fall back for the app.

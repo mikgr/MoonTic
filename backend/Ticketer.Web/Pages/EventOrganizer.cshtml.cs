@@ -1,6 +1,7 @@
-﻿﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SpikeDb;
+
+
 using Ticketer.Model;
 using Ticketer.UseCases;
 
@@ -11,40 +12,44 @@ public class EventOrganizerModel : PageModel
     public List<EventInfo> DraftEvents { get; set; } = [];
     public List<EventContract> PublishedEvents { get; set; } = [];
     
-    public IActionResult OnGet()
+    public async Task<IActionResult> OnGet()
     {
-        if (TryGetCurrentUser() is not {} currentUser)
+        if (await TryGetCurrentUser() is not {} currentUser)
             return RedirectToPage("/LogIn");
         
-        LoadDraftEvents(currentUser);
+        await LoadDraftEvents(currentUser);
         
         return Page();
     }
 
-    private void LoadDraftEvents(User currentUser)
+    private async Task LoadDraftEvents(User currentUser)
     {
-        DraftEvents = SpikeRepo
-            .ReadCollection<EventInfo>(x => x.Owner == currentUser.Id)
-            .ToList();
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        DraftEvents = await repo.EventInfo(currentUser.Id);
     }
 
-    private User? TryGetCurrentUser()
+    private async Task<User?> TryGetCurrentUser()
     {
-        var userId = HttpContext.Session.GetInt32("UserId");
+        var userId = HttpContext.Session.GetString("UserId");
         User? currentUser = null;
-        if (userId is null or -1)
+        
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+
+        if (string.IsNullOrWhiteSpace(userId))
             currentUser = null;
-        else 
-            currentUser = SpikeRepo.ReadIntId<User>(userId.Value);
+        else
+            currentUser = await repo.LoadUserAsync(userId);
+        
         return currentUser;
     }
 
-    public async Task<IActionResult> OnPostPublish(int eventId)
+    public async Task<IActionResult> OnPostPublish(string eventId)
     {
-        var userId = HttpContext.Session.GetInt32("UserId");
+        var userId = HttpContext.Session.GetString("UserId");
         if (userId is null) return RedirectToPage("/LogIn");
         
-        var currentUser = SpikeRepo.ReadIntId<User>(userId.Value);
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        var currentUser = await repo.LoadUserAsync(userId);
         
         var publishEventHandler = HttpContext.RequestServices.GetRequiredService<PublishEventHandler>();
         await publishEventHandler.Execute(eventId, currentUser);
@@ -52,22 +57,23 @@ public class EventOrganizerModel : PageModel
         return Redirect("/Events");
     }
     
-    public IActionResult OnPostCreateEvent(string eventName, DateTime venueOpenTime, DateTime venueCloseTime, int ticketCount, decimal price)
+    
+    public async Task<IActionResult> OnPostCreateEvent(
+        string eventName, DateTime venueOpenTime, DateTime venueCloseTime, int ticketCount, decimal price)
     {
         if (venueOpenTime >= venueCloseTime) 
             throw new ArgumentException($"{nameof(venueOpenTime)} must be before {nameof(venueCloseTime)}");
         
-        var userId = HttpContext.Session.GetInt32("UserId");
-        if (userId is null or -1)
+        var userId = HttpContext.Session.GetString("UserId");
+        if (string.IsNullOrWhiteSpace(userId))
             return RedirectToPage("/LogIn");
 
         // todo validate with fluent validation
         
         // todo use handler
-        new EventInfo
+        var eventInfo = new EventInfo
         {
-            Owner = userId.Value,
-            Id = -1,
+            Owner = userId,
             Name = eventName,
             VenueOpenTime = venueOpenTime,
             Tickets = ticketCount,
@@ -75,26 +81,31 @@ public class EventOrganizerModel : PageModel
             Description = "",
             BlockCheckOutBeforeVenueOpenInHours = 5,
             VenueCloseTime = venueCloseTime
-        }.SpikePersistInt();
+        };
 
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        await repo.Persist(eventInfo);
+        
         return RedirectToPage("/EventOrganizer");
     }
     
-    public IActionResult OnGetDraftEvents()
+    
+    public async Task<IActionResult> OnGetDraftEvents()
     {
-        if (TryGetCurrentUser() is not {} currentUser) return RedirectToPage("/LogIn");
+        if (await TryGetCurrentUser() is not {} currentUser) return RedirectToPage("/LogIn");
         
-        LoadDraftEvents(currentUser);
+        await LoadDraftEvents(currentUser);
         
         return Partial("_DraftEvents", DraftEvents);
     }
     
-    public IActionResult OnGetPublishedEvents()
+    
+    public async Task<IActionResult> OnGetPublishedEvents()
     {
-        if (TryGetCurrentUser() is not {} currentUser) return RedirectToPage("/LogIn");
+        if (await TryGetCurrentUser() is not {} currentUser) return RedirectToPage("/LogIn");
         
-        var eventContracts = SpikeRepo.ReadCollection<EventContract>(x => x.OwnerId == currentUser.Id);
-        PublishedEvents = eventContracts.ToList();
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        PublishedEvents = await repo.LoadContractsBy(ownerId: currentUser.Id); 
         
         return Partial("_PublishedEvents", PublishedEvents);
     }

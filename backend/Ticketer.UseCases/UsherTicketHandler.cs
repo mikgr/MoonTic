@@ -1,15 +1,23 @@
-using SpikeDb;
+using Amazon.DynamoDBv2.DataModel;
+
 using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class UsherTicketHandler
+public class UsherTicketHandler(IDynamoDBContext dynamo)
 {
-    public void Execute(User? usherUser, string contractAddress, int ticketId, string secret)
+    public async Task Execute(User? usherUser, string contractAddress, int ticketId, string secret)
     {
         if (usherUser is null) throw new Exception("Current user not set");
         
-        var eventContract = SpikeRepo.ReadSingle<EventContract>(x => x.ContractAddress.ToLower() == contractAddress.ToLower());
+        // var eventContract = SpikeRepo.ReadSingle<EventContract>(x => x.ContractAddress.ToLower() == contractAddress.ToLower());
+        var eventContractStateSearch = dynamo.QueryAsync<EventContractState>(
+            contractAddress.ToLower());
+        
+        var eventContractState = (await eventContractStateSearch.GetRemainingAsync()).Single();
+        
+        var eventContract = new EventContract(eventContractState);
+        
         if (eventContract.OwnerId != usherUser.Id)
         {
             Console.WriteLine($"Not authorized to let people in. Contract:{eventContract.Id}  Owner: {eventContract.OwnerId}, Usher: {usherUser.Id}");
@@ -19,8 +27,15 @@ public class UsherTicketHandler
         if (!eventContract.CheckOutBlockIsActive(TimeProvider.System)) // todo inject
             throw new DomainInvariant("Event cannot be entered before checkout block is active");
         
-        var eventEntered = SpikeRepo.ReadFirstOrDefault<EventEnteredEvent>(x => 
-            x.ContractAddress.ToLower() == eventContract.ContractAddress.ToLower() && x.TicketId == ticketId);
+        // var eventEntered = SpikeRepo.ReadFirstOrDefault<EventEnteredEvent>(x => 
+        //     x.ContractAddress.ToLower() == eventContract.ContractAddress.ToLower() && x.TicketId == ticketId);
+        //
+        
+        var eventEntered = await dynamo.LoadAsync<EventEnteredEvent>(
+            eventContract.ContractAddress, // Partition key
+            ticketId                        // Sort key
+        );
+        
         if (eventEntered is not null) throw new DomainInvariant("Ticket is already used to enter the event");
         
         var ticketHolderKnowsSecret = eventContract.ProofByTicketHolder(ticketId, secret);
@@ -29,15 +44,21 @@ public class UsherTicketHandler
         var address = eventContract.GetHolderOfTicket(ticketId) 
             ?? throw new DomainInvariant("Ticket has no holder");
         
-        var holderWallet = SpikeRepo.ReadSingle<UserWallet>(x => x.Address.ToLower() == address.ToLower());
+        var holderWalletSearch = dynamo.QueryAsync<UserWallet>(
+                address.ToLower(), new QueryConfig{ IndexName = "AddressIndex" });
         
-        new EventEnteredEvent 
+        var holderWallet = (await holderWalletSearch.GetRemainingAsync()).Single();    
+          
+        
+        // LoadAsync<UserWallet>(x => x.Address.ToLower() == address.ToLower());
+        
+        var eventEnteredEvent = new EventEnteredEvent 
         {
-            Id = -1,
             ContractAddress = eventContract.ContractAddress,
             TicketId = ticketId,
-            HolderId = holderWallet.Id,
+            HolderId = holderWallet.UserId,
             EnteredAt = DateTime.UtcNow
-        }.SpikePersistInt();
+        };
+        await dynamo.SaveAsync(eventEnteredEvent);
     }
 }

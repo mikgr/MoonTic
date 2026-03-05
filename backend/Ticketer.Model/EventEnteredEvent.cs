@@ -1,12 +1,17 @@
-using SpikeDb;
+
+using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
-public class EventEnteredEvent : ISpikeObjIntKey
+[DynamoDBTable("EventEnteredEvent")]
+public class EventEnteredEvent
 {
-    public required int Id { get; set; }
+    [DynamoDBHashKey]
     public required string ContractAddress { get; init; }
+    
+    [DynamoDBRangeKey]
     public required int TicketId { get; init; }
+    
     public required DateTime EnteredAt { get; init; }
-    public int HolderId { get; init; }
+    public required string HolderId { get; init; }
 }
