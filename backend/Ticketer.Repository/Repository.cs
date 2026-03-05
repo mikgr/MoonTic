@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Ticketer.Model;
@@ -6,6 +7,8 @@ namespace Ticketer.Repository;
 
 public class Repository(IDynamoDBContext dynamo) : IRepository
 {
+    public IDynamoDBContext DbContext => dynamo;
+    
     public async Task<User> LoadUserAsync(string userId)
     {
         var userState = await dynamo.LoadAsync<UserState>(userId)
