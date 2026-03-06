@@ -1,4 +1,3 @@
-using Amazon.DynamoDBv2.DataModel;
 using Ticketer.Model;
 
 namespace Ticketer.UseCases;
@@ -30,16 +29,20 @@ public class CheckInTicketHandler(TicketContractClient ticketContractClient, IRe
             CheckInSecretHash = checkInSecretHash
         };
         
-        await repo.DbContext.SaveAsync(@event);
-
         var userTickets = await repo.LoadUserTicketContainer(currentUser.Id);
-        
         userTickets.ApplyEvent(@event);
-        // userTickets.SpikePersistInt();
-        await repo.DbContext.SaveAsync(userTickets.GetState());
-        
         contract.ApplyEvent(@event);
-        // contract.SpikePersistInt();
-        await repo.DbContext.SaveAsync(contract.GetState());
+
+        var eventWrite = repo.CreateTransactWrite<TicketCheckedInEvent>();
+        eventWrite.AddSaveItem(@event);
+        
+        var userTicketsWrite = repo.CreateTransactWrite<UserTicketContainerState>();
+        userTicketsWrite.AddSaveItem(userTickets.GetState());
+        
+        var contractWrite = repo.CreateTransactWrite<EventContractState>();
+        contractWrite.AddSaveItem(contract.GetState());
+        
+        var transaction = repo.CreateMultiTableTransactWrite(eventWrite, userTicketsWrite, contractWrite);
+        await transaction.ExecuteAsync();
     }
 }

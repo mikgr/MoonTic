@@ -5,6 +5,8 @@ namespace Ticketer.Model;
 public interface IRepository
 {
     IDynamoDBContext DbContext { get; }
+    ITransactWrite<T> CreateTransactWrite<T>();
+    IMultiTableTransactWrite CreateMultiTableTransactWrite(params ITransactWrite[] writes);
     Task<User> LoadUserAsync(string userId);
     Task Persist<T>(T obj);
     Task<List<EventInfo>> EventInfo(string ownerId);

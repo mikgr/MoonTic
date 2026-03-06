@@ -1,13 +1,8 @@
-using Amazon.DynamoDBv2.DataModel;
-using Nethereum.Util;
 using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class CheckOutTicketHandler(
-    TicketContractClient ticketContractClient,
-    IDynamoDBContext dynamo,
-    IRepository repo)
+public class CheckOutTicketHandler(TicketContractClient ticketContractClient, IRepository repo)
 {
     public async Task Execute(User? currentUser, string contractAddress, int ticketId)
     {
@@ -16,8 +11,7 @@ public class CheckOutTicketHandler(
         
         var checkoutResult = await ticketContractClient.OnChainCheckOut(currentUser, ticketId, eventContract);
         
-        var ticketContainerState = await dynamo.LoadAsync<UserTicketContainerState>(currentUser.Id);
-        var ticketContainer = new UserTicketContainer(ticketContainerState);
+        var ticketContainer = await repo.LoadUserTicketContainer(currentUser.Id);
         
         var newCheckOutEvent = new TicketCheckedOutEvent
         {
@@ -29,15 +23,23 @@ public class CheckOutTicketHandler(
             TransactionHash = checkoutResult.receipt.TransactionHash,
             Address = checkoutResult.receipt.From
         };
-
-        await dynamo.SaveAsync(newCheckOutEvent);
-        ticketContainer.ApplyEvent(newCheckOutEvent);
-        eventContract.ApplyEvent(newCheckOutEvent);
         
-        //ticketContainer.SpikePersistInt();
-        await dynamo.SaveAsync(ticketContainer.GetState());
-        //eventContract.SpikePersistInt();
-        await dynamo.SaveAsync(eventContract.GetState());
+        eventContract.ApplyEvent(newCheckOutEvent);
+        ticketContainer.ApplyEvent(newCheckOutEvent);
+        
+        var checkOutEventWrite = repo.CreateTransactWrite<TicketCheckedOutEvent>();
+        checkOutEventWrite.AddSaveItem(newCheckOutEvent);
+        
+        var ticketContainerWrite = repo.CreateTransactWrite<UserTicketContainerState>();
+        ticketContainerWrite.AddSaveItem(ticketContainer.GetState());
+        
+        var eventContractWrite = repo.CreateTransactWrite<EventContractState>();
+        eventContractWrite.AddSaveItem(eventContract.GetState());
+        
+        var transaction = repo.CreateMultiTableTransactWrite(
+            checkOutEventWrite, ticketContainerWrite, eventContractWrite);
+        
+        await transaction.ExecuteAsync();
     }
     
 }
