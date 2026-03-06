@@ -10,7 +10,7 @@ public class DeployContractHandler
     
     public async Task<DeployContractResult> Execute(object[] constructorArgs)
     {
-        var privateKey = TicketerOptions.PrivateKey
+        var privateKey = TicketerOptions.SystemPrivateKey
             ?? throw new Exception("PRIVATE_KEY not set");
 
         var account = new Nethereum.Web3.Accounts.Account(privateKey);
