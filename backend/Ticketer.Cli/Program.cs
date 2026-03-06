@@ -1,6 +1,4 @@
-﻿using Amazon;
-using Amazon.DynamoDBv2;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SpikeCli;
@@ -14,8 +12,6 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        //SpikeDbConfig.GetInstance().SetRootFolder("/Users/mikkel/ticketer");
-        
         User? currentUser = null;
 
         var config = new ConfigurationBuilder()
@@ -32,28 +28,13 @@ public static class Program
             .CmdDi("new", "user", "user-name", "email", (IServiceProvider s, string userName, string email) => 
                 s.GetRequiredService<CreateUserHandler>().Execute(userName, email).Wait())
             
+            .CmdDi("set", "user", "user-id", (IServiceProvider s, string userId) =>
+            {
+                HandleSetUser(userId, s);
+            })
+            
             .Cmd("create", "table", ()=> new SetUpDynamoTables().Execute(services.GetRequiredService<IOptions<DynamoDbSettings>>()))
             
-            .Cmd("ls", "table", () =>
-            {
-                // var config = new AmazonDynamoDBConfig
-                // {
-                //     
-                //     ServiceURL = "http://localhost:8123"
-                // };
-                using var client = new AmazonDynamoDBClient(
-                    "", "", RegionEndpoint.EUWest1);
-
-                var response = client.ListTablesAsync().GetAwaiter().GetResult();
-                foreach (var name in response.TableNames)
-                    Console.WriteLine(name);
-            })
-            
-            .Cmd("ls", "user", () =>
-            {
-                throw new NotImplementedException();
-            })
-            // .Cmd("set", "user", "user-id", (int id) => currentUser = HandleSetUser(id))
                 
             .CmdDi("print", "secret", "contract-id", "ticket-id", (IServiceProvider s, string contractId, int ticketId) => 
                 s.GetRequiredService<PrintSecretHandler>().Execute(currentUser, contractId, ticketId))
@@ -63,20 +44,11 @@ public static class Program
                 (IServiceProvider s, string name, DateTime venueOpenTime, DateTime venueCloseTime, int tickets, decimal price) => 
                     s.GetRequiredService<NewEventInfoHandler>().Execute(currentUser, name, venueOpenTime, venueCloseTime, tickets, price).Wait())
             
-            .Cmd("ls", "event-info", () => HandleLsEventInfo(currentUser))
-            // .Cmd("rm", "event-info", "id", (int eventInfoId) => HandleRmEventInfo(eventInfoId, currentUser))
-            // todo must deploy 
             .CmdDi("publish", "event", "event-info-id", (IServiceProvider s, string eventInfoId) => 
                 s.GetRequiredService<PublishEventHandler>().Execute(eventInfoId, currentUser!).Wait())
             
-            // contract
-            // .CmdDi("print", "event", "id", (IServiceProvider s, int eventId) => 
-            //     s.GetRequiredService<PrintEventHandler>().Execute(eventId))
-            
             .CmdDi("buy", "ticket", "event-contract-id", (IServiceProvider s, string eventContractId) => 
                 s.GetRequiredService<BuyTicketHandler>().Execute(eventContractId, currentUser!).Wait())
-            
-            .Cmd("ls", "event", HandleLsEvent)
             
             .CmdDi("transfer", "ticket", "event-id", "ticket-id", "to-address", (IServiceProvider s, string eventId, int ticketId, string toAddress) => 
                 s.GetRequiredService<TransferTicketHandler>().Execute(currentUser!, eventId, ticketId, toAddress).Wait())
@@ -97,33 +69,8 @@ public static class Program
             .CmdDi("enter", "event", "contract-address", "ticket-id", "secret", 
                 (IServiceProvider s, string contractAddress, int ticketId, string secret) => 
                 s.GetRequiredService<UsherTicketHandler>()
-                    .Execute(usherUser: currentUser, contractAddress, ticketId, secret).Wait())
+                    .Execute(usherUser: currentUser!, contractAddress, ticketId, secret).Wait())
             
-            // .CmdDi("deploy", "contract", "event-id", (IServiceProvider s, int eventInfoId) =>
-            // {
-            //     // todo merge with publish
-            //     
-            //     var eventContract = SpikeRepo.ReadOrNullByInt<EventContract>(eventInfoId)
-            //         ?? throw new Exception("Event not found");
-            //     
-            //     // Constructor arguments
-            //     BigInteger fakeCheckOutBlockedTime = eventContract.GetCheckOutBlockStart().ToUnixTimestamp();
-            //     BigInteger venueOpenTime = eventContract.VenueOpenTime.ToUnixTimestamp();
-            //     BigInteger venueCloseTime = eventContract.VenueCloseTimeUtc.ToUnixTimestamp();
-            //     BigInteger totalTicketCount = eventContract.TotalTickets; // uint64 can be BigInteger in Nethereum
-            //     string location = "Store VEGA, Enghavevej 40, 1674 Copenhagen V, Denmark"; // todo fix
-            //
-            //     var constructorArgs = new object[]
-            //     {
-            //         fakeCheckOutBlockedTime,
-            //         venueOpenTime,
-            //         venueCloseTime,
-            //         totalTicketCount,
-            //         location
-            //     };
-            //     
-            //     Task.Run(async () => { await s.GetRequiredService<DeployContractHandler>().Execute(constructorArgs, eventContract); }).Wait();
-            // })
             // Crypto
             .CmdDi("mint", "ticket", "contract-address", "to-address", 
                 (IServiceProvider s, string contractAddress, string toAddress) =>
@@ -181,54 +128,13 @@ public static class Program
     //         Console.WriteLine("Proof failed");
     // }
 
-    private static void HandleLsEvent()
+    
+    private static User? HandleSetUser(string userId, IServiceProvider services)
     {
-        throw new NotImplementedException();
-        // var events = SpikeRepo.ReadCollection<EventContract>();
-        // Console.WriteLine(JsonSerializer.Serialize(events, new JsonSerializerOptions { WriteIndented = true }));
+        var repo = services.GetRequiredService<IRepository>();
+        var user = repo.LoadUserAsync(userId);
+        user.Wait();
+        
+        return user.Result;
     }
-
-    // private static void HandlePrintEvent(int eventId)
-    // {
-    //     var eventContract = SpikeRepo.ReadIntId<EventContract>(eventId);
-    //     Console.WriteLine(JsonSerializer.Serialize(eventContract, new JsonSerializerOptions { WriteIndented = true }));
-    // }
-
-    // private static void HandleRmEventInfo(int eventInfoId, User? currentUser)
-    // {
-    //     var eventInfo = SpikeRepo.ReadOrNullByInt<EventInfo>(eventInfoId);
-    //     if (eventInfo is null) throw new Exception("Event not found");
-    //     if (eventInfo.Owner != currentUser?.Id) throw new Exception("Not authorized");
-    //             
-    //     SpikeRepo.Delete<EventInfo>(eventInfoId);
-    // }
-
-    private static void HandleLsEventInfo(User? currentUser)
-    {
-        throw new NotImplementedException();
-        // if (currentUser is null) throw new Exception("User not set");
-        //
-        // SpikeRepo.ReadCollection<EventInfo>(x => x.Owner == currentUser.Id)
-        //     .ToList()
-        //     .ForEach(e => Console.WriteLine($"{e.Id} {e.Name} Start:{e.VenueOpenTime} End:{e.VenueCloseTimeUtc} {e.Tickets} {e.Price}"));
-    }
-
-    // private static User? HandleSetUser(int userId)
-    // {
-    //     var currentUser = SpikeRepo.ReadOrNullByInt<User>(userId)
-    //         ?? throw new ArgumentException("User not found");
-    //     
-    //     return currentUser;
-    // }
-
-
 }
-
-// public class PrintEventHandler
-// {
-//     public void Execute(int eventId)
-//     {
-//         var eventContract = SpikeRepo.ReadIntId<EventContract>(eventId);
-//         Console.WriteLine(JsonSerializer.Serialize(eventContract, new JsonSerializerOptions { WriteIndented = true }));
-//     }
-// }
