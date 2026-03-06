@@ -54,33 +54,34 @@ app.MapRazorPages().WithStaticAssets();
 app.Run();
 
 
+// todo extract endpoints
 void MapPostProcessUsherCheckIn(WebApplication webApplication)
 {
     webApplication.MapPost("/organizer/event/usher-ticket", async (
         HttpContext context, 
         UsherTicketDtoV1 dto,
-        [FromServices] IDynamoDBContext dynamo) =>
+        [FromServices] IRepository repo) =>
     {
         try
         {
+            string? fakeAuthToken = null;
             // TODO FAKE AUTH - FIX UP
-            if (!context.Request.Headers.TryGetValue("Authorization", out var authHeader))
+            if (context.Request.Headers.TryGetValue("Authorization", out var authHeader))
             {
                 var token = authHeader.ToString().Replace("Bearer ", "");
-                if (string.IsNullOrEmpty(token)) return Results.Unauthorized();
-                authHeader = token;
+                fakeAuthToken = token;
             }
-
-            // if (!int.TryParse(authHeader, out var fakeTokeIsReallyUserId))
-            //     return Results.BadRequest();
             
-            var maybeUserState = await dynamo.LoadAsync<UserState>(authHeader);
+            if (string.IsNullOrEmpty(fakeAuthToken)) return Results.Unauthorized();
+            
+            
+            var maybeUser = await repo.LoadUserAsync(fakeAuthToken);
 
-            if (maybeUserState is not { } usherUserState)
+            if (maybeUser is not { } usherUserState)
                 return Results.Unauthorized();
 
             var usherTicketHandler = context.RequestServices.GetRequiredService<UsherTicketHandler>();
-            await usherTicketHandler.Execute(new User(usherUserState), dto.ContractAddress, dto.TicketId, dto.CheckInSecret);
+            await usherTicketHandler.Execute(maybeUser, dto.ContractAddress, dto.TicketId, dto.CheckInSecret);
 
             return Results.Ok("EVENT_ENTERED");
         }

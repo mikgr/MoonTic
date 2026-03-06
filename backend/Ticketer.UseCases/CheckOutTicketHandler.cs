@@ -2,6 +2,8 @@ using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
+
+// todo handle check out is blocked Nethereum.ABI.FunctionEncoding.SmartContractRevertException: Smart contract error: Check out is blocked
 public class CheckOutTicketHandler(TicketContractClient ticketContractClient, IRepository repo)
 {
     public async Task Execute(User? currentUser, string contractAddress, int ticketId)

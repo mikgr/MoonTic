@@ -60,10 +60,20 @@
                                 </span>
                             </div>
                             <div class="col-md-6 text-end">
-                                <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#buy-modal"
-                                        data-event-id="@c.ContractAddress" data-event-name="@c.Name" data-event-price="@c.TicketPrice.ToString("F2")">
-                                    🛒 Buy Ticket
-                                </button>
+                                @if (c.RemainingTickets > 0)
+                                {
+                                    <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#buy-modal"
+                                            data-event-id="@c.ContractAddress" data-event-name="@c.Name" data-event-price="@c.TicketPrice.ToString("F2")">
+                                        🛒 Buy Ticket
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-light disabled" type="button" data-bs-toggle="modal"
+                                            data-event-id="@c.ContractAddress" data-event-name="@c.Name" data-event-price="@c.TicketPrice.ToString("F2")">
+                                        👐 Sold Out
+                                    </button>
+                                }
                             </div>
                         </div>
                     </div>

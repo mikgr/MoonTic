@@ -41,14 +41,14 @@ public class MintTicketHandler
             functionInput: toAddress
         );
 
-        BigInteger tokenId = -1;
         
         var log = txReceipt.Logs.FirstOrDefault();
-        if (log is not null)
-        {
-            tokenId = new HexBigInteger(log.Data).Value;
-            Console.WriteLine($"Minted token ID: {tokenId}");
-        }
+        if (log is null) throw new M.DomainInvariant("Minting failed: no log returned");
+        
+        BigInteger tokenId = -1;
+        tokenId = new HexBigInteger(log.Data).Value;
+        Console.WriteLine($"Minted token ID: {tokenId}");
+        
         
         Console.WriteLine("Transaction hash: " + txReceipt.TransactionHash);
         
