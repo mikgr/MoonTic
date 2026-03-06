@@ -1,4 +1,5 @@
 @page "/Tickets"
+@using Ticketer.Model
 @model Ticketer.Web.Pages.Test
 
 @{
@@ -30,20 +31,29 @@
                 <div class="row fs-4">
                     <div class="col-md-6">
                         <p><strong>Ticket No:</strong> @t.TicketNo</p>
-                        <p><strong>Event Id:</strong> @t.ContractAddress</p>
+                        <p><strong>Event Id:</strong> @t.ContractAddress.Compress(16)</p>
                         <p><strong>Date:</strong> @t.Date.ToString("MMM d yyyy HH\\:mm")</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Status:</strong></p>
-                        <div id="@($"status_{t.ContractAddress}_{t.TicketNo}")">
-                            <partial name="_TicketStatus" model="@(new TicketActionStatus(t.ContractAddress, t.TicketNo, (t.IsCheckedIn ? "checked-in" : "not-checked-in"), "nil"))"/>
-                        </div>
+                        <p><strong>Status: &nbsp;</strong>
+                            <span id="@($"status_{t.ContractAddress}_{t.TicketNo}")">
+                                <partial name="_TicketStatus" model="@(new TicketActionStatus(t.ContractAddress, t.TicketNo, (t.IsCheckedIn ? "checked-in" : "not-checked-in"), "nil"))"/>
+                            </span>
+                        </p>
+                        <p>
+                            @if (@t.CheckoutIsBlocked)
+                            {
+                                <span class="badge bg-warning">
+                                    Checkout Is Blocked
+                                </span>
+                            }
+                        </p>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <hr style="border: 1px dashed #ccc;" />
-                        <partial name="_TicketActionButton" model="@(new TicketHolding(t.TicketNo, t.ContractAddress, t.EventName, t.Date, t.IsCheckedIn))"/>
+                        <partial name="_TicketActionButton" model="@(new TicketHolding(t.TicketNo, t.ContractAddress, t.EventName, t.Date, t.IsCheckedIn, t.CheckoutIsBlocked))"/>
                     </div>
                 </div>
             </div>
