@@ -20,7 +20,6 @@ public class BuyTicketHandler(MintTicketHandler mintTicketHandler, IRepository r
             contract.ContractAddress, 
             toAddress: userWallet.Address);
         
-        
         var @event = new TicketPurchasedEvent
         {
             TimestampUtc = DateTime.UtcNow,
@@ -33,16 +32,20 @@ public class BuyTicketHandler(MintTicketHandler mintTicketHandler, IRepository r
             TicketPrice = contract.TicketPrice
         };
         
-        // todo transaction
-        await repo.Persist(@event);
-        
-        contract.ApplyEvent(@event);
-        await repo.Persist(contract.GetState());
-
         var userTickets = await repo.LoadUserTicketContainer(currentUser.Id);
-        
+        contract.ApplyEvent(@event);
         userTickets.ApplyEvent(@event);
         
-        await repo.Persist(userTickets.GetState());
+        var eventWrite = repo.DbContext.CreateTransactWrite<TicketPurchasedEvent>();
+        eventWrite.AddSaveItem(@event);
+        
+        var contractWrite = repo.DbContext.CreateTransactWrite<EventContractState>();
+        contractWrite.AddSaveItem(contract.GetState());
+        
+        var userTicketsWrite = repo.DbContext.CreateTransactWrite<UserTicketContainerState>();
+        userTicketsWrite.AddSaveItem(userTickets.GetState());
+        
+        var transaction = repo.DbContext.CreateMultiTableTransactWrite(eventWrite, contractWrite, userTicketsWrite);
+        await transaction.ExecuteAsync();
     }
 }
