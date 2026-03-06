@@ -61,6 +61,16 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
         return dynamo.LoadAsync<UserWallet>(userId);
     }
 
+    public async Task<UserWallet?> LoadUserWalletOrNullBy(string address)
+    {
+        var holderWalletSearch = dynamo.QueryAsync<UserWallet>(
+            address.ToLower(), new QueryConfig{ IndexName = "AddressIndex" });
+        
+        var holderWallet = (await holderWalletSearch.GetRemainingAsync()).SingleOrDefault();
+
+        return holderWallet;
+    }
+
     public async Task<UserTicketContainer> LoadUserTicketContainer(string userId)
     {
         var state = await dynamo.LoadAsync<UserTicketContainerState>(userId);
