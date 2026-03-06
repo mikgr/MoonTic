@@ -5,6 +5,6 @@ Authorization: ada
 
 {
   "contractAddress": "0xfb936dd6215cc442ba9fd47f1d0a069a206a0a70",
-  "ticketId": 1,
-  "checkInSecret": "f39cca83-7f3e-4794-86c2-db22abfeaaed"
+  "ticketId": 0,
+  "checkInSecret": "09eb1b4a-88e9-4038-9a17-eade28b5e4b0"
 }

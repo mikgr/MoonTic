@@ -4,16 +4,11 @@ using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class UsherTicketHandler(IDynamoDBContext dynamo)
+public class UsherTicketHandler(IRepository repo)
 {
     public async Task Execute(User usherUser, string contractAddress, int ticketId, string secret)
     {
-        var eventContractStateSearch = dynamo.QueryAsync<EventContractState>(
-            contractAddress.ToLower());
-        
-        var eventContractState = (await eventContractStateSearch.GetRemainingAsync()).Single();
-        
-        var eventContract = new EventContract(eventContractState);
+        var eventContract = await repo.LoadContractBy(contractAddress);
         
         if (eventContract.OwnerId != usherUser.Id)
         {
@@ -24,7 +19,7 @@ public class UsherTicketHandler(IDynamoDBContext dynamo)
         if (!eventContract.CheckOutBlockIsActive(TimeProvider.System)) // todo inject
             throw new DomainInvariant("Event cannot be entered before checkout block is active");
         
-        var eventEntered = await dynamo.LoadAsync<EventEnteredEvent>(
+        var eventEntered = await repo.DbContext.LoadAsync<EventEnteredEvent>(
             eventContract.ContractAddress, // Partition key
             ticketId                        // Sort key
         );
@@ -37,19 +32,16 @@ public class UsherTicketHandler(IDynamoDBContext dynamo)
         var address = eventContract.GetHolderOfTicket(ticketId) 
             ?? throw new DomainInvariant("Ticket has no holder");
         
-        var holderWalletSearch = dynamo.QueryAsync<UserWallet>(
-            address.ToLower(), new QueryConfig{ IndexName = "AddressIndex" });
-        
-        var holderWallet = (await holderWalletSearch.GetRemainingAsync()).Single();
+        var holderWallet = await repo.LoadUserWalletOrNullBy(address: address.ToLower());
         
         var eventEnteredEvent = new EventEnteredEvent 
         {
             ContractAddress = eventContract.ContractAddress,
             TicketId = ticketId,
-            HolderId = holderWallet.UserId,
+            HolderId = holderWallet?.UserId ?? address,
             EnteredAt = DateTime.UtcNow
         };
         
-        await dynamo.SaveAsync(eventEnteredEvent);
+        await repo.DbContext.SaveAsync(eventEnteredEvent);
     }
 }
