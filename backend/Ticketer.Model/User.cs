@@ -14,6 +14,7 @@ public class UserState
     public required string UserName { get; init; }
     
     // todo index
+    [DynamoDBGlobalSecondaryIndexHashKey("EmailIndex")]
     public required string Email { get; init; }
     public Dictionary<string, string> Secrets { get; set; } = new();
 }

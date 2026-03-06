@@ -31,6 +31,12 @@ public class SetUpDynamoTables
                         IndexName = "UserNameIndex",
                         KeySchema = new List<KeySchemaElement> { new("UserName", KeyType.HASH) },
                         Projection = new Projection { ProjectionType = ProjectionType.ALL }
+                    },
+                    new GlobalSecondaryIndex
+                    {
+                        IndexName = "EmailIndex",
+                        KeySchema = new List<KeySchemaElement> { new("Email", KeyType.HASH) },
+                        Projection = new Projection { ProjectionType = ProjectionType.ALL }
                     }
                 },
                 BillingMode = BillingMode.PAY_PER_REQUEST
