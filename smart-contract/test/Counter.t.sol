@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import { Test } from "forge-std/Test.sol";
 import {Ticket} from "../src/Ticket.sol";
 
-contract CounterTest is Test {
+contract TicketTest is Test {
     Ticket public ticketContract;
     address public ownerAddr = 0xA2258d67a701e1abB8564db41aDeb5d530203Fc0;
     uint256 public checkOutBlockedTime = 1770927699;    // Thu Feb 12 2026 20:21:39 GMT+0000
