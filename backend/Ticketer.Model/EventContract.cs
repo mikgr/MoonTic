@@ -28,8 +28,10 @@ public class EventContractState
     public decimal Balance { get; set; } = 0m;
     public string DeployTxHash { get; set; } = "";
     public DateTime DeployedAtUtc { get; set; } = default;
-    public Dictionary<string, string> TicketAllocation = new();
+    public Dictionary<string, string> TicketAllocation { get; set; } = new();
+    public Dictionary<string, string> CheckInSecretHashes { get; set; } = new();
 }
+
 
 
 public class EventContract(EventContractState state) : IAccount
@@ -49,9 +51,7 @@ public class EventContract(EventContractState state) : IAccount
         get => state.ContractAddress;
         set => state.ContractAddress = value.ToLower();
     }
-
     public decimal Balance => state.Balance;
-
     public string DeployTxHash
     {
         get => state.DeployTxHash;
@@ -62,7 +62,6 @@ public class EventContract(EventContractState state) : IAccount
         get => state.DeployedAtUtc;
         set => state.DeployedAtUtc = value;    
     }
-    
     public int SoldTickets => state.TicketCounter;
     public int RemainingTickets => state.TotalTickets - state.TicketCounter;
     public int TotalTickets => state.TotalTickets;
@@ -85,11 +84,10 @@ public class EventContract(EventContractState state) : IAccount
         });
     }
 
+    
     // sell ticket, crate ask, cancel ask, when ticket has ask it cannot be transferred
     void IAccount.ReceiveMoney(decimal amount) =>
         state.Balance += amount;
-    
-    
     
     
     public string? GetHolderOfTicket(int ticketId)
@@ -100,13 +98,10 @@ public class EventContract(EventContractState state) : IAccount
         return null;
     }
     
-    // todo rename to _checkInSecretHashes
-    Dictionary<int, string> _checkSecretInHashes = new();
-    
     
     public bool ProofByTicketHolder(int ticketId, string secret)
     {
-        if(!_checkSecretInHashes.TryGetValue(ticketId, out var hash))
+        if(!state.CheckInSecretHashes.TryGetValue(ticketId.ToString(), out var hash))
             throw new DomainInvariant($"{nameof(ProofByTicketHolder)} failed. Ticket not checked in");
          
         using var sha256 = SHA256.Create();
@@ -116,6 +111,7 @@ public class EventContract(EventContractState state) : IAccount
         return Convert.ToHexString(secretHash) == hash; 
     }
 
+    
     public DateTime GetCheckOutBlockStart() => 
         VenueOpenTime.AddHours(-state.BlockCheckOutBeforeVenueOpenInHours);
 
@@ -125,7 +121,7 @@ public class EventContract(EventContractState state) : IAccount
 
     
     public void ApplyEvent(TicketCheckedInEvent @event) => 
-        _checkSecretInHashes[@event.TicketId] = @event.CheckInSecretHash;
+        state.CheckInSecretHashes[@event.TicketId.ToString()] = @event.CheckInSecretHash;
 
     
     public void ApplyEvent(TicketPurchasedEvent @event)
@@ -136,7 +132,7 @@ public class EventContract(EventContractState state) : IAccount
 
 
     public void ApplyEvent(TicketCheckedOutEvent newCheckOutEvent) => 
-        _checkSecretInHashes.Remove(newCheckOutEvent.TicketId);
+        state.CheckInSecretHashes.Remove(newCheckOutEvent.TicketId.ToString());
 
     
     public void ApplyEvent(TicketTransferredEvent newCheckOutEvent) => 
