@@ -15,7 +15,7 @@ public class AllEventsModel : PageModel
     public async Task OnGet()
     {
         var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
-        EventContracts = await repo.LoadAllContracts();// SpikeRepo.ReadCollection<EventContract>();
+        EventContracts = await repo.LoadAllContracts();
     }
     
     public async Task<IActionResult> OnPostBuy(string eventId)

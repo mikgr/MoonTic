@@ -1,10 +1,10 @@
 ### Check in a ticket
 POST http://localhost:5021//organizer/event/usher-ticket
 Content-Type: application/json
-Authorization: 0
+Authorization: ada
 
 {
-  "contractId": 0,
-  "ticketId": 0,
-  "checkInSecret": "2b6385d5-8168-4304-955c-3c07f9b1f523"
+  "contractAddress": "0xfb936dd6215cc442ba9fd47f1d0a069a206a0a70",
+  "ticketId": 1,
+  "checkInSecret": "f39cca83-7f3e-4794-86c2-db22abfeaaed"
 }

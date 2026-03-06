@@ -12,7 +12,7 @@ public class BuyTicketHandler(MintTicketHandler mintTicketHandler, IRepository r
     {
         if (currentUser is not {} usr) throw new Exception("User not set");
 
-        var contract = await repo.LoadContractBy(contractAddress); 
+        var contract = await repo.LoadContractBy(contractAddress);
         
         var userWallet = await repo.LoadUserWallet(currentUser.Id);
            
