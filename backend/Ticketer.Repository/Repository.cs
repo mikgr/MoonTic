@@ -8,6 +8,9 @@ namespace Ticketer.Repository;
 public class Repository(IDynamoDBContext dynamo) : IRepository
 {
     public IDynamoDBContext DbContext => dynamo;
+    public ITransactWrite<T> CreateTransactWrite<T>() => dynamo.CreateTransactWrite<T>();
+    public IMultiTableTransactWrite CreateMultiTableTransactWrite(params ITransactWrite[] writes) => 
+        dynamo.CreateMultiTableTransactWrite(writes);
     
     public async Task<User> LoadUserAsync(string userId)
     {
