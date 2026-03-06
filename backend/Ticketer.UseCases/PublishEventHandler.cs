@@ -13,6 +13,7 @@ public class PublishEventHandler(
     public async Task Execute(string eventInfoId, User currentUser)
     {
         Console.WriteLine("Publishing event");
+        
         // todo prevent the same event from being published twice
         var eventInfo = await dynamo.LoadAsync<EventInfo>(currentUser.Id, eventInfoId);
         if (eventInfo is null) throw new InvalidOperationException("Event not found");
@@ -20,7 +21,6 @@ public class PublishEventHandler(
 
         var eventContract = EventContract.New(eventInfo);
       
-        
         // Constructor arguments
         BigInteger fakeCheckOutBlockedTime = eventContract.GetCheckOutBlockStart().ToUnixTimestamp();
         BigInteger venueOpenTime = eventContract.VenueOpenTime.ToUnixTimestamp();
@@ -38,8 +38,24 @@ public class PublishEventHandler(
             location
         };
                 
-        await deployContractHandler.Execute(constructorArgs, eventContract);
+        var (
+            deployedAtUtc, 
+            contractAddress, 
+            deployTxHash
+        ) = await deployContractHandler.Execute(constructorArgs);
         
-        await dynamo.DeleteAsync<EventInfo>(eventInfo.Owner, eventInfoId);
+        eventContract.ContractAddress = contractAddress;
+        eventContract.DeployTxHash = deployTxHash;
+        eventContract.DeployedAtUtc = deployedAtUtc;
+
+        
+        var saveContract = dynamo.CreateTransactWrite<EventContractState>();
+        saveContract.AddSaveItem(eventContract.GetState());
+
+        var deleteEventInfo = dynamo.CreateTransactWrite<EventInfo>();
+        deleteEventInfo.AddDeleteKey(eventInfo.Owner, eventInfoId);
+
+        var transaction = dynamo.CreateMultiTableTransactWrite(saveContract, deleteEventInfo);
+        await transaction.ExecuteAsync();
     }
 }
