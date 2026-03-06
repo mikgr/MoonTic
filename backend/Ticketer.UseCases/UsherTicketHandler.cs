@@ -6,11 +6,8 @@ namespace Ticketer.UseCases;
 
 public class UsherTicketHandler(IDynamoDBContext dynamo)
 {
-    public async Task Execute(User? usherUser, string contractAddress, int ticketId, string secret)
+    public async Task Execute(User usherUser, string contractAddress, int ticketId, string secret)
     {
-        if (usherUser is null) throw new Exception("Current user not set");
-        
-        // var eventContract = SpikeRepo.ReadSingle<EventContract>(x => x.ContractAddress.ToLower() == contractAddress.ToLower());
         var eventContractStateSearch = dynamo.QueryAsync<EventContractState>(
             contractAddress.ToLower());
         
@@ -27,10 +24,6 @@ public class UsherTicketHandler(IDynamoDBContext dynamo)
         if (!eventContract.CheckOutBlockIsActive(TimeProvider.System)) // todo inject
             throw new DomainInvariant("Event cannot be entered before checkout block is active");
         
-        // var eventEntered = SpikeRepo.ReadFirstOrDefault<EventEnteredEvent>(x => 
-        //     x.ContractAddress.ToLower() == eventContract.ContractAddress.ToLower() && x.TicketId == ticketId);
-        //
-        
         var eventEntered = await dynamo.LoadAsync<EventEnteredEvent>(
             eventContract.ContractAddress, // Partition key
             ticketId                        // Sort key
@@ -45,12 +38,9 @@ public class UsherTicketHandler(IDynamoDBContext dynamo)
             ?? throw new DomainInvariant("Ticket has no holder");
         
         var holderWalletSearch = dynamo.QueryAsync<UserWallet>(
-                address.ToLower(), new QueryConfig{ IndexName = "AddressIndex" });
+            address.ToLower(), new QueryConfig{ IndexName = "AddressIndex" });
         
-        var holderWallet = (await holderWalletSearch.GetRemainingAsync()).Single();    
-          
-        
-        // LoadAsync<UserWallet>(x => x.Address.ToLower() == address.ToLower());
+        var holderWallet = (await holderWalletSearch.GetRemainingAsync()).Single();
         
         var eventEnteredEvent = new EventEnteredEvent 
         {
@@ -59,6 +49,7 @@ public class UsherTicketHandler(IDynamoDBContext dynamo)
             HolderId = holderWallet.UserId,
             EnteredAt = DateTime.UtcNow
         };
+        
         await dynamo.SaveAsync(eventEnteredEvent);
     }
 }
