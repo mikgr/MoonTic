@@ -16,18 +16,27 @@
                 </li>
                 <li>
                     <!-- Button trigger modal -->
-                    <div type="button" 
-                         class="dropdown-item" 
-                         data-bs-toggle="modal" 
-                         data-bs-target="#check-out-modal"
-                         data-ticket-id="@Model.TicketNo" 
-                         data-event-id="@Model.ContractAddress"
-                         hx-get="/Tickets?handler=CheckOutModal&eventId=@Model.ContractAddress&ticketId=@Model.TicketNo" 
-                         hx-target="#modal-container" 
-                         hx-swap="innerHTML"
-                         >
-                        🚪️ Check Out
-                    </div>
+                    @if (!Model.CheckoutIsBlocked)
+                    {
+                        <div type="button" 
+                             class="dropdown-item" 
+                             data-bs-toggle="modal" 
+                             data-bs-target="#check-out-modal"
+                             data-ticket-id="@Model.TicketNo" 
+                             data-event-id="@Model.ContractAddress"
+                             hx-get="/Tickets?handler=CheckOutModal&eventId=@Model.ContractAddress&ticketId=@Model.TicketNo" 
+                             hx-target="#modal-container" 
+                             hx-swap="innerHTML"
+                             >
+                            🚪️ Check Out
+                        </div>
+                    }
+                    else
+                    {
+                        <div type="button" class="dropdown-item disabled">
+                            🚪️ Check Out
+                        </div>
+                    }
                 </li>
                 <li>
                     <button type="button" class="disabled dropdown-item">📩 Transfer Ticket</button>

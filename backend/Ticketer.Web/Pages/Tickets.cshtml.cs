@@ -8,7 +8,15 @@ using Ticketer.UseCases;
 namespace Ticketer.Web.Pages;
 
 
-public record TicketHolding(int TicketNo, string ContractAddress, string EventName, DateTimeOffset Date, bool IsCheckedIn);
+public record TicketHolding(
+    int TicketNo,
+    string ContractAddress,
+    string EventName,
+    DateTimeOffset Date,
+    bool IsCheckedIn,
+    bool CheckoutIsBlocked
+    );
+
 public record TicketActionStatus(string ContractAddress, int TicketId, string Status, string Action);
 
 public class Test : PageModel
@@ -23,11 +31,12 @@ public class Test : PageModel
 
         var dynamo = HttpContext.RequestServices.GetRequiredService<IDynamoDBContext>();
 
-        var userTicketContainerState = await dynamo.LoadAsync<UserTicketContainerState>(userId); // SpikeRepo.ReadSingleOrDefault<UserTicketContainer>(x => x.UserId == userId);
+        var userTicketContainerState = await dynamo.LoadAsync<UserTicketContainerState>(userId);
+        
         var ticketPurchases = new UserTicketContainer(userTicketContainerState);
         if (userTicketContainerState == null)
         {
-            Console.Error.WriteLine($"No user ticket container found for {userId}");
+            await Console.Error.WriteLineAsync($"No user ticket container found for {userId}");
             return Page();
         }
         
@@ -43,7 +52,7 @@ public class Test : PageModel
             join c in contracts on t.ContractAddress equals c.Id
             orderby c.VenueOpenTime, t.TicketId
             select new TicketHolding(
-                t.TicketId, c.ContractAddress, c.Name, c.VenueOpenTime, t.IsCheckedIn);
+                t.TicketId, c.ContractAddress, c.Name, c.VenueOpenTime, t.IsCheckedIn, c.CheckOutBlockIsActive(TimeProvider.System));
         
         Tickets = tickets;
         
@@ -199,7 +208,7 @@ public class Test : PageModel
        
         var ticketContainer = await repo.LoadUserTicketContainer(userId); 
 
-        var xx = ticketContainer.GetAllTickets().SingleOrDefault(x =>
+        var userTicket = ticketContainer.GetAllTickets().SingleOrDefault(x =>
             x.ContractAddress == contractAddress && x.TicketId == ticketId) 
                  ?? throw new Exception("No ticket found");
         
@@ -208,7 +217,8 @@ public class Test : PageModel
             contract.ContractAddress, 
             contract.Name, 
             contract.VenueOpenTime, 
-            xx.IsCheckedIn
+            userTicket.IsCheckedIn,
+            contract.CheckOutBlockIsActive(TimeProvider.System)
         );
         
         return Partial("_TicketActionButton", x);
