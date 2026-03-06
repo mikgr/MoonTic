@@ -79,7 +79,7 @@ public static class Program
             .Cmd("ls", "event", HandleLsEvent)
             
             .CmdDi("transfer", "ticket", "event-id", "ticket-id", "to-address", (IServiceProvider s, string eventId, int ticketId, string toAddress) => 
-                s.GetRequiredService<TransferTicketHandler>().Execute(currentUser, eventId, ticketId, toAddress).Wait())
+                s.GetRequiredService<TransferTicketHandler>().Execute(currentUser!, eventId, ticketId, toAddress).Wait())
             
             // new ask
             // cancel ask
