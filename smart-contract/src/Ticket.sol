@@ -21,6 +21,7 @@ contract Ticket {
     uint256 public venueCloseTime;
     uint64 public totalTicketCount;
     string public location;
+    uint256 public maxResellPrice;
     IERC20 public stableCoinPaymentContract; // todo can i validate this like is ERC20
 
     address private _owner;
@@ -37,17 +38,20 @@ contract Ticket {
         uint256 venueCloseTime_, 
         uint64 totalTicketCount_,
         string memory location_,
-        address stableCoinPaymentAddress_
+        address stableCoinPaymentAddress_,
+        uint256 maxResellPrice_
     ) {
         require(checkOutBlockedTime<= venueOpenTime_, "Check out blocked time must be before venue open time");
         require(venueOpenTime_ < venueCloseTime_, "Venue open time must be before venue close time");
         require(bytes(location_).length <= 200, "Location string too long");
+        require(maxResellPrice_ > 0, "Max resell price must be greater than 0");
         
         checkOutBlockedTime = checkOutBlockedTime_;
         venueOpenTime = venueOpenTime_;
         venueCloseTime = venueCloseTime_;
         totalTicketCount = totalTicketCount_;
         location = location_;
+        maxResellPrice = maxResellPrice_;
         stableCoinPaymentContract = IERC20(stableCoinPaymentAddress_);
         _owner = msg.sender;
         _nextTokenId = 0;
@@ -111,6 +115,7 @@ contract Ticket {
     function createAsk(uint256 tokenId, uint256 price) public {
         require(msg.sender == ownerOf(tokenId), "Only token owner can create ask");
         require(price > 0, "Price must be greater than 0");
+        require(price <= maxResellPrice, "Price exceeds max resell price");
         require(_checkIns[tokenId] == bytes32(0) || venueCloseTime < block.timestamp, "Cannot create ask for checked in token before venue close time");
         require(_asks[tokenId] == 0, "Ask already exists. Cancel existing ask first.");
 

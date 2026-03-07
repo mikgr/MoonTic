@@ -28,7 +28,8 @@ contract AcceptAskTest is Test {
             venueCloseTime,
             totalTicketCount,
             location,
-            address(usdc)
+            address(usdc),
+            500 * 1e6
         );
     }
 

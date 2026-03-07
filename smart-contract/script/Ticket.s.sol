@@ -24,7 +24,8 @@ contract CounterScript is Script {
             venueCloseTime,
             totalTicketCount,
             location,
-            0xf14E7183aaE1A10bae05f862A127F92fc98dda98
+            0xf14E7183aaE1A10bae05f862A127F92fc98dda98,
+            500 * 1e6
         );
     
         vm.stopBroadcast();

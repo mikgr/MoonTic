@@ -22,7 +22,8 @@ contract TicketTest is Test {
             venueCloseTime,
             totalTicketCount,
             location,
-            mockUsdcAddr
+            mockUsdcAddr,
+            500 * 1e6
         );
     }
 

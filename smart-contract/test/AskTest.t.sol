@@ -22,7 +22,8 @@ contract AskTest is Test {
             venueCloseTime,
             totalTicketCount,
             location,
-            mockUsdcAddr
+            mockUsdcAddr,
+            500 * 1e6
         );
     }
 
@@ -210,5 +211,60 @@ contract AskTest is Test {
         
         // Act
         ticketContract.askFor(tokenId);
+    }
+
+    // maxResellPrice
+
+    function test_createAsk_fails_if_price_exceeds_max_resell_price() public {
+        // Arrange
+        address ada = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+
+        vm.prank(ownerAddr);
+        uint256 tokenId = ticketContract.mint(ada);
+
+        uint256 aboveMax = 500 * 1e6 + 1; // 1 unit above maxResellPrice
+
+        // Assert
+        vm.prank(ada);
+        vm.expectRevert("Price exceeds max resell price");
+
+        // Act
+        ticketContract.createAsk(tokenId, aboveMax);
+    }
+
+    function test_createAsk_works_at_exact_max_resell_price() public {
+        // Arrange
+        address ada = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+
+        vm.prank(ownerAddr);
+        uint256 tokenId = ticketContract.mint(ada);
+
+        uint256 exactMax = 500 * 1e6; // exactly maxResellPrice
+
+        // Act
+        vm.prank(ada);
+        ticketContract.createAsk(tokenId, exactMax);
+
+        // Assert
+        uint256 price = ticketContract.askFor(tokenId);
+        assertEq(price, exactMax);
+    }
+
+    function test_createAsk_works_below_max_resell_price() public {
+        // Arrange
+        address ada = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+
+        vm.prank(ownerAddr);
+        uint256 tokenId = ticketContract.mint(ada);
+
+        uint256 belowMax = 499 * 1e6;
+
+        // Act
+        vm.prank(ada);
+        ticketContract.createAsk(tokenId, belowMax);
+
+        // Assert
+        uint256 price = ticketContract.askFor(tokenId);
+        assertEq(price, belowMax);
     }
 }
