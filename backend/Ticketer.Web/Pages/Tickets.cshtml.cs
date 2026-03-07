@@ -12,14 +12,14 @@ public record TicketHolding(
     int TicketNo,
     string ContractAddress,
     string EventName,
-    DateTimeOffset Date,
+    string VenueOpenTimeLocal,
     bool IsCheckedIn,
     bool CheckoutIsBlocked
     );
 
 public record TicketActionStatus(string ContractAddress, int TicketId, string Status, string Action);
 
-public class Test : PageModel
+public class TicketsPage : PageModel
 {
     public IEnumerable<TicketHolding> Tickets { get; set; } = new List<TicketHolding>();
     
@@ -50,9 +50,9 @@ public class Test : PageModel
         var tickets = 
             from t in ticketPurchases.GetAllTickets()
             join c in contracts on t.ContractAddress equals c.Id
-            orderby c.VenueOpenTime, t.TicketId
+            orderby c.VenueOpenTimeUtc, t.TicketId
             select new TicketHolding(
-                t.TicketId, c.ContractAddress, c.Name, c.VenueOpenTime, t.IsCheckedIn, c.CheckOutBlockIsActive(TimeProvider.System));
+                t.TicketId, c.ContractAddress, c.Name, c.VenueOpenTimeLocal, t.IsCheckedIn, c.CheckOutBlockIsActive(TimeProvider.System));
         
         Tickets = tickets;
         
@@ -216,7 +216,7 @@ public class Test : PageModel
             ticketId, 
             contract.ContractAddress, 
             contract.Name, 
-            contract.VenueOpenTime, 
+            contract.VenueOpenTimeLocal, 
             userTicket.IsCheckedIn,
             contract.CheckOutBlockIsActive(TimeProvider.System)
         );

@@ -4,8 +4,8 @@ using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
-// todo spike repo support auto property like this - no inint or setter break read
-// public DateTime VenueOpenTime { get; }
+
+// todo use [DynamoDBVersion] enforce concurrency on updates
 
 [DynamoDBTable("EventContractState")]
 public class EventContractState
@@ -14,12 +14,13 @@ public class EventContractState
     public string ContractAddress { get; set; } = "";
     [DynamoDBGlobalSecondaryIndexHashKey("OwnerIdIndex")]
     public required string OwnerId { get; init; }
-    // private readonly int _eventId;
-    // todo turn intp range 
+    
     // todo enforce explicit timezones on times
     [DynamoDBGlobalSecondaryIndexRangeKey("OwnerIdVenueOpenTimeIndex")]
     public DateTime VenueOpenTimeUtc { get; set; }
     public DateTime VenueCloseTimeUtc { get; set; }
+    public string FullVenueAddress { get; set; } = "";
+    public string VenueTimeZone { get; set; } = "";
     public uint BlockCheckOutBeforeVenueOpenInHours { get; set; }
     public int TicketCounter = 0;
     public int TotalTickets { get; set; }
@@ -42,8 +43,11 @@ public class EventContract(EventContractState state) : IAccount
     // private readonly int _eventId;
     // todo turn intp range 
     // todo enforce explicit timezones on times
-    public DateTime VenueOpenTime => state.VenueOpenTimeUtc;
-    public DateTime VenueCloseTime => state.VenueCloseTimeUtc;
+    public DateTime VenueOpenTimeUtc => state.VenueOpenTimeUtc;
+    public DateTime VenueCloseTimeUtc => state.VenueCloseTimeUtc;
+    public string VenueOpenTimeLocal => state.VenueOpenTimeUtc.UtcToLocalTimeString(state.VenueTimeZone);
+    public string VenueCloseTimeLocal => state.VenueCloseTimeUtc.UtcToLocalTimeString(state.VenueTimeZone);
+    public string FullVenueAddress => state.FullVenueAddress;
     public decimal TicketPrice => state.TicketPrice;
     public string Name => state.Name;
     public string ContractAddress
@@ -70,7 +74,10 @@ public class EventContract(EventContractState state) : IAccount
     public static EventContract New(EventInfo eventInfo)
     {
         var blockCheckOutBeforeVenueOpenInHours = eventInfo.BlockCheckOutBeforeVenueOpenInHours;
-        if (blockCheckOutBeforeVenueOpenInHours < 5) throw new DomainInvariant($"{nameof(blockCheckOutBeforeVenueOpenInHours)} Cannot be less than 5 hours");
+        
+        // todo move 5 to config
+        if (blockCheckOutBeforeVenueOpenInHours < 5) 
+            throw new DomainInvariant($"{nameof(blockCheckOutBeforeVenueOpenInHours)} Cannot be less than 5 hours");
         
         return new EventContract(new EventContractState
         {
@@ -78,6 +85,8 @@ public class EventContract(EventContractState state) : IAccount
             Name = eventInfo.Name,
             VenueOpenTimeUtc = eventInfo.VenueOpenTime,
             VenueCloseTimeUtc = eventInfo.VenueCloseTime,
+            FullVenueAddress = eventInfo.FullVenueAddress,
+            VenueTimeZone = eventInfo.VenueTimeZone,
             BlockCheckOutBeforeVenueOpenInHours = blockCheckOutBeforeVenueOpenInHours,
             TotalTickets = eventInfo.Tickets,
             TicketPrice = eventInfo.Price,
@@ -113,7 +122,7 @@ public class EventContract(EventContractState state) : IAccount
 
     
     public DateTime GetCheckOutBlockStart() => 
-        VenueOpenTime.AddHours(-state.BlockCheckOutBeforeVenueOpenInHours);
+        VenueOpenTimeUtc.AddHours(-state.BlockCheckOutBeforeVenueOpenInHours);
 
     
     public bool CheckOutBlockIsActive(TimeProvider clock)=>

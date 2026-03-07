@@ -67,12 +67,63 @@
                         <input type="text" class="form-control" id="eventName" name="eventName" required/>
                     </div>
                     <div class="mb-3">
-                        <label for="eventDate" class="form-label">Venue Open Time</label>
-                        <input type="datetime-local" class="form-control" id="eventDate" name="venueOpenTime" required/>
+                        <label for="venueFullAddress" class="form-label">Venue Full Address</label>
+                        <input type="text" class="form-control" id="venueFullAddress" name="venueFullAddress" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="venueTimeZone" class="form-label">Venue Time Zone</label>
+                        <select class="form-select" id="venueTimeZone" name="venueTimeZone" required>
+                            <option value="" disabled selected>Select time zone</option>
+                            <option value="Pacific/Midway">(UTC-11:00) Midway Island</option>
+                            <option value="Pacific/Honolulu">(UTC-10:00) Hawaii</option>
+                            <option value="America/Anchorage">(UTC-09:00) Alaska</option>
+                            <option value="America/Los_Angeles">(UTC-08:00) Pacific Time (US & Canada)</option>
+                            <option value="America/Denver">(UTC-07:00) Mountain Time (US & Canada)</option>
+                            <option value="America/Chicago">(UTC-06:00) Central Time (US & Canada)</option>
+                            <option value="America/New_York">(UTC-05:00) Eastern Time (US & Canada)</option>
+                            <option value="America/Caracas">(UTC-04:30) Caracas</option>
+                            <option value="America/Halifax">(UTC-04:00) Atlantic Time (Canada)</option>
+                            <option value="America/Sao_Paulo">(UTC-03:00) São Paulo</option>
+                            <option value="Atlantic/South_Georgia">(UTC-02:00) Mid-Atlantic</option>
+                            <option value="Atlantic/Azores">(UTC-01:00) Azores</option>
+                            <option value="Europe/London">(UTC+00:00) London, Dublin, Lisbon</option>
+                            <option value="Europe/Paris">(UTC+01:00) Paris, Berlin, Rome, Madrid</option>
+                            <option value="Europe/Copenhagen" selected>(UTC+01:00) Copenhagen</option>
+                            <option value="Europe/Helsinki">(UTC+02:00) Helsinki, Bucharest, Cairo</option>
+                            <option value="Europe/Moscow">(UTC+03:00) Moscow, Istanbul</option>
+                            <option value="Asia/Dubai">(UTC+04:00) Dubai, Abu Dhabi</option>
+                            <option value="Asia/Karachi">(UTC+05:00) Karachi, Tashkent</option>
+                            <option value="Asia/Kolkata">(UTC+05:30) Mumbai, New Delhi</option>
+                            <option value="Asia/Dhaka">(UTC+06:00) Dhaka</option>
+                            <option value="Asia/Bangkok">(UTC+07:00) Bangkok, Hanoi, Jakarta</option>
+                            <option value="Asia/Shanghai">(UTC+08:00) Beijing, Singapore, Hong Kong</option>
+                            <option value="Asia/Tokyo">(UTC+09:00) Tokyo, Seoul</option>
+                            <option value="Australia/Sydney">(UTC+10:00) Sydney, Melbourne</option>
+                            <option value="Pacific/Noumea">(UTC+11:00) New Caledonia</option>
+                            <option value="Pacific/Auckland">(UTC+12:00) Auckland, Wellington</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="venueOpenTime" class="form-label">Venue Open Time</label>
+                        <div class="input-group" id="venueOpenTimePicker" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                            <input type="text" class="form-control" id="venueOpenTime" name="venueOpenTime" data-td-target="#venueOpenTimePicker" required/>
+                            <span class="input-group-text" data-td-target="#venueOpenTimePicker" data-td-toggle="datetimepicker">
+                                <i class="fas fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="blockCheckOutBeforeVenueOpenInHours" class="form-label">Block Checkout Before Venue Open, In Hours</label>
+                        <input type="number" min="5" value="5" class="form-control" id="blockCheckOutBeforeVenueOpenInHours" name="blockCheckOutBeforeVenueOpenInHours" required/>
                     </div>
                     <div class="mb-3">
                         <label for="venueCloseTime" class="form-label">Venue Close Time</label>
-                        <input type="datetime-local" class="form-control" id="venueCloseTime" name="venueCloseTime" required/>
+                        <div class="input-group" id="venueCloseTimePicker" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                            <input type="text" class="form-control" id="venueCloseTime" name="venueCloseTime" data-td-target="#venueCloseTimePicker" required/>
+                            <span class="input-group-text" data-td-target="#venueCloseTimePicker" data-td-toggle="datetimepicker">
+                                <i class="fas fa-calendar"></i>
+                            </span>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="ticketCount" class="form-label">Ticket Count</label>
@@ -91,3 +142,81 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const openPicker = new tempusDominus.TempusDominus(
+                document.getElementById('venueOpenTimePicker'), {
+                    display: {
+                        components: {
+                            decades: true,
+                            year: true,
+                            month: true,
+                            date: true,
+                            hours: true,
+                            minutes: true,
+                            seconds: false
+                        },
+                        icons: {
+                            type: 'icons',
+                            time: 'fas fa-clock',
+                            date: 'fas fa-calendar',
+                            up: 'fas fa-arrow-up',
+                            down: 'fas fa-arrow-down',
+                            previous: 'fas fa-chevron-left',
+                            next: 'fas fa-chevron-right',
+                            today: 'fas fa-calendar-check',
+                            clear: 'fas fa-trash',
+                            close: 'fas fa-xmark'
+                        }
+                    },
+                    localization: {
+                        format: 'yyyy-MM-dd HH:mm'
+                    }
+                }
+            );
+
+            const closePicker = new tempusDominus.TempusDominus(
+                document.getElementById('venueCloseTimePicker'), {
+                    display: {
+                        components: {
+                            decades: true,
+                            year: true,
+                            month: true,
+                            date: true,
+                            hours: true,
+                            minutes: true,
+                            seconds: false
+                        },
+                        icons: {
+                            type: 'icons',
+                            time: 'fas fa-clock',
+                            date: 'fas fa-calendar',
+                            up: 'fas fa-arrow-up',
+                            down: 'fas fa-arrow-down',
+                            previous: 'fas fa-chevron-left',
+                            next: 'fas fa-chevron-right',
+                            today: 'fas fa-calendar-check',
+                            clear: 'fas fa-trash',
+                            close: 'fas fa-xmark'
+                        }
+                    },
+                    localization: {
+                        format: 'yyyy-MM-dd HH:mm'
+                    }
+                }
+            );
+
+            // When open time changes, set it as the minimum for close time
+            document.getElementById('venueOpenTimePicker')
+                .addEventListener(tempusDominus.Namespace.events.change, (e) => {
+                    closePicker.updateOptions({
+                        restrictions: {
+                            minDate: e.detail.date
+                        }
+                    });
+                });
+        });
+    </script>
+}

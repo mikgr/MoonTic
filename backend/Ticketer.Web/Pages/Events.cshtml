@@ -39,13 +39,13 @@
                     @* checkout-block time, event end time, publish time, days left bids asks Artwork, description   *@
                     <div class="card-text fw-bolder" style="color: aliceblue; padding-top: 1rem;">
                         <p>
-                            🗓️ Venue Open: @c.VenueOpenTime.ToString("MMM d yyyy HH\\:mm")
+                            🗓️ Venue Open: @c.VenueOpenTimeLocal
                             <br/><small>
                                 Ticket Check-Out is prohipited from @c.GetCheckOutBlockStart().ToString("MMM d yyyy HH\\:mm")
                             </small>
                         </p>
-                        <p>🗓️ Venue Close: @c.VenueCloseTime.ToString("MMM d yyyy HH\\:mm")</p>
-                        <p>💰 Price: € @c.TicketPrice.ToString("F2")</p>
+                        <p>🗓️ Venue Close: @c.VenueCloseTimeLocal</p>
+                        <p>💰 Price: $ @c.TicketPrice.ToString("F2")</p>
                         <p>Organizer: @c.OwnerId</p>
                         <div class="d-flex align-items-center gap-3">
                             <span>🎫 Remaining Tickets: @c.RemainingTickets of @(c.SoldTickets + c.RemainingTickets)</span>
@@ -93,7 +93,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>💰 Price: € <span id="buy-event-price"></span></p>
+                <p>💰 Price: $ <span id="buy-event-price"></span></p>
                 <hr/>
                 <div class="mb-3">
                     <label class="form-label small text-muted">Card Number</label>

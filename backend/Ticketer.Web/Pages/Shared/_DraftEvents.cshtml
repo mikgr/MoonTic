@@ -1,3 +1,4 @@
+@using Ticketer.Model
 @model List<Ticketer.Model.EventInfo>
 
 @foreach (var e in Model)
@@ -12,13 +13,23 @@
             </div>
             <div class="row fs-4">
                 <div class="col-md-6">
-                    <p><strong>Venue Open Time:</strong> @e.VenueOpenTime.ToString("MMM d yyyy HH\\:mm")</p>
-                    <p><strong>Price:</strong> € @e.Price.ToString("F2")</p>
-                    <p><strong>Ticket Count:</strong> @e.Tickets</p>
+                    <p><strong>Venue Open Time:</strong> @e.VenueOpenTime.UtcToLocalTimeString(e.VenueTimeZone)</p>
+                    <p><strong>Venue Time Zone:</strong> @e.VenueTimeZone</p>
+                    <p><strong>Price:</strong> $ @e.Price.ToString("F2")</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Venue Close Time:</strong> @e.VenueCloseTime.ToString("MMM d yyyy HH\\:mm")</p>
-                    <p><strong>Check-Out Blocked:</strong> '@e.BlockCheckOutBeforeVenueOpenInHours' hours before Venue Open Time</p>
+                    <p><strong>Venue Close Time:</strong> @e.VenueCloseTime.UtcToLocalTimeString(e.VenueTimeZone)</p>
+                    <p><strong>Ticket Count:</strong> @e.Tickets</p>
+                </div>
+            </div>
+            <div class="row fs-4">
+                <div class="col-12">
+                    <p><strong>Venue Full Address:</strong> @e.FullVenueAddress</p>
+                </div>
+            </div>
+            <div class="row fs-4">
+                <div class="col-12">
+                    <p><strong>Check-Out Blocked:</strong> @e.BlockCheckOutBeforeVenueOpenInHours hours before Venue Open Time</p>
                 </div>
             </div>
             <div class="row">

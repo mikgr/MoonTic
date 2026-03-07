@@ -3,13 +3,16 @@ using Ticketer.Model;
 
 namespace Ticketer;
 
+// todo use this in web code behind
 public class NewEventInfoHandler(IDynamoDBContext dynamo)
 {
     public async Task Execute(
-        User? currentUser,
+        User currentUser,
         string name,
+        string fullVenueAddress,
         DateTime venueOpenTime,
         DateTime venueCloseTime,
+        string venueTimeZone,
         int tickets,
         decimal price)
     {
@@ -19,7 +22,9 @@ public class NewEventInfoHandler(IDynamoDBContext dynamo)
         {
             Owner = currentUser.Id,
             Name = name,
+            FullVenueAddress = "",
             VenueOpenTime = venueOpenTime,
+            VenueTimeZone = venueTimeZone,
             VenueCloseTime = venueCloseTime,
             Tickets = tickets,
             Price = price,
