@@ -1,7 +1,7 @@
 @model TicketActionStatus
 
 <form class="d-inline"
-      hx-post="/Tickets?handler=Transfer"
+      hx-post="/Tickets?handler=CreateAsk"
       hx-target="@($"#status_{Model.ContractAddress}_{Model.TicketId}")"
       hx-swap="innerHTML">
     <div class="modal fade" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
@@ -14,10 +14,18 @@
                 <div class="modal-body">
                     <p>When you list your ticket for sale anyone can buy it by transferring the asking price you specify. 
                         Money and ticket will change hands in one safe transaction.</p>
-                    
+                    <div class="alert alert-success fw-bold" role="alert">
+                        ✅ KYC Status OK
+                    </div>
+                    <div class="mb-3 alert alert-success" role="alert">
+                        <label for="bank-account" class="form-label fw-bold">Payout Bank Account</label>
+                        <select id="bank-account" class="form-select" aria-label="Default select example" name="bankAccountId">
+                            <option value="123">IBAN: DKXX XXXX XXXX XXXX XXXX</option>
+                        </select>
+                    </div>
                     <div class="mb-3">
-                        <label for="asking-price" class="form-label">Asking Price $</label>
-                        <input type="number" class="form-control" id="asking-price" name="askingPrice" min="1" placeholder="" />@* todo add max value *@
+                        <label for="ask-price" class="form-label"><b>Asking Price $</b></label>
+                        <input type="number" class="form-control" id="ask-price" name="askPrice" min="1" placeholder="" />@* todo add max value *@
                     </div>
                 
                 </div>
@@ -26,7 +34,7 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="contractAddress" value="@Model.ContractAddress" />
                     <input type="hidden" name="ticketId" value="@Model.TicketId" />
-                    <button type="submit" class="btn btn-primary">Transfer</button>
+                    <button type="submit" class="btn btn-primary">Ok</button>
                 </div>
             </div>
         </div>

@@ -85,6 +85,7 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
 
     public async Task<List<IContractEvent>> LoadContractEvents(string contractAddress)
     {
+        // todo optimize this for prod use
         var purchasedTask = dynamo.QueryAsync<TicketPurchasedEvent>(contractAddress).GetRemainingAsync(); // ScanAsync<TicketPurchasedEvent>([]).GetRemainingAsync();
         var checkedInTask = dynamo.QueryAsync<TicketCheckedInEvent>(contractAddress).GetRemainingAsync();   //.ScanAsync<TicketCheckedInEvent>([]).GetRemainingAsync();
         var checkedOutTask = dynamo.QueryAsync<TicketCheckedOutEvent>(contractAddress).GetRemainingAsync();  //.ScanAsync<TicketCheckedOutEvent>([]).GetRemainingAsync();

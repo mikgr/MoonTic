@@ -169,6 +169,37 @@ public class TicketsPage : PageModel
         }
     }
     
+    public async Task<IActionResult> OnPostCreateAsk(string contractAddress, int ticketId, int askPrice, int bankAccountId)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(contractAddress);
+
+            var userId = HttpContext.Session.GetString("UserId");
+            if (userId == null) return HtmxRedirect("/LogIn");
+            
+            var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+            var user = await repo.LoadUserAsync(userId);
+            
+            var jobQueue = HttpContext.RequestServices.GetRequiredService<IJobQueue>();
+            var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+
+            await jobQueue.EnqueueAsync(async ct =>
+            {
+                using var scope = scopeFactory.CreateScope();
+                var createAskHandler = scope.ServiceProvider.GetRequiredService<CreateAskHandler>();
+                await createAskHandler.Execute(user, contractAddress, ticketId, askPrice);
+            });
+            
+            return Partial("_TicketStatus", new TicketActionStatus(contractAddress, ticketId, "pending", "create-ask"));
+        }
+        catch (DomainInvariant)
+        {
+            // todo show error in modal
+            return Partial("_TransferModal", new TicketActionStatus(contractAddress, ticketId, "", ""));
+        }
+    }
+    
     
     
     public async Task<IActionResult> OnGetTicketStatus(string action, string contractAddress, int ticketId)
