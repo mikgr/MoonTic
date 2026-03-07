@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import {ERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "../lib/openzeppelin-contracts/lib/erc4626-tests/ERC4626.prop.sol";
+
 //import { ERC721ConsecutiveTest } from "../lib/openzeppelin-contracts/test/token/ERC721/extensions/ERC721Consecutive.t.sol";
 
 // todo implement ERC721
-
 contract Ticket {
     
     event TokenMinted(address indexed to, uint256 tokenId);
@@ -20,6 +22,7 @@ contract Ticket {
     uint256 public venueCloseTime;
     uint64 public totalTicketCount;
     string public location;
+    IERC20 public stableCoinPaymentContract; // todo can i validate this like is ERC20
 
     address private _owner;
     uint256 private _nextTokenId;
@@ -34,7 +37,8 @@ contract Ticket {
         uint256 venueOpenTime_, 
         uint256 venueCloseTime_, 
         uint64 totalTicketCount_,
-        string memory location_
+        string memory location_,
+        address stableCoinPaymentAddress_
     ) {
         require(checkOutBlockedTime<= venueOpenTime_, "Check out blocked time must be before venue open time");
         require(venueOpenTime_ < venueCloseTime_, "Venue open time must be before venue close time");
@@ -45,7 +49,7 @@ contract Ticket {
         venueCloseTime = venueCloseTime_;
         totalTicketCount = totalTicketCount_;
         location = location_;
-        
+        stableCoinPaymentContract = IERC20(stableCoinPaymentAddress_);
         _owner = msg.sender;
         _nextTokenId = 0;
     }
