@@ -22,7 +22,8 @@ contract TicketTest is Test {
             venueCloseTime,
             totalTicketCount,
             location,
-            mockUsdcAddr
+            mockUsdcAddr,
+            500 * 1e6
         );
     }
     
@@ -61,7 +62,8 @@ contract TicketTest is Test {
         venueCloseTime, 
         1,
             location,
-            mockUsdcAddr
+            mockUsdcAddr,
+            500 * 1e6
         );
         
         vm.prank(ownerAddr);
