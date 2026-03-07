@@ -20,7 +20,7 @@ public static class Configuration
             .AddScoped<TicketContractClient>()
             .AddScoped<TransferTicketHandler>()
             .AddScoped<MintTicketHandler>()
-            .AddScoped<UsherTicketHandler>();
+            .AddScoped<UsherTicketHandler>()
+            .AddScoped<CreateAskHandler>();
     }
-    
 }
