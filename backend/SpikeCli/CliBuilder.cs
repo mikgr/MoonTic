@@ -245,6 +245,35 @@ public class CliBuilder(IServiceProvider? serviceProvider = null)
         return this;
     }
     
+    public CliBuilder CmdDi<TP1, TP2, TP3, TP4, TP5, TP6>(
+        string verb,
+        string noun,
+        string p1Name,
+        string p2Name,
+        string p3Name,
+        string p4Name,
+        string p5Name,
+        string p6Name,
+        Action<IServiceProvider, TP1, TP2, TP3, TP4, TP5, TP6> action)
+    {
+        var cmdDef = CreateCmdInfo(verb, noun, argCount: 6, withDependencyInjection: true)
+            .AddParam<TP1>(p1Name)
+            .AddParam<TP2>(p2Name)
+            .AddParam<TP3>(p3Name)
+            .AddParam<TP4>(p4Name)
+            .AddParam<TP5>(p5Name)
+            .AddParam<TP6>(p6Name);
+
+        cmdDef.Action = (object?[] parameters) =>
+        {
+            action.DynamicInvoke(parameters);
+            return null;
+        };
+
+        _commandInfos.Add(cmdDef);
+        return this;
+    }
+    
     
     public ParamBuilder BldCmd<TP1,TP2>(string verb, string noun, Action<TP1, TP2> action)
     {
