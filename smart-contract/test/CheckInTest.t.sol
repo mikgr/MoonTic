@@ -76,4 +76,24 @@ contract TicketTest is Test {
         vm.expectRevert();
         ticketContract.checkInSecretHashFor(tokenId);
     }
+    
+    function test_checkIn_fails_with_active_ask() public {
+        // Arrange
+        address ada = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+
+        vm.prank(ownerAddr);
+        uint256 tokenId = ticketContract.mint(ada);
+
+        vm.prank(ada);
+        ticketContract.createAsk(tokenId, 100);
+
+        bytes32 checkInSecretHash = sha256(abi.encodePacked("my super secret secret"));
+
+        // Assert
+        vm.prank(ada);
+        vm.expectRevert("Cannot check in token with active ask. Cancel ask first.");
+
+        // Act
+        ticketContract.checkIn(tokenId, checkInSecretHash);
+    }
 }

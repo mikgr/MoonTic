@@ -209,49 +209,4 @@ contract AskTest is Test {
         // Act
         ticketContract.askFor(tokenId);
     }
-
-    // ask blocks transfer
-
-    // todo move to Transfer test
-    function test_transfer_fails_with_active_ask() public {
-        // Arrange
-        address ada = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
-        address bob = 0xcE7c92a6368B445DC8d168a45f35c20644eeC5bf;
-
-        vm.prank(ownerAddr);
-        uint256 tokenId = ticketContract.mint(ada);
-
-        vm.prank(ada);
-        ticketContract.createAsk(tokenId, 100);
-
-        // Assert
-        vm.prank(ada);
-        vm.expectRevert("Cannot transfer token with active ask. Cancel ask first.");
-        
-        // Act
-        ticketContract.transfer(bob, tokenId);
-    }
-
-    // ask blocks check-in
-
-    // todo move to CheckIn test
-    function test_checkIn_fails_with_active_ask() public {
-        // Arrange
-        address ada = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
-
-        vm.prank(ownerAddr);
-        uint256 tokenId = ticketContract.mint(ada);
-
-        vm.prank(ada);
-        ticketContract.createAsk(tokenId, 100);
-
-        bytes32 checkInSecretHash = sha256(abi.encodePacked("my super secret secret"));
-
-        // Assert
-        vm.prank(ada);
-        vm.expectRevert("Cannot check in token with active ask. Cancel ask first.");
-        
-        // Act
-        ticketContract.checkIn(tokenId, checkInSecretHash);
-    }
 }
