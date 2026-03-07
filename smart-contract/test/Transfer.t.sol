@@ -103,4 +103,22 @@ contract TicketTest is Test {
         ticketContract.transfer(bob, tokenId);
     }
     
+    function test_transfer_fails_with_active_ask() public {
+        // Arrange
+        address ada = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+        address bob = 0xcE7c92a6368B445DC8d168a45f35c20644eeC5bf;
+
+        vm.prank(ownerAddr);
+        uint256 tokenId = ticketContract.mint(ada);
+
+        vm.prank(ada);
+        ticketContract.createAsk(tokenId, 100);
+
+        // Assert
+        vm.prank(ada);
+        vm.expectRevert("Cannot transfer token with active ask. Cancel ask first.");
+
+        // Act
+        ticketContract.transfer(bob, tokenId);
+    }
 }
