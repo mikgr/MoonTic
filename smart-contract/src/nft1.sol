@@ -18,7 +18,5 @@ contract Nft1 is ERC721, Ownable {
 
 
     // todo : Override tokenURI to return metadata for each token
-    // todo checkIn
-    // todo checkOut
 
 }

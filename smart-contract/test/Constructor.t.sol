@@ -12,7 +12,8 @@ contract TicketTest is Test {
     uint256 public venueCloseTime = 1772405999;         // Sun Mar 01 2026 22:59:59 GMT+0000
     uint64 public totalTicketCount = 10;
     string public location = "Store VEGA, Enghavevej 40, 1674 Copenhagen V, Denmark";
-
+    address public mockUsdcAddr = 0xf14E7183aaE1A10bae05f862A127F92fc98dda98;
+    
     function setUp() public {
         vm.prank(ownerAddr);
         ticketContract = new Ticket(
@@ -20,7 +21,8 @@ contract TicketTest is Test {
             venueOpenTime,
             venueCloseTime,
             totalTicketCount,
-            location
+            location,
+            mockUsdcAddr
         );
     }
 
