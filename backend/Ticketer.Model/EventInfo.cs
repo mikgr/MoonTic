@@ -14,12 +14,14 @@ public class EventInfo
     
     // todo use this as partition key
     public required string Name { get; init; }
+    public required string FullVenueAddress { get; set; }
     public required string Description { get; set; } = "";
-    public required DateTime VenueOpenTime { get; init; }
+    public required DateTime VenueOpenTime { get; init; } // todo rename to UTC
+    public required DateTime VenueCloseTime { get; init; } // todo rename to UTC
+    public required string VenueTimeZone { get; init; } // todo add tests 
 
     public required uint BlockCheckOutBeforeVenueOpenInHours { get; init; } = 10;
 
-    public required DateTime VenueCloseTime { get; init; }
     // venue address (optional) might be a virtual event
     public required decimal Price { get; set; }
     public required int Tickets { get; set; }

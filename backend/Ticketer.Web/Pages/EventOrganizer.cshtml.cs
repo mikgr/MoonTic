@@ -59,7 +59,14 @@ public class EventOrganizerModel : PageModel
     
     
     public async Task<IActionResult> OnPostCreateEvent(
-        string eventName, DateTime venueOpenTime, DateTime venueCloseTime, int ticketCount, decimal price)
+        string eventName,
+        string venueFullAddress,
+        DateTime venueOpenTime,
+        DateTime venueCloseTime,
+        int ticketCount,
+        decimal price,
+        uint blockCheckOutBeforeVenueOpenInHours,
+        string venueTimeZone)
     {
         if (venueOpenTime >= venueCloseTime) 
             throw new ArgumentException($"{nameof(venueOpenTime)} must be before {nameof(venueCloseTime)}");
@@ -67,20 +74,32 @@ public class EventOrganizerModel : PageModel
         var userId = HttpContext.Session.GetString("UserId");
         if (string.IsNullOrWhiteSpace(userId))
             return RedirectToPage("/LogIn");
-
-        // todo validate with fluent validation
+        
+       
+        var tz = TimeZoneInfo.FindSystemTimeZoneById(venueTimeZone);
+        
+        var ot = venueOpenTime;
+        var localOpenTime = new DateTime(ot.Year, ot.Month, ot.Day, ot.Hour, ot.Minute, 0, DateTimeKind.Unspecified);
+        var openTimeUtc = TimeZoneInfo.ConvertTimeToUtc(localOpenTime, tz);
+        
+        var ct = venueCloseTime;
+        var localCloseTime = new DateTime(ct.Year, ct.Month, ct.Day, ct.Hour, ct.Minute, 0, DateTimeKind.Unspecified);
+        var closeTimeUtc = TimeZoneInfo.ConvertTimeToUtc(localCloseTime, tz);
+       
         
         // todo use handler
         var eventInfo = new EventInfo
         {
             Owner = userId,
             Name = eventName,
-            VenueOpenTime = venueOpenTime,
+            FullVenueAddress = venueFullAddress,
+            VenueOpenTime = openTimeUtc,
+            VenueCloseTime = closeTimeUtc,
+            VenueTimeZone = venueTimeZone,
             Tickets = ticketCount,
             Price = price,
-            Description = "",
-            BlockCheckOutBeforeVenueOpenInHours = 5,
-            VenueCloseTime = venueCloseTime
+            Description = "", // todo 
+            BlockCheckOutBeforeVenueOpenInHours = blockCheckOutBeforeVenueOpenInHours,
         };
 
         var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();

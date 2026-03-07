@@ -23,19 +23,17 @@ public class PublishEventHandler(
       
         // Constructor arguments
         BigInteger fakeCheckOutBlockedTime = eventContract.GetCheckOutBlockStart().ToUnixTimestamp();
-        BigInteger venueOpenTime = eventContract.VenueOpenTime.ToUnixTimestamp();
-        BigInteger venueCloseTime = eventContract.VenueCloseTime.ToUnixTimestamp();
+        BigInteger venueOpenTime = eventContract.VenueOpenTimeUtc.ToUnixTimestamp();
+        BigInteger venueCloseTime = eventContract.VenueCloseTimeUtc.ToUnixTimestamp();
         BigInteger totalTicketCount = eventContract.TotalTickets; // uint64 can be BigInteger in Nethereum
         
-        string location = "Store VEGA, Enghavevej 40, 1674 Copenhagen V, Denmark"; // todo fix
-
         var constructorArgs = new object[]
         {
             fakeCheckOutBlockedTime,
             venueOpenTime,
             venueCloseTime,
             totalTicketCount,
-            location
+            eventInfo.FullVenueAddress
         };
                 
         var (

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SpikeCli;
@@ -40,9 +40,9 @@ public static class Program
                 s.GetRequiredService<PrintSecretHandler>().Execute(currentUser, contractId, ticketId))
             
             // event crud
-            .CmdDi("new", "event", "event-name", "venue-open-time", "venue-close-time", "ticket-count", "price",
-                (IServiceProvider s, string name, DateTime venueOpenTime, DateTime venueCloseTime, int tickets, decimal price) => 
-                    s.GetRequiredService<NewEventInfoHandler>().Execute(currentUser, name, venueOpenTime, venueCloseTime, tickets, price).Wait())
+            .CmdDi("new", "event", "event-name", "venue-open-time", "venue-close-time", "venue-time-zone", "ticket-count", "price",
+                (IServiceProvider s, string name, DateTime venueOpenTime, DateTime venueCloseTime, string venueTimeZone, int tickets, decimal price) => 
+                    s.GetRequiredService<NewEventInfoHandler>().Execute(currentUser!, name, "full venue addresss" ,venueOpenTime, venueCloseTime, venueTimeZone, tickets, price).Wait())
             
             .CmdDi("publish", "event", "event-info-id", (IServiceProvider s, string eventInfoId) => 
                 s.GetRequiredService<PublishEventHandler>().Execute(eventInfoId, currentUser!).Wait())

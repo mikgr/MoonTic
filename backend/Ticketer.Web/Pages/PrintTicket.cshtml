@@ -18,8 +18,8 @@
         <div class="col-12" style="margin-top: 2rem">
             <h1>@Model.Contract.Name</h1>
             <hr/>
-            <h2>Venue TODO</h2>
-            <p>Doors open: @Model.Contract.VenueOpenTime</p>
+            <h2>@Model.Contract.FullVenueAddress</h2>
+            <h4>Doors open: @Model.Contract.VenueOpenTimeLocal</h4>
         </div>
     </div>
     <div class="row">
@@ -31,9 +31,11 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <p>Ticket Contract Address: @Model.ContractAddress</p>
-            <p>Ticket ID: @Model.TicketId</p>
-            <p>Check-in Secret: @Model.Secret</p>
+            <p>
+                <b>Ticket Contract Address:</b> @Model.ContractAddress<br/>
+                <b>Ticket ID:</b> @Model.TicketId<br/>
+                <b>Check-in Secret:</b> @Model.Secret
+            </p>
         </div>
     </div>
 </div>

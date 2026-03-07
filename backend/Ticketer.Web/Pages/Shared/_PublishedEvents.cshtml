@@ -14,12 +14,12 @@
             </div>
             <div class="row fs-4">
                 <div class="col-md-6">
-                    <p><strong>Venue Open Time:</strong> @item.VenueOpenTime.ToString("MMM d yyyy HH\\:mm")</p>
+                    <p><strong>Venue Open Time:</strong> @item.VenueOpenTimeLocal</p>
                     <p><strong>Ticket Price:</strong> @item.TicketPrice.ToString("F2")</p>
                     <p><strong>Sold Tickets:</strong> @item.SoldTickets</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Venue Close Time:</strong> @item.VenueCloseTime.ToString("MMM d yyyy HH\\:mm")</p>
+                    <p><strong>Venue Close Time:</strong> @item.VenueCloseTimeLocal</p>
                     <p><strong>Balance:</strong> @item.Balance.ToString("F2")</p>
                     <p><strong>Remaining Tickets:</strong> @item.RemainingTickets</p>
                 </div>
