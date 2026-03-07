@@ -24,7 +24,10 @@ public class EventInfo
 
     // venue address (optional) might be a virtual event
     public required decimal Price { get; set; }
+    public required decimal MaxResellPrice { get; set; }
     public required int Tickets { get; set; }
+    public required string PaymentStableCoinSymbol { get; init; }
+
     // todo  change state on publish
 }
 

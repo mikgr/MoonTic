@@ -1,8 +1,9 @@
 using System.Text.Json;
-using Amazon.DynamoDBv2.DataModel;
 using Ticketer.Model;
 
+
 namespace Ticketer.UseCases;
+
 
 public class DeployContractHandler
 {
@@ -17,26 +18,25 @@ public class DeployContractHandler
         var web3 = new Nethereum.Web3.Web3(account, TicketerOptions.BlockchainRpcUrl);
 
         Console.WriteLine("Using account: " + account.Address);
-                    
-        // Read the Forge build JSON TODO dont hardcode path
-        var jsonText = await File.ReadAllTextAsync("/Users/mikkel/Code/hello_foundry/nft-foundry/out/Ticket.sol/Ticket.json");
+        
+        // todo path to config, NB for prod hash contract and check, before publish 
+        var jsonText = await File.ReadAllTextAsync("/Users/mikkel/Code/moontic/smart-contract/out/Ticket.sol/Ticket.json"); 
 
         using var doc = JsonDocument.Parse(jsonText);
         var root = doc.RootElement;
 
         // Extract ABI and bytecode
-        string abi = root.GetProperty("abi").GetRawText(); // ABI array as string
+        string abi = root.GetProperty("abi").GetRawText(); 
         string byteCode = root.GetProperty("bytecode").GetProperty("object").GetString()
             ?? throw new Exception("Bytecode not found in Ticket.json");
-
-        //Deploy contract
+        
         Console.WriteLine("Deploying contract...");
 
         var deploymentReceipt = await web3.Eth.DeployContract.SendRequestAndWaitForReceiptAsync(
             abi: abi,
             contractByteCode: byteCode,
             from: account.Address,
-            gas: new Nethereum.Hex.HexTypes.HexBigInteger(3000000), // adjust if needed
+            gas: new Nethereum.Hex.HexTypes.HexBigInteger(3000000), 
             values: constructorArgs
         );
         

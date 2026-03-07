@@ -65,15 +65,23 @@ public class EventOrganizerModel : PageModel
         DateTime venueCloseTime,
         int ticketCount,
         decimal price,
+        decimal maxResellPrice,
         uint blockCheckOutBeforeVenueOpenInHours,
         string venueTimeZone)
+        //todo PaymentStableCoinSymbol
     {
-        if (venueOpenTime >= venueCloseTime) 
-            throw new ArgumentException($"{nameof(venueOpenTime)} must be before {nameof(venueCloseTime)}");
-        
         var userId = HttpContext.Session.GetString("UserId");
         if (string.IsNullOrWhiteSpace(userId))
             return RedirectToPage("/LogIn");
+
+        if (venueOpenTime >= venueCloseTime) 
+            throw new ArgumentException($"{nameof(venueOpenTime)} must be before {nameof(venueCloseTime)}");
+        if (string.IsNullOrWhiteSpace(eventName)) throw new ArgumentException($"{nameof(eventName)} cannot be empty");
+        if (string.IsNullOrWhiteSpace(venueFullAddress)) throw new ArgumentException($"{nameof(venueFullAddress)} cannot be empty");
+        if (ticketCount < 1) throw new ArgumentException($"{nameof(ticketCount)} must be positive");
+        if (price < 0) throw new ArgumentException($"{nameof(price)} must be positive");
+        if (maxResellPrice < 0) throw new ArgumentException($"{nameof(maxResellPrice)} must be positive");
+        if (blockCheckOutBeforeVenueOpenInHours < 5) throw new ArgumentException($"{nameof(blockCheckOutBeforeVenueOpenInHours)} must be positive");
         
        
         var tz = TimeZoneInfo.FindSystemTimeZoneById(venueTimeZone);
@@ -97,7 +105,9 @@ public class EventOrganizerModel : PageModel
             VenueCloseTime = closeTimeUtc,
             VenueTimeZone = venueTimeZone,
             Tickets = ticketCount,
+            PaymentStableCoinSymbol = "USDC", // todo let organizers choose when they create event
             Price = price,
+            MaxResellPrice = maxResellPrice,
             Description = "", // todo 
             BlockCheckOutBeforeVenueOpenInHours = blockCheckOutBeforeVenueOpenInHours,
         };
