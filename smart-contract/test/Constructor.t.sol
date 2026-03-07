@@ -41,4 +41,17 @@ contract TicketTest is Test {
         uint256 venueCloseTimeRead = ticketContract.venueCloseTime();
         assertEq(venueCloseTimeRead, venueCloseTime);
     }
+
+
+    // todo accept ask
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
