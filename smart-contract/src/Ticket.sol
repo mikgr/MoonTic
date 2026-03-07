@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {ERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "../lib/openzeppelin-contracts/lib/erc4626-tests/ERC4626.prop.sol";
 
 //import { ERC721ConsecutiveTest } from "../lib/openzeppelin-contracts/test/token/ERC721/extensions/ERC721Consecutive.t.sol";
@@ -15,7 +14,7 @@ contract Ticket {
     event TokenCheckedOut(uint256 indexed tokenId);
     event AskCreated(uint256 indexed tokenId, uint256 priceUsdc);
     event AskCancelled(uint256 indexed tokenId);
-    event AskFulfilled(uint256 indexed tokenId, address indexed buyer, uint256 priceUsdc);
+    event AskAccepted(uint256 indexed tokenId, address indexed buyer, uint256 priceUsdc);
     
     uint256 public checkOutBlockedTime;
     uint256 public venueOpenTime;
@@ -78,7 +77,7 @@ contract Ticket {
         require(_asks[tokenId] == 0, "Cannot transfer token with active ask. Cancel ask first.");
         
         emit TokenTransferred(msg.sender, to, tokenId);
-        
+
         _tokenOwners[tokenId]= to;
     }
     
@@ -109,15 +108,15 @@ contract Ticket {
 
     // Ask functions
 
-    function createAsk(uint256 tokenId, uint256 priceUsdc) public {
+    function createAsk(uint256 tokenId, uint256 price) public {
         require(msg.sender == ownerOf(tokenId), "Only token owner can create ask");
-        require(priceUsdc > 0, "Price must be greater than 0");
+        require(price > 0, "Price must be greater than 0");
         require(_checkIns[tokenId] == bytes32(0) || venueCloseTime < block.timestamp, "Cannot create ask for checked in token before venue close time");
         require(_asks[tokenId] == 0, "Ask already exists. Cancel existing ask first.");
 
-        _asks[tokenId] = priceUsdc;
+        _asks[tokenId] = price;
 
-        emit AskCreated(tokenId, priceUsdc);
+        emit AskCreated(tokenId, price);
     }
 
     function cancelAsk(uint256 tokenId) public {
@@ -133,5 +132,22 @@ contract Ticket {
         uint256 price = _asks[tokenId];
         require(price != 0, "No active ask");
         return price;
+    }
+    
+    function acceptAsk(uint256 tokenId) public {
+        uint256 price = _asks[tokenId];
+        require(price != 0, "No active ask to fulfill");
+        
+        address seller = ownerOf(tokenId);
+        require(seller != msg.sender, "Cannot fulfill ask for your own token");
+        
+        require(stableCoinPaymentContract.transferFrom(msg.sender, seller, price), "Payment transfer failed");
+        
+        delete _asks[tokenId];
+        
+        _tokenOwners[tokenId] = msg.sender;
+        emit TokenTransferred(seller, msg.sender, tokenId);
+
+        emit AskAccepted(tokenId, msg.sender, price);
     }
 }
