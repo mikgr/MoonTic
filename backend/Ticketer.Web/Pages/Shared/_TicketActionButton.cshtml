@@ -41,6 +41,9 @@
                 <li>
                     <button type="button" class="disabled dropdown-item">📩 Transfer Ticket</button>
                 </li>
+                <li>
+                    <button type="button" class="disabled dropdown-item">🫴 List for Sale</button>
+                </li>
             }
             else
             {
@@ -73,8 +76,20 @@
                          hx-get="@($"/Tickets?handler=TransferModal&eventId={Model.ContractAddress}&ticketId={Model.TicketNo}")"
                          hx-target="#modal-container"
                          hx-swap="innerHTML"
-                         >
+                    >
                         📩 Transfer Ticket
+                    </div>
+                </li>
+                <li>
+                    <div type="button"
+                         class="dropdown-item"
+                         data-bs-toggle="modal" 
+                         data-bs-target="#check-in-modal"
+                         hx-get="@($"/Tickets?handler=CreateAskModal&contractAddress={Model.ContractAddress}&ticketId={Model.TicketNo}")"
+                         hx-target="#modal-container"
+                         hx-swap="innerHTML"
+                    >
+                        🫴 List for Sale
                     </div>
                 </li>
             }

@@ -77,6 +77,11 @@ public class TicketsPage : PageModel
         return Partial("_TransferModal", new TicketActionStatus(eventId, ticketId, "", ""));
     }
     
+    public IActionResult OnGetCreateAskModal(string contractAddress, int ticketId)
+    {
+        return Partial("_CreateAskModal", new TicketActionStatus(contractAddress, ticketId, "", ""));
+    }
+    
     
     public async Task<IActionResult> OnPostCheckIn(string contractAddress, int ticketId)
     {
@@ -163,6 +168,7 @@ public class TicketsPage : PageModel
             return Partial("_TransferModal", new TicketActionStatus(contractAddress, ticketId, "", ""));
         }
     }
+    
     
     
     public async Task<IActionResult> OnGetTicketStatus(string action, string contractAddress, int ticketId)

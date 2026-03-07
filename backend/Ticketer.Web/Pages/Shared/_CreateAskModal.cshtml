@@ -1,0 +1,34 @@
+@model TicketActionStatus
+
+<form class="d-inline"
+      hx-post="/Tickets?handler=Transfer"
+      hx-target="@($"#status_{Model.ContractAddress}_{Model.TicketId}")"
+      hx-swap="innerHTML">
+    <div class="modal fade" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="transferModalLabel">🫴 List Ticket @Model.TicketId For Sale. </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>When you list your ticket for sale anyone can buy it by transferring the asking price you specify. 
+                        Money and ticket will change hands in one safe transaction.</p>
+                    
+                    <div class="mb-3">
+                        <label for="asking-price" class="form-label">Asking Price $</label>
+                        <input type="number" class="form-control" id="asking-price" name="askingPrice" min="1" placeholder="" />@* todo add max value *@
+                    </div>
+                
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="contractAddress" value="@Model.ContractAddress" />
+                    <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                    <button type="submit" class="btn btn-primary">Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
