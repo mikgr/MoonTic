@@ -14,7 +14,9 @@ public class NewEventInfoHandler(IDynamoDBContext dynamo)
         DateTime venueCloseTime,
         string venueTimeZone,
         int tickets,
-        decimal price)
+        decimal price,
+        decimal maxResellPrice,
+        string paymentStableCoinSymbol)
     {
         if (currentUser is null) throw new Exception("User not set");
 
@@ -29,7 +31,9 @@ public class NewEventInfoHandler(IDynamoDBContext dynamo)
             Tickets = tickets,
             Price = price,
             Description = "",
-            BlockCheckOutBeforeVenueOpenInHours = 5 // todo dont default
+            BlockCheckOutBeforeVenueOpenInHours = 5,
+            MaxResellPrice = maxResellPrice,
+            PaymentStableCoinSymbol = paymentStableCoinSymbol // todo dont default
         };
         
         await dynamo.SaveAsync(eventInfo);

@@ -8,6 +8,7 @@ namespace Ticketer.UseCases;
 
 public class PublishEventHandler(
     DeployContractHandler deployContractHandler,
+    IStableCoinInfoProvider stableCoinInfoProvider,
     IDynamoDBContext dynamo)
 {
     public async Task Execute(string eventInfoId, User currentUser)
@@ -22,18 +23,26 @@ public class PublishEventHandler(
         var eventContract = EventContract.New(eventInfo);
       
         // Constructor arguments
-        BigInteger fakeCheckOutBlockedTime = eventContract.GetCheckOutBlockStart().ToUnixTimestamp();
+        BigInteger checkOutBlockedTime = eventContract.GetCheckOutBlockStart().ToUnixTimestamp();
         BigInteger venueOpenTime = eventContract.VenueOpenTimeUtc.ToUnixTimestamp();
         BigInteger venueCloseTime = eventContract.VenueCloseTimeUtc.ToUnixTimestamp();
         BigInteger totalTicketCount = eventContract.TotalTickets; // uint64 can be BigInteger in Nethereum
+
+        // todo address is valid reachable ERC20 address, check symbol/name matchse
+        var stableCoinInfo = stableCoinInfoProvider.GetStableCoinInfo("USDC"); // TODO
+        
+        // todo verify uint8 usdcDecimals = IERC20Metadata(usdcAddress).decimals(); matcher stablecoininfo.decimals
+        BigInteger maxResellPrice = eventContract.MaxResellPrice(stableCoinInfo.decimals);
         
         var constructorArgs = new object[]
         {
-            fakeCheckOutBlockedTime,
+            checkOutBlockedTime,
             venueOpenTime,
             venueCloseTime,
             totalTicketCount,
-            eventInfo.FullVenueAddress
+            eventInfo.FullVenueAddress,
+            stableCoinInfo.contractAddress,
+            maxResellPrice
         };
                 
         var (

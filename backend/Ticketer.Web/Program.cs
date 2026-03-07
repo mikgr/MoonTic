@@ -25,7 +25,7 @@ builder.Services.AddSingleton<IJobQueue>(_ => new JobQueue(100));
 builder.Services.AddHostedService<WorkerService>();
 
 builder.Services.AddRepository(builder.Configuration);
-builder.Services.AddAllUseCases();
+builder.Services.AddAllUseCases(builder.Configuration);
 
 
 var app = builder.Build();

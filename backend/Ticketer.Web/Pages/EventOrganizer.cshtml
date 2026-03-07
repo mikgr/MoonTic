@@ -131,7 +131,11 @@
                     </div>
                     <div class="mb-3">
                         <label for="price" class="form-label">Price</label>
-                        <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required/>
+                        <input type="number" class="form-control" id="price" name="price" step="1" min="1" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Max Resell Price</label>
+                        <input type="number" class="form-control" id="maxResellPrice" name="maxResellPrice" step="1" min="1" max="100000000" required/>
                     </div>
                 </div>
                 <div class="modal-footer">

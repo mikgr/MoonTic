@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using Amazon.DynamoDBv2.DataModel;
@@ -25,6 +26,8 @@ public class EventContractState
     public int TicketCounter = 0;
     public int TotalTickets { get; set; }
     public decimal TicketPrice { get; set; }
+    public string PaymentStableCoinSymbol { get; set; } = "";
+    public decimal MaxResellPrice { get; set; }
     public string Name { get; set; } = "";
     public decimal Balance { get; set; } = 0m;
     public string DeployTxHash { get; set; } = "";
@@ -69,8 +72,9 @@ public class EventContract(EventContractState state) : IAccount
     public int SoldTickets => state.TicketCounter;
     public int RemainingTickets => state.TotalTickets - state.TicketCounter;
     public int TotalTickets => state.TotalTickets;
-    
-    
+    public BigInteger MaxResellPrice(uint decimals) => new (state.MaxResellPrice * (decimal)Math.Pow(10, decimals));
+
+
     public static EventContract New(EventInfo eventInfo)
     {
         var blockCheckOutBeforeVenueOpenInHours = eventInfo.BlockCheckOutBeforeVenueOpenInHours;
@@ -90,6 +94,9 @@ public class EventContract(EventContractState state) : IAccount
             BlockCheckOutBeforeVenueOpenInHours = blockCheckOutBeforeVenueOpenInHours,
             TotalTickets = eventInfo.Tickets,
             TicketPrice = eventInfo.Price,
+            MaxResellPrice = eventInfo.MaxResellPrice,
+            PaymentStableCoinSymbol = eventInfo.PaymentStableCoinSymbol
+            
         });
     }
 
