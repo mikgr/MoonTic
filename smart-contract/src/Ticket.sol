@@ -11,6 +11,9 @@ contract Ticket {
     event TokenTransferred(address indexed from, address indexed to, uint256 indexed tokenId);
     event TokenCheckedIn(uint256 indexed tokenId, bytes32 indexed secretHash); // todo should i index here?
     event TokenCheckedOut(uint256 indexed tokenId);
+    event AskCreated(uint256 indexed tokenId, uint256 priceUsdc);
+    event AskCancelled(uint256 indexed tokenId);
+    event AskFulfilled(uint256 indexed tokenId, address indexed buyer, uint256 priceUsdc);
     
     uint256 public checkOutBlockedTime;
     uint256 public venueOpenTime;
@@ -22,6 +25,7 @@ contract Ticket {
     uint256 private _nextTokenId;
     mapping(uint256 tokenId => address) private _tokenOwners;
     mapping(uint256 tokenId => bytes32) private _checkIns;
+    mapping(uint256 tokenId => uint256) private _asks; // price in USDC (0 = no active ask)
 
     // todo name:string, symbol:MOONTIC, tokenURI
     // todo add uint64 totalTickets, fail if exceed total tickets
@@ -67,6 +71,7 @@ contract Ticket {
         require(msg.sender == ownerOf(tokenId), "Only token owner can transfer token");
         require(msg.sender != to, "Cannot transfer to self");
         require(_checkIns[tokenId] == bytes32(0) || venueCloseTime < block.timestamp , "Checked in tokens cannot be transferred before venue close time. Check out to transfer.");
+        require(_asks[tokenId] == 0, "Cannot transfer token with active ask. Cancel ask first.");
         
         emit TokenTransferred(msg.sender, to, tokenId);
         
@@ -75,6 +80,7 @@ contract Ticket {
     
     function checkIn(uint256 tokenId, bytes32 secretHash) public {
         require(msg.sender == ownerOf(tokenId));
+        require(_asks[tokenId] == 0, "Cannot check in token with active ask. Cancel ask first.");
         
         emit TokenCheckedIn(tokenId, secretHash);
         
@@ -95,5 +101,33 @@ contract Ticket {
         emit TokenCheckedOut(tokenId);
         
         delete _checkIns[tokenId];
+    }
+
+    // Ask functions
+
+    function createAsk(uint256 tokenId, uint256 priceUsdc) public {
+        require(msg.sender == ownerOf(tokenId), "Only token owner can create ask");
+        require(priceUsdc > 0, "Price must be greater than 0");
+        require(_checkIns[tokenId] == bytes32(0) || venueCloseTime < block.timestamp, "Cannot create ask for checked in token before venue close time");
+        require(_asks[tokenId] == 0, "Ask already exists. Cancel existing ask first.");
+
+        _asks[tokenId] = priceUsdc;
+
+        emit AskCreated(tokenId, priceUsdc);
+    }
+
+    function cancelAsk(uint256 tokenId) public {
+        require(msg.sender == ownerOf(tokenId), "Only token owner can cancel ask");
+        require(_asks[tokenId] != 0, "No active ask to cancel");
+
+        delete _asks[tokenId];
+
+        emit AskCancelled(tokenId);
+    }
+
+    function askFor(uint256 tokenId) public view returns(uint256) {
+        uint256 price = _asks[tokenId];
+        require(price != 0, "No active ask");
+        return price;
     }
 }
