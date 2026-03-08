@@ -60,16 +60,33 @@
                                 </span>
                             </div>
                             <div class="col-md-6 text-end">
+                                @* <button class="btn btn-dark fw-bold" type="button" data-bs-toggle="modal" data-bs-target="#buy-modal"> *@
+                                @* </button> *@
+                                @* *@
+                                <button 
+                                    class="btn btn-dark fw-bold"
+                                    type="button" 
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#check-out-modal"
+                                     hx-get="/Events?handler=SecondaryMarketModal&contractAddress=@c.ContractAddress" 
+                                     hx-target="#modal-container" 
+                                     hx-swap="innerHTML"
+                                >
+                                    🤝 Buy Resale
+                                </button>
+                                
+                                
+                                
                                 @if (c.RemainingTickets > 0)
                                 {
-                                    <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#buy-modal"
+                                    <button class="btn btn-light fw-bold" type="button" data-bs-toggle="modal" data-bs-target="#buy-modal"
                                             data-event-id="@c.ContractAddress" data-event-name="@c.Name" data-event-price="@c.TicketPrice.ToString("F2")">
                                         🛒 Buy Ticket
                                     </button>
                                 }
                                 else
                                 {
-                                    <button class="btn btn-light disabled" type="button" data-bs-toggle="modal"
+                                    <button class="btn btn-light fw-bold disabled" type="button" data-bs-toggle="modal"
                                             data-event-id="@c.ContractAddress" data-event-name="@c.Name" data-event-price="@c.TicketPrice.ToString("F2")">
                                         👐 Sold Out
                                     </button>
@@ -94,7 +111,6 @@
             </div>
             <div class="modal-body">
                 <p>💰 Price: $ <span id="buy-event-price"></span></p>
-                <hr/>
                 <div class="mb-3">
                     <label class="form-label small text-muted">Card Number</label>
                     <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" />
@@ -118,7 +134,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form class="btn btn-success" method="post" asp-page-handler="Buy">
                     <input type="hidden" id="buy-event-id" name="eventId" value="" />
-                    <button class="dropdown-item" type="submit">🛒 Confirm Purchase</button>
+                    <button class="dropdown-item fw-bold" type="submit">Confirm Purchase</button>
                 </form>
             </div>
         </div>

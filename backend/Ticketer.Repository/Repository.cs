@@ -83,6 +83,20 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
         throw new NotImplementedException();
     }
 
+    public async Task<TicketAsk> FindAsk(string contractAddress, int ticketId)
+    {
+        var asks = await FindAsks(contractAddress);
+        return asks.SingleOrDefault(a => a.TicketId == ticketId) 
+            ?? throw new DomainInvariant("Ask not found");
+    }
+
+    public async Task<TicketAsk[]> FindAsks(string contractAddress)
+    {
+        var askQuery = dynamo.QueryAsync<TicketAsk>(contractAddress);
+        var asks = await askQuery.GetRemainingAsync();
+        return asks.ToArray();  
+    }
+    
     public async Task<List<IContractEvent>> LoadContractEvents(string contractAddress)
     {
         // todo optimize this for prod use
@@ -105,11 +119,5 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
             .ToList();
     }
 
-    public async Task<TicketAsk> FindAsk(string contractAddress, int ticketId)
-    {
-        var askQuery = dynamo.QueryAsync<TicketAsk>(contractAddress);
-        var asks = await askQuery.GetRemainingAsync();
-        return asks.SingleOrDefault(a => a.TicketId == ticketId)
-            ?? throw new DomainInvariant("Ask not found");
-    }
+
 }
