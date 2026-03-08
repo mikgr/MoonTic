@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 namespace Ticketer.UseCases;
 
 
-internal class StableCoinEntry
+public class StableCoinEntry
 {
     public required string ContractAddress { get; init; }
     public required uint Decimals { get; init; }
@@ -19,7 +19,7 @@ public interface IStableCoinInfoProvider
 
 
 
-internal class StableCoinInfoProvider(IOptions<Dictionary<string, StableCoinEntry>> options) : IStableCoinInfoProvider
+public class StableCoinInfoProvider(IOptions<Dictionary<string, StableCoinEntry>> options) : IStableCoinInfoProvider
 {
     public (string contractAddress, uint decimals) GetStableCoinInfo(string symbol)
     {

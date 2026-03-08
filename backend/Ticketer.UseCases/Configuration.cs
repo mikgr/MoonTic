@@ -10,14 +10,18 @@ public static class Configuration
         services.Configure<Dictionary<string, StableCoinEntry>>(configuration.GetSection("StableCoins"));
         services.AddSingleton<IStableCoinInfoProvider, StableCoinInfoProvider>();
 
+        services.AddSingleton(TimeProvider.System);
+        
         return services
+            .AddScoped<TicketContractClient>()
+            .AddScoped<StableCoinContractClient>()
+     
             .AddScoped<CreateUserHandler>()
             .AddScoped<BuyTicketHandler>()
             .AddScoped<CheckInTicketHandler>()
             .AddScoped<CheckOutTicketHandler>()
             .AddScoped<DeployContractHandler>()
             .AddScoped<PublishEventHandler>()
-            .AddScoped<TicketContractClient>()
             .AddScoped<TransferTicketHandler>()
             .AddScoped<MintTicketHandler>()
             .AddScoped<UsherTicketHandler>()

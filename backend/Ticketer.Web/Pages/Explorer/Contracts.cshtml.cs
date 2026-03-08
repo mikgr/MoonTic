@@ -31,10 +31,15 @@ public class Contracts : PageModel
         {
             var ticketPurchasedEvents = await repo.LoadContractEvents(ContractAddress);
 
-            ContractEvents = ticketPurchasedEvents
-                .OrderByDescending(x => x.TimestampUtc)
-                .ToList();
-            
+            ContractEvents = ticketId is null
+                ? ticketPurchasedEvents
+                    .OrderByDescending(x => x.TimestampUtc)
+                    .ToList()
+                : ticketPurchasedEvents
+                    .Where(x => x.TicketId == ticketId)
+                    .OrderByDescending(x => x.TimestampUtc)
+                    .ToList();
+
             return;
         }
         

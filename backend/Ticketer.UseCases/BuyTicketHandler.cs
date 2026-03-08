@@ -24,12 +24,14 @@ public class BuyTicketHandler(MintTicketHandler mintTicketHandler, IRepository r
         {
             TimestampUtc = DateTime.UtcNow,
             OwnerId = currentUser.Id,
+            SellerId = contractAddress,
             EventContractId = contract.Id,
             TicketId = mintResult.tokenId,
             ContractAddress = contract.ContractAddress,
             TransactionHash = mintResult.transactionHash,
             ToAddress = userWallet.Address,
-            TicketPrice = contract.TicketPrice
+            TicketPrice = contract.TicketPrice,
+            PurchaseType = nameof(PurchaseType.Primary)
         };
         
         var userTickets = await repo.LoadUserTicketContainer(currentUser.Id);

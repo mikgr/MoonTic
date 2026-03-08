@@ -36,7 +36,11 @@ public class AllEventsModel : PageModel
     {
         var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
         var asks = await repo.FindAsks(contractAddress);
-        var viewModel = new SecondaryMarketViewModel {ContractAddress = contractAddress, TicketAsks = asks};
+        var viewModel = new SecondaryMarketViewModel
+        {
+            ContractAddress = contractAddress, 
+            TicketAsks = asks
+        };
         return Partial("_SecondaryMarketModal", viewModel);    
     }
     
@@ -102,7 +106,7 @@ public class AllEventsModel : PageModel
             {
                 using var scope = scopeFactory.CreateScope();
                 // todo include card details
-                var acceptAskHandler = HttpContext.RequestServices.GetRequiredService<AcceptAskHandler>();
+                var acceptAskHandler = scope.ServiceProvider.GetRequiredService<AcceptAskHandler>();
                 await acceptAskHandler.Execute(contractAddress, ticketId, price, user);
             });
             

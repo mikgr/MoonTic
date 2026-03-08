@@ -52,6 +52,7 @@ public class EventContract(EventContractState state) : IAccount
     public string VenueCloseTimeLocal => state.VenueCloseTimeUtc.UtcToLocalTimeString(state.VenueTimeZone);
     public string FullVenueAddress => state.FullVenueAddress;
     public decimal TicketPrice => state.TicketPrice;
+    public string PaymentStableCoinSymbol => state.PaymentStableCoinSymbol;
     public string Name => state.Name;
     public string ContractAddress
     {
@@ -96,7 +97,6 @@ public class EventContract(EventContractState state) : IAccount
             TicketPrice = eventInfo.Price,
             MaxResellPrice = eventInfo.MaxResellPrice,
             PaymentStableCoinSymbol = eventInfo.PaymentStableCoinSymbol
-            
         });
     }
 
