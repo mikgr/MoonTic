@@ -1,9 +1,9 @@
 @model SecondaryMarketPayViewModel
 
-<form hx-post="/Events?handler=PaySecondaryMarket"
-        hx-target="#modal-container"
-        hx-swap="innerHTML"
-    >
+<form 
+    hx-post="/Events?handler=PaySecondaryMarket" 
+    hx-target="body" 
+    hx-swap="none">
     <input type="hidden" name="contractAddress" value="@Model.ContractAddress" />
     <input type="hidden" name="ticketId" value="@Model.TicketId" />
     <input type="hidden" name="price" value="@Model.Price" />
