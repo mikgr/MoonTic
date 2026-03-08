@@ -1,0 +1,41 @@
+@model SecondaryMarketViewModel
+
+<div class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Secondary Market For XXXXX</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (Model.TicketAsks.Length == 0)
+                {
+                    <partial name="_Crickets" />
+                }
+                @foreach (var a in Model.TicketAsks)
+                {
+                    <div class="card mb-2">
+                        <div class="card-body d-flex align-items-end">
+                            <span><span class="fw-bold">Ticket No: </span>@a.TicketId</span>
+                            <span class="ms-3"><span class="fw-bold">Price: </span> $ @(a.Price),-</span>
+                            <button 
+                                class="btn btn-sm btn-secondary ms-auto fw-bold"
+                                type="button" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#check-out-modal"
+                                hx-get="/Events?handler=SecondaryMarketPayModal&contractAddress=@Model.ContractAddress&ticketId=@a.TicketId" 
+                                hx-target="#modal-container" 
+                                hx-swap="innerHTML"
+                            >
+                                🤝 Accept
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

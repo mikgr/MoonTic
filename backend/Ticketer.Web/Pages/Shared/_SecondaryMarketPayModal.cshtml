@@ -1,0 +1,49 @@
+@model SecondaryMarketPayViewModel
+
+<form hx-post="/Events?handler=PaySecondaryMarket"
+        hx-target="#modal-container"
+        hx-swap="innerHTML"
+    >
+    <input type="hidden" name="contractAddress" value="@Model.ContractAddress" />
+    <input type="hidden" name="ticketId" value="@Model.TicketId" />
+    <input type="hidden" name="price" value="@Model.Price" />
+    @Html.AntiForgeryToken()
+    
+    <div class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5"> @Model.EventName 
+                    <small>Ticket No: @Model.TicketId</small><br/>
+                    <small>Price: $ @(Model.Price),-</small>
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Card Number</label>
+                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" />
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label small text-muted">Expiry</label>
+                        <input type="text" class="form-control" placeholder="MM / YY" maxlength="7" />
+                    </div>
+                    <div class="col">
+                        <label class="form-label small text-muted">CVC</label>
+                        <input type="text" class="form-control" placeholder="123" maxlength="4" />
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label small text-muted">Name on Card</label>
+                    <input type="text" class="form-control" placeholder="J. Doe" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success fw-bold" data-bs-dismiss="modal">Confirm Purchase</button>
+            </div>
+        </div>
+    </div>
+</div>
+</form>

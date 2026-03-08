@@ -22,6 +22,7 @@ public static class Configuration
             .AddScoped<MintTicketHandler>()
             .AddScoped<UsherTicketHandler>()
             .AddScoped<CreateAskHandler>()
-            .AddScoped<CancelAskHandler>();
+            .AddScoped<CancelAskHandler>()
+            .AddScoped<AcceptAskHandler>();
     }
 }
