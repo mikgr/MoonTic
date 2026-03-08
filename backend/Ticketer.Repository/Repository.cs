@@ -55,6 +55,12 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
         
         return new EventContract(state);
     }
+    public async Task<EventContract?> LoadContractOrNullBy(string contractAddress)
+    {
+        var state = await dynamo.LoadAsync<EventContractState>(contractAddress.ToLower());
+        if (state is null) return null;
+        return new EventContract(state);
+    }
 
     public Task<UserWallet> LoadUserWallet(string userId)
     {
@@ -96,7 +102,16 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
         var asks = await askQuery.GetRemainingAsync();
         return asks.ToArray();  
     }
-    
+
+    public async Task<TicketPurchasedEvent[]> LoadFiatEventsFor(string userId)
+    {
+        var events = await dynamo.QueryAsync<TicketPurchasedEvent>(userId, new QueryConfig
+        {
+            IndexName = "OwnerIdIndex"
+        }).GetRemainingAsync();
+        return events.ToArray();
+    }
+
     public async Task<List<IContractEvent>> LoadContractEvents(string contractAddress)
     {
         // todo optimize this for prod use

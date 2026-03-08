@@ -144,12 +144,25 @@ public class SetUpDynamoTables
                 AttributeDefinitions = new List<AttributeDefinition>
                 {
                     new("ContractAddress", ScalarAttributeType.S),
-                    new("TimestampUtc", ScalarAttributeType.S)
+                    new("TimestampUtc", ScalarAttributeType.S),
+                    new("OwnerId", ScalarAttributeType.S)
                 },
                 KeySchema = new List<KeySchemaElement>
                 {
                     new("ContractAddress", KeyType.HASH),
                     new("TimestampUtc", KeyType.RANGE)
+                },
+                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
+                {
+                    new GlobalSecondaryIndex
+                    {
+                        IndexName = "OwnerIdIndex",
+                        KeySchema = new List<KeySchemaElement>
+                        {
+                            new("OwnerId", KeyType.HASH),
+                        },
+                        Projection = new Projection { ProjectionType = ProjectionType.ALL }
+                    }
                 },
                 BillingMode = BillingMode.PAY_PER_REQUEST
             },

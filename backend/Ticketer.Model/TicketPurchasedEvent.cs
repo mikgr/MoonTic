@@ -13,6 +13,7 @@ public class TicketPurchasedEvent :  IContractEvent
     [DynamoDBRangeKey] 
     public required DateTime TimestampUtc { get; init; }
     
+    [DynamoDBGlobalSecondaryIndexHashKey("OwnerIdIndex")]
     public required string OwnerId { get; init; }
     public required string EventContractId { get; init; }
     public required int TicketId { get; init; }

@@ -7,7 +7,10 @@ public class AcceptAskHandler
     public  Task Execute(string contractAddress, int ticketId, int price, User user)
     {
         // - [x] holder/seller: Create Ask
-        // - [ ] buyer: Pay fiat to moontic
+        
+        // - [ ] buyer: Pay fiat to moontic - for the POC We'll just log that this went through
+        
+        
         // - [ ] moontic: Fund buyer address with usdc
         // - [ ] moontic-for-buyer: approve ticket-contract to pull usdc from buyer address
         // - [ ] moontic-for-buyer: accept Ask
