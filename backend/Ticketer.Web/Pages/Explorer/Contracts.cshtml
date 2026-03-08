@@ -85,6 +85,16 @@
                             <td><code class="small">@ace.TransactionHash.Compress(hashCompression)</code></td>
                         </tr>
                         break;
+                        
+                    case AskCanceledEvent ace:
+                        <tr>
+                            <td><span class="me-2">🫸</span>Cancel Listing</td>
+                            <td><a href="/explorer/contracts/@Model.ContractAddress/ticket/@ace.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@ace.TicketId</a></td>
+                            <td title="@ace.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC">@(ace.TimestampUtc.ToTimeAgo())</td>
+                            <td>@ace.Address.Compress(20)</td>
+                            <td><code class="small">@ace.TransactionHash.Compress(hashCompression)</code></td>
+                        </tr>
+                        break;
                 }
             }
             </tbody>

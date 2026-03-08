@@ -46,6 +46,19 @@
                     <button type="button" class="disabled dropdown-item">🫴 List for Sale</button>
                 </li>
             }
+            else if (@Model.UserTicketState == UserTicketState.IsForSale)
+            {
+                <li>
+                    <form hx-post="/Tickets?handler=CancelAsk"
+                          hx-target='@($"#status_{Model.ContractAddress}_{Model.TicketNo}")'
+                          hx-swap="innerHTML">
+                        <input type="hidden" name="contractAddress" value="@Model.ContractAddress"/>
+                        <input type="hidden" name="ticketId" value="@Model.TicketNo"/>
+                        @Html.AntiForgeryToken()
+                        <input type="submit" class="dropdown-item" value="🫸 Cancel Listing">
+                    </form>
+                </li>
+            }
             else
             {
                 <li>

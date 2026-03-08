@@ -205,6 +205,26 @@ public class TicketsPage : PageModel
         }
     }
     
+    public async Task<IActionResult> OnPostCancelAsk(string contractAddress, int ticketId)
+    {
+        var userId = HttpContext.Session.GetString("UserId");
+        if (userId == null) return HtmxRedirect("/LogIn");
+        
+        var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
+        var user = await repo.LoadUserAsync(userId);
+        
+        var jobQueue = HttpContext.RequestServices.GetRequiredService<IJobQueue>();
+        var scopeFactory = HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+
+        await jobQueue.EnqueueAsync(async ct =>
+        {
+            using var scope = scopeFactory.CreateScope();
+            var cancelAskHandler = scope.ServiceProvider.GetRequiredService<CancelAskHandler>();
+            await cancelAskHandler.Execute(user, contractAddress, ticketId);
+        });
+            
+        return Partial("_TicketStatus", new TicketActionStatus(contractAddress, ticketId, "pending", "cancel-ask"));
+    }
     
     
     public async Task<IActionResult> OnGetTicketStatus(string action, string contractAddress, int ticketId)

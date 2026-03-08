@@ -215,6 +215,21 @@ public class SetUpDynamoTables
             },
             new CreateTableRequest
             {
+                TableName = "AskCanceledEvent",
+                AttributeDefinitions = new List<AttributeDefinition>
+                {
+                    new("ContractAddress", ScalarAttributeType.S),
+                    new("TimestampUtc", ScalarAttributeType.S)
+                },
+                KeySchema = new List<KeySchemaElement>
+                {
+                    new("ContractAddress", KeyType.HASH),
+                    new("TimestampUtc", KeyType.RANGE)
+                },
+                BillingMode = BillingMode.PAY_PER_REQUEST
+            },
+            new CreateTableRequest
+            {
                 TableName = "TicketAsk",
                 AttributeDefinitions = new List<AttributeDefinition>
                 {

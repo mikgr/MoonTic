@@ -119,6 +119,19 @@ public class UserTicketContainer(UserTicketContainerState state)
         return this;
     }
     
+    public UserTicketContainer ApplyEvent(AskCanceledEvent @event)
+    {
+        if (@event.UserId != UserId) throw new InvalidOperationException("Can only cancel ask for tickets you own");
+        RemoveTicketStateIfExists(@event.ContractAddress, @event.TicketId);
+        state.BaseStateTickets.Add(new UserTicket
+        {
+            TicketId = @event.TicketId,
+            ContractAddress = @event.ContractAddress,
+            State = UserTicketState.BaseState
+        });
+        return this;
+    }
+    
     private void RemoveTicketStateIfExists(string eventContractId, int ticketId)
     {
         var maybe = state.BaseStateTickets
@@ -145,5 +158,6 @@ public class UserTicketContainer(UserTicketContainerState state)
         return ticket.State == UserTicketState.IsCheckedIn;
     }
 
-  
+
+
 }
