@@ -32,25 +32,32 @@ public class ProfileModel : PageModel
         var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
         CurrentUser = await repo.LoadUserAsync(userId);
         
-        var userWallet = await repo.LoadUserWallet(userId);
-        Address = userWallet.Address;
+        var userWallet =  repo.LoadUserWallet(userId);
+        var fiatEvents =  repo.LoadFiatEventsFor(userId);
 
-        var fiatEvents = await repo.LoadFiatEventsFor(userId);
+        await Task.WhenAll(userWallet, fiatEvents);
+        Address = userWallet.Result.Address;
 
-        var contractAddresses = fiatEvents.Select(x => x.ContractAddress).Distinct().ToArray();
+        var contractAddresses = fiatEvents.Result.Select(x => x.ContractAddress).Distinct().ToArray();
 
+        var contractTasks = new List<Task<EventContract?>>();
+
+        // todo dont do this lookup, just have the event name on the purchase event 
+        foreach (var contractAddress in contractAddresses)
+            contractTasks.Add(repo.LoadContractOrNullBy(contractAddress));
+                
+        await Task.WhenAll(contractTasks);
+        
         var eventNameMap = new Dictionary<string, string>();
         
-        foreach (var contractAddress in contractAddresses)
-            if (await repo.LoadContractOrNullBy(contractAddress) is {} contract)
-                eventNameMap[contractAddress] = contract.Name;
-            else 
-                eventNameMap[contractAddress] = "(unknown event)";
+        foreach (var contractTask in contractTasks)
+            if (contractTask.Result is {} contract)
+                eventNameMap[contract.ContractAddress] = contract.Name;
         
-        Purchases = fiatEvents
+        Purchases = fiatEvents.Result
             .OrderByDescending(x => x.TimestampUtc)
             .Select(x => new TicketPurchaseViewModel(
-            eventNameMap[x.ContractAddress],
+            eventNameMap.TryGetValue(x.ContractAddress, out var c) ? c : "Unknown Event",
             x.ContractAddress, 
             x.TicketId,
             x.TimestampUtc,
