@@ -57,3 +57,19 @@ hr{
   opacity: 0;
   transition: opacity 0.4s ease-out;
 }
+
+/*override border radius*/
+.card,
+.btn,
+.form-control,
+.form-select,
+input[type="text"],
+input[type="submit"],
+input[type="button"],
+.input-group-text,
+.dropdown-menu,
+.modal-content,
+.modal-header,
+.modal-footer{
+  border-radius: 0.2rem !important;
+}
