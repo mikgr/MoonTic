@@ -6,26 +6,32 @@
 
 
 <div class="row">
+    <div class="col-md-12">
+        <hr class="shadow" style="border-top: 6px solid #ffffff"/>
+        <div class="text-center text-white fw-bolder" style="margin-bottom: 1rem;">
+            <h1 class="display-2">~ Profile ~</h1>
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <div class="col-12">
-        <div class="card site-box-shadow" style="margin-top: 2rem">
+        <div class="card site-box-shadow" style="margin-top: 1rem">
             <div class="card-body">
-                <span class="display-4">Profile</span>
-                <p>
-                    E-mail: @(Model.CurrentUser?.Email??"n/a")
-                </p>
-                <p>
-                    Address: @Model.Address
+                <p class="fs-5">
+                    <span class="fw-bold">E-mail:</span> @(Model.CurrentUser?.Email??"n/a")<br/>
+                    <span class="fw-bold">Address:</span> @Model.Address
                 </p>
                 
-                <span class="display-4">Ticket Purchases</span>
+                <p class="fs-3 fw-bold" style="margin-bottom: 0">Credit Card Transactions</p>
                 <table class="table table-striped">
                     <thead>
                     <tr>
                         <th>Date</th>
                         <th>Event</th>
-                        <th>Price</th>
-                        <th>Contract Address</th>
-                        <th>Ticket Id</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-end">Event Contract Address</th>
+                        <th class="text-end">Ticket Id</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -33,11 +39,13 @@
                 @foreach (var item in Model.Purchases)
                 {
                     <tr>
-                        <td>@item.TimeStamp</td>
+                        <td>@item.TimeStamp.ToString("MMM d yyyy HH\\:mm")</td>
                         <td>@item.EventName</td>
-                        <td>@item.Price</td>
-                        <td>@item.ContractAddress</td>
-                        <td>@item.TicketId</td>
+                        <td class="text-end">@(item.Price),-</td>
+                        <td class="text-end"><a href="/explorer/contracts/@item.ContractAddress" class="text-decoration-none" style="color: var(--bs-code-color);"><code class="small">@item.ContractAddress</code></a></td>
+                        <td class="text-end">
+                            <a href="/explorer/contracts/@item.ContractAddress/ticket/@item.TicketId" class="text-decoration-none" style="color: var(--bs-code-color);">@item.TicketId</a>
+                        </td>
                     </tr>
                 }
                     </tbody>

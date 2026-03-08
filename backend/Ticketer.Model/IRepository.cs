@@ -13,6 +13,7 @@ public interface IRepository
     Task<List<EventContract>> LoadContractsBy(string ownerId);
     Task<List<EventContract>> LoadAllContracts();
     Task<EventContract> LoadContractBy(string contractAddress);
+    Task<EventContract?> LoadContractOrNullBy(string contractAddress);
     Task<UserWallet> LoadUserWallet(string userId);
     Task<UserWallet?> LoadUserWalletOrNullBy(string address);
     Task<UserTicketContainer> LoadUserTicketContainer(string userId);
@@ -20,4 +21,5 @@ public interface IRepository
     Task<List<IContractEvent>> LoadContractEvents(string contractAddress);
     Task<TicketAsk> FindAsk(string contractAddress, int ticketId);
     Task<TicketAsk[]> FindAsks(string contractAddress);
+    Task<TicketPurchasedEvent[]> LoadFiatEventsFor(string userId);
 }
