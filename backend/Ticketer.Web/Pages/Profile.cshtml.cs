@@ -57,7 +57,7 @@ public class ProfileModel : PageModel
         Purchases = fiatEvents.Result
             .OrderByDescending(x => x.TimestampUtc)
             .Select(x => new TicketPurchaseViewModel(
-            eventNameMap.TryGetValue(x.ContractAddress, out var c) ? c : "Unknown Event",
+            eventNameMap.GetValueOrDefault(x.ContractAddress, "Unknown Event"),
             x.ContractAddress, 
             x.TicketId,
             x.TimestampUtc,
