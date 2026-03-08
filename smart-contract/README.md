@@ -19,9 +19,6 @@ cast send <MOCKUSDC_ADDRESS> "faucet()" \
 --rpc-url http://127.0.0.1:9650/ext/bc/C/rpc \
 --private-key 0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027
 
-cast send <MOCKUSDC_ADDRESS> "faucet()" \
---rpc-url http://127.0.0.1:9650/ext/bc/C/rpc \
---private-key 0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027
 
 ### Get balance of an address > cast to decimal > format with decimals
 cast call <MOCKUSDC_ADDRESS> "balanceOf(address)" 0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC \
