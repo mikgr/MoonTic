@@ -45,7 +45,16 @@ public class UserTicketContainer(UserTicketContainerState state)
         
     public UserTicketContainer ApplyEvent(TicketPurchasedEvent evnt)
     {
+        // Apply event to resell-seller
+        if (evnt.OwnerId != UserId && evnt.PurchaseType == nameof(PurchaseType.Secondary))
+        {
+            RemoveTicketStateIfExists(evnt.EventContractId, evnt.TicketId);
+            return this;
+        }
+        
+        // Apply event to any buyer
         if (evnt.OwnerId != UserId) throw new InvalidOperationException("Can only purchase tickets for yourself");
+        
         RemoveTicketStateIfExists(evnt.EventContractId, evnt.TicketId);
         state.BaseStateTickets.Add(new UserTicket
             {

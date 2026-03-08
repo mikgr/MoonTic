@@ -100,16 +100,27 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
     {
         var askQuery = dynamo.QueryAsync<TicketAsk>(contractAddress);
         var asks = await askQuery.GetRemainingAsync();
-        return asks.ToArray();  
+        return asks.OrderBy(x => x.Price).ToArray();  
     }
 
     public async Task<TicketPurchasedEvent[]> LoadFiatEventsFor(string userId)
     {
-        var events = await dynamo.QueryAsync<TicketPurchasedEvent>(userId, new QueryConfig
+        var buyEventsTask = dynamo.QueryAsync<TicketPurchasedEvent>(userId, new QueryConfig
         {
             IndexName = "OwnerIdIndex"
         }).GetRemainingAsync();
-        return events.ToArray();
+        
+        var sellEvents = dynamo.QueryAsync<TicketPurchasedEvent>(userId, new QueryConfig
+        {
+            IndexName = "SellerIdIndex"
+        }).GetRemainingAsync();
+        
+        await Task.WhenAll(buyEventsTask, sellEvents);
+        
+        return buyEventsTask.Result
+            .Concat(sellEvents.Result)
+            .OrderByDescending(x => x.TimestampUtc)
+            .ToArray();
     }
 
     public async Task<List<IContractEvent>> LoadContractEvents(string contractAddress)

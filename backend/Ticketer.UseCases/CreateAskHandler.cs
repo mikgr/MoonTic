@@ -2,11 +2,18 @@ using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
-public class CreateAskHandler(IRepository repo, TicketContractClient ticketContractClient)
+public class CreateAskHandler(
+    IRepository repo,
+    TicketContractClient ticketContractClient,
+    IStableCoinInfoProvider stableCoinInfoProvider)
 {
     public async Task Execute(User user, string contractAddress, int ticketId, int askPrice)
     {
         var contract = await repo.LoadContractBy(contractAddress);
+        var stablesInfo = stableCoinInfoProvider.GetStableCoinInfo(contract.PaymentStableCoinSymbol);
+        
+        if (contract.MaxResellPrice(stablesInfo.decimals) < askPrice) throw new DomainInvariant("Ask price is too high");
+        
         var userTicketContainer = await repo.LoadUserTicketContainer(user.Id);
         
         var ticket = userTicketContainer.GetAllTickets()

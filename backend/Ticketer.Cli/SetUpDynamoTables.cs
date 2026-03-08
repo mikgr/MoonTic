@@ -99,6 +99,12 @@ public class SetUpDynamoTables
                     },
                     new GlobalSecondaryIndex
                     {
+                        IndexName = "SellerIdIndex",
+                        KeySchema = new List<KeySchemaElement> { new("SellerId", KeyType.HASH) },
+                        Projection = new Projection { ProjectionType = ProjectionType.ALL }
+                    },
+                    new GlobalSecondaryIndex
+                    {
                         IndexName = "OwnerIdVenueOpenTimeIndex",
                         KeySchema = new List<KeySchemaElement>
                         {

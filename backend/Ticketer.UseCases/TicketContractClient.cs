@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.DataModel;
+using Microsoft.Extensions.Options;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
 
@@ -167,6 +168,35 @@ public class TicketContractClient(IDynamoDBContext dynamo)
         return await ExecuteContractFunction(contract, userPrivateKey, abi, functionName, functionInput);
     }
     
+
+    public async Task<(TransactionReceipt receipt, DateTime blockTimestamp)> OnChainAcceptAsk(
+        User byUser, int ticketId, EventContract contract)
+    {
+        var abi = """
+                  [
+                  {
+                    "inputs": [
+                    {"internalType":"uint256","name":"tokenId","type":"uint256"}
+                    ],
+                    "name":"acceptAsk",
+                    "outputs": [],
+                    "stateMutability":"nonpayable",
+                    "type":"function"
+                  }
+                  ]
+                  """;
+        
+        var byUserWallet = await dynamo.LoadAsync<UserWallet>(byUser.Id);
+        var functionInput = new object[] {ticketId};
+        
+        return await ExecuteContractFunction2(
+            contract.ContractAddress, 
+            byUserWallet.PrivateKey, 
+            abi, 
+            functionName: "acceptAsk",
+            functionInput);
+    }
+    
     
     // todo use kms client, dont store private key in settings 
     // var kmsClient = new AmazonKeyManagementServiceClient();
@@ -179,7 +209,7 @@ public class TicketContractClient(IDynamoDBContext dynamo)
         object[] functionInput)
     {
         // Create an account object
-        var userAccount = new Nethereum.Web3.Accounts.Account(userPrivateKey, TicketerOptions.BlockchainId);
+        var userAccount = new Nethereum.Web3.Accounts.Account(userPrivateKey, TicketerOptions.BlockchainId); // todo user options
 
         // Create a Web3 instance
         var web3 = new Web3(userAccount, TicketerOptions.BlockchainRpcUrl);
@@ -211,7 +241,42 @@ public class TicketContractClient(IDynamoDBContext dynamo)
         
         return (receipt, blockTimestamp);
     }
-
-
     
+    internal static async Task<(TransactionReceipt receipt, DateTime blockTimestamp)> ExecuteContractFunction2(
+        string contractAddress, 
+        string userPrivateKey, 
+        string abi, 
+        string functionName, 
+        object[] functionInput)
+    {
+        var executingAccount = new Nethereum.Web3.Accounts.Account(userPrivateKey, TicketerOptions.BlockchainId); // todo user options
+        
+        var web3Instance = new Web3(executingAccount, TicketerOptions.BlockchainRpcUrl); // todo user options
+        
+        var contractInstance = web3Instance.Eth.GetContract(abi, contractAddress);
+        
+        var contractFunction = contractInstance.GetFunction(functionName);
+        
+        var estimatedGas = await EstimateGasAndEnsureSufficientFundsHandler.Execute(
+            contractFunction, functionInput, executingAccount.Address, web3Instance);
+        
+        
+        Console.WriteLine($"Executing function {functionName}");
+        
+        var receipt = await contractFunction.SendTransactionAndWaitForReceiptAsync(
+            from: executingAccount.Address,
+            gas: new Nethereum.Hex.HexTypes.HexBigInteger(estimatedGas.Value * 120 / 100), // Add 20% buffer
+            value: null,
+            functionInput: functionInput
+        );
+        
+        Console.WriteLine($"Executed function {functionName}");
+        
+        var block = await web3Instance.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(receipt.BlockNumber);
+        var blockTimestamp = DateTimeOffset.FromUnixTimeSeconds((long)block.Timestamp.Value).UtcDateTime;
+        
+        return (receipt, blockTimestamp);
+    }
+
+
 }

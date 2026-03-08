@@ -10,14 +10,13 @@ public record TicketPurchaseViewModel(
     string ContractAddress, 
     int TicketId, 
     DateTimeOffset TimeStamp, 
-    decimal Price);
+    decimal Price,
+    string TransactionType);
 
 
 
 public class ProfileModel : PageModel
 {
-    public string Title => "Ticketer.Cli - Your Event Ticketing Solution";
-
     public User? CurrentUser;
   
     public string Address { get; set; } = "";
@@ -61,7 +60,8 @@ public class ProfileModel : PageModel
             x.ContractAddress, 
             x.TicketId,
             x.TimestampUtc,
-            x.TicketPrice));
+            x.TicketPrice,
+            x.SellerId == userId ? "Sold" : "Purchased"));
       
         return Page();   
     }
