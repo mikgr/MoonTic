@@ -91,15 +91,25 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
         var checkedOutTask = dynamo.QueryAsync<TicketCheckedOutEvent>(contractAddress).GetRemainingAsync();  //.ScanAsync<TicketCheckedOutEvent>([]).GetRemainingAsync();
         var transferredTask = dynamo.QueryAsync<TicketTransferredEvent>(contractAddress).GetRemainingAsync(); //.ScanAsync<TicketTransferredEvent>([]).GetRemainingAsync();
         var askCreatedTask = dynamo.QueryAsync<AskCreatedEvent>(contractAddress).GetRemainingAsync();
+        var askCancledTask = dynamo.QueryAsync<AskCanceledEvent>(contractAddress).GetRemainingAsync();
         
-        await Task.WhenAll(purchasedTask, checkedInTask, checkedOutTask, transferredTask, askCreatedTask);
+        await Task.WhenAll(purchasedTask, checkedInTask, checkedOutTask, transferredTask, askCreatedTask, askCancledTask);
 
         return purchasedTask.Result.Cast<IContractEvent>()
             .Concat(checkedInTask.Result)
             .Concat(checkedOutTask.Result)
             .Concat(transferredTask.Result)
             .Concat(askCreatedTask.Result)
+            .Concat(askCancledTask.Result)
             .OrderByDescending(e => e.TimestampUtc)
             .ToList();
+    }
+
+    public async Task<TicketAsk> FindAsk(string contractAddress, int ticketId)
+    {
+        var askQuery = dynamo.QueryAsync<TicketAsk>(contractAddress);
+        var asks = await askQuery.GetRemainingAsync();
+        return asks.SingleOrDefault(a => a.TicketId == ticketId)
+            ?? throw new DomainInvariant("Ask not found");
     }
 }

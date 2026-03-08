@@ -141,6 +141,33 @@ public class TicketContractClient(IDynamoDBContext dynamo)
     }
     
     
+    public async Task<(TransactionReceipt receipt, DateTime blockTimestamp)> OnChainCancelAsk(
+        User user, int ticketId, EventContract contract)
+    {
+        var abi = """
+                  [
+                  {
+                    "inputs": [
+                    {"internalType":"uint256","name":"tokenId","type":"uint256"}
+                    ],
+                    "name":"cancelAsk",
+                    "outputs": [],
+                    "stateMutability":"nonpayable",
+                    "type":"function"
+                  }
+                  ]
+                  """;
+        
+        var userWallet = await dynamo.LoadAsync<UserWallet>(user.Id);
+        var userPrivateKey = userWallet.PrivateKey;
+         
+        var functionName = "cancelAsk";
+        var functionInput = new object[] {ticketId};
+        
+        return await ExecuteContractFunction(contract, userPrivateKey, abi, functionName, functionInput);
+    }
+    
+    
     // todo use kms client, dont store private key in settings 
     // var kmsClient = new AmazonKeyManagementServiceClient();
     // var kmsKeyId = TicketerOptions.KmsKeyId ?? throw new Exception("KMS_KEY_ID not set");
@@ -185,5 +212,6 @@ public class TicketContractClient(IDynamoDBContext dynamo)
         return (receipt, blockTimestamp);
     }
 
- 
+
+    
 }

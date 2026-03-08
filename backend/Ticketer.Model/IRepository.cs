@@ -18,4 +18,5 @@ public interface IRepository
     Task<UserTicketContainer> LoadUserTicketContainer(string userId);
     Task<TicketPurchasedEvent> LoadEventsBy(string contractAddress);
     Task<List<IContractEvent>> LoadContractEvents(string contractAddress);
+    Task<TicketAsk> FindAsk(string contractAddress, int ticketId);
 }
