@@ -14,10 +14,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5"> @Model.EventName 
-                    <small>Ticket No: @Model.TicketId</small><br/>
-                    <small>Price: $ @(Model.Price),-</small>
                 </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-header fs-5 d-flex justify-content-between w-100" style="border-bottom: 1px dotted #dee2e6;">
+                <span>Ticket No: @Model.TicketId</span>
+                <span class="ms-auto">Price: $ @(Model.Price),-</span>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
