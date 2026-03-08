@@ -1,3 +1,4 @@
+@using Ticketer.Model
 @model TicketHolding
 
 <div class="btn-group float-end" id="@($"ticket_actions_{@Model.ContractAddress}_{@Model.TicketNo}")">
@@ -6,7 +7,7 @@
     </button>
     <ul class="dropdown-menu">
         <li>
-            @if (@Model.IsCheckedIn)
+            @if (@Model.UserTicketState == UserTicketState.IsCheckedIn)
             {
                 <li>
                     <!-- Button trigger modal -->

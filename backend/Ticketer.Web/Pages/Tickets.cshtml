@@ -37,7 +37,11 @@
                     <div class="col-md-6">
                         <p><strong>Status: &nbsp;</strong>
                             <span id="@($"status_{t.ContractAddress}_{t.TicketNo}")">
-                                <partial name="_TicketStatus" model="@(new TicketActionStatus(t.ContractAddress, t.TicketNo, (t.IsCheckedIn ? "checked-in" : "not-checked-in"), "nil"))"/>
+                                <partial name="_TicketStatus" model="@(new TicketActionStatus(
+                                    t.ContractAddress, t.TicketNo, (
+                                        t.UserTicketState == UserTicketState.IsCheckedIn ? "checked-in" :
+                                        t.UserTicketState == UserTicketState.BaseState ? "not-checked-in" :
+                                        t.UserTicketState == UserTicketState.IsForSale ? "for-sale" : ""), "nil"))"/>
                             </span>
                         </p>
                         <p>
@@ -53,7 +57,7 @@
                 <div class="row">
                     <div class="col-12">
                         <hr style="border: 1px dashed #ccc;" />
-                        <partial name="_TicketActionButton" model="@(new TicketHolding(t.TicketNo, t.ContractAddress, t.EventName, t.VenueOpenTimeLocal, t.IsCheckedIn, t.CheckoutIsBlocked))"/>
+                        <partial name="_TicketActionButton" model="@(new TicketHolding(t.TicketNo, t.ContractAddress, t.EventName, t.VenueOpenTimeLocal, t.UserTicketState, t.CheckoutIsBlocked))"/>
                     </div>
                 </div>
             </div>

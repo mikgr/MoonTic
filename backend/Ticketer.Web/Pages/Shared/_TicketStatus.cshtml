@@ -40,6 +40,17 @@ else if (Model.Status == "not-checked-in")
          hx-swap="outerHTML"
          style="display: none;"></div>
 }
+else if (Model.Status == "for-sale")
+{
+    <span class="badge bg-warning">
+        For Sale
+    </span>
+    <div hx-get="@($"/Tickets?handler=ActionButton&contractAddress={Model.ContractAddress}&ticketId={Model.TicketId}")"
+         hx-trigger="load"
+         hx-target="@($"#ticket_actions_{Model.ContractAddress}_{Model.TicketId}")"
+         hx-swap="outerHTML"
+         style="display: none;"></div>
+}
 else if (Model.Action == "transfer")
 {
     @* Server sends HX-Trigger: fadeOutCard so layout script fades out and removes the card *@

@@ -12,9 +12,9 @@ contract Ticket {
     event TokenTransferred(address indexed from, address indexed to, uint256 indexed tokenId);
     event TokenCheckedIn(uint256 indexed tokenId, bytes32 indexed secretHash); // todo should i index here?
     event TokenCheckedOut(uint256 indexed tokenId);
-    event AskCreated(uint256 indexed tokenId, uint256 priceUsdc);
+    event AskCreated(uint256 indexed tokenId, uint256 price);
     event AskCancelled(uint256 indexed tokenId);
-    event AskAccepted(uint256 indexed tokenId, address indexed buyer, uint256 priceUsdc);
+    event AskAccepted(uint256 indexed tokenId, address indexed buyer, uint256 price);
     
     uint256 public checkOutBlockedTime;
     uint256 public venueOpenTime;
@@ -28,7 +28,7 @@ contract Ticket {
     uint256 private _nextTokenId;
     mapping(uint256 tokenId => address) private _tokenOwners;
     mapping(uint256 tokenId => bytes32) private _checkIns;
-    mapping(uint256 tokenId => uint256) private _asks; // price in USDC (0 = no active ask)
+    mapping(uint256 tokenId => uint256) private _asks; // price in the stableCoinPaymentContract currency (0 = no active ask)
 
     // todo name:string, symbol:MOONTIC, tokenURI
     // todo add uint64 totalTickets, fail if exceed total tickets

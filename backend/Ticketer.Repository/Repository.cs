@@ -90,13 +90,15 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
         var checkedInTask = dynamo.QueryAsync<TicketCheckedInEvent>(contractAddress).GetRemainingAsync();   //.ScanAsync<TicketCheckedInEvent>([]).GetRemainingAsync();
         var checkedOutTask = dynamo.QueryAsync<TicketCheckedOutEvent>(contractAddress).GetRemainingAsync();  //.ScanAsync<TicketCheckedOutEvent>([]).GetRemainingAsync();
         var transferredTask = dynamo.QueryAsync<TicketTransferredEvent>(contractAddress).GetRemainingAsync(); //.ScanAsync<TicketTransferredEvent>([]).GetRemainingAsync();
-
-        await Task.WhenAll(purchasedTask, checkedInTask, checkedOutTask, transferredTask);
+        var askCreatedTask = dynamo.QueryAsync<AskCreatedEvent>(contractAddress).GetRemainingAsync();
+        
+        await Task.WhenAll(purchasedTask, checkedInTask, checkedOutTask, transferredTask, askCreatedTask);
 
         return purchasedTask.Result.Cast<IContractEvent>()
             .Concat(checkedInTask.Result)
             .Concat(checkedOutTask.Result)
             .Concat(transferredTask.Result)
+            .Concat(askCreatedTask.Result)
             .OrderByDescending(e => e.TimestampUtc)
             .ToList();
     }

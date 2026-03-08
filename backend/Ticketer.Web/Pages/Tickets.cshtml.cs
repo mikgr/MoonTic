@@ -13,7 +13,7 @@ public record TicketHolding(
     string ContractAddress,
     string EventName,
     string VenueOpenTimeLocal,
-    bool IsCheckedIn,
+    UserTicketState UserTicketState,
     bool CheckoutIsBlocked
     );
 
@@ -52,7 +52,12 @@ public class TicketsPage : PageModel
             join c in contracts on t.ContractAddress equals c.Id
             orderby c.VenueOpenTimeUtc, t.TicketId
             select new TicketHolding(
-                t.TicketId, c.ContractAddress, c.Name, c.VenueOpenTimeLocal, t.IsCheckedIn, c.CheckOutBlockIsActive(TimeProvider.System));
+                t.TicketId, 
+                c.ContractAddress, 
+                c.Name, 
+                c.VenueOpenTimeLocal, 
+                t.State, 
+                c.CheckOutBlockIsActive(TimeProvider.System));
         
         Tickets = tickets;
         
@@ -249,16 +254,16 @@ public class TicketsPage : PageModel
             x.ContractAddress == contractAddress && x.TicketId == ticketId) 
                  ?? throw new Exception("No ticket found");
         
-        var x = new TicketHolding(
+        var ticketHolding = new TicketHolding(
             ticketId, 
             contract.ContractAddress, 
             contract.Name, 
             contract.VenueOpenTimeLocal, 
-            userTicket.IsCheckedIn,
+            userTicket.State,
             contract.CheckOutBlockIsActive(TimeProvider.System)
         );
         
-        return Partial("_TicketActionButton", x);
+        return Partial("_TicketActionButton", ticketHolding);
     }
     
     
