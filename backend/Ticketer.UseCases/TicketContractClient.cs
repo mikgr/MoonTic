@@ -109,6 +109,38 @@ public class TicketContractClient(IDynamoDBContext dynamo)
     }
 
     
+    public async Task<(TransactionReceipt receipt, DateTime blockTimestamp)> OnChainCreateAsk(
+        User currentUser, 
+        int ticketId, 
+        int askPrice, 
+        EventContract contract)
+    {
+        var abi = """
+                     [
+                     {
+                       "inputs": [
+                       {"internalType":"uint256","name":"tokenId","type":"uint256"},
+                       {"internalType":"uint256","name":"price","type":"uint256"}
+                       ],
+                       "name":"createAsk",
+                       "outputs": [],
+                       "stateMutability":"nonpayable",
+                       "type":"function"
+                     }
+                     ]
+                     """;
+        
+        // User private key
+        var userWallet = await dynamo.LoadAsync<UserWallet>(currentUser.Id);
+        var userPrivateKey = userWallet.PrivateKey;
+        var functionName = "createAsk";
+        
+        var functionInput = new object[] {ticketId, askPrice};
+        
+        return await ExecuteContractFunction(contract, userPrivateKey, abi, functionName, functionInput);
+    }
+    
+    
     // todo use kms client, dont store private key in settings 
     // var kmsClient = new AmazonKeyManagementServiceClient();
     // var kmsKeyId = TicketerOptions.KmsKeyId ?? throw new Exception("KMS_KEY_ID not set");

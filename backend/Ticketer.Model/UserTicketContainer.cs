@@ -3,12 +3,21 @@ using Amazon.DynamoDBv2.DataModel;
 
 namespace Ticketer.Model;
 
+
 public class UserTicket
 {
     public required int TicketId { get; init; } 
     public required string ContractAddress { get; init; }
-    public required bool IsCheckedIn { get; init; }
+    public required UserTicketState State { get; init; } = UserTicketState.BaseState;
 }
+
+public enum UserTicketState
+{
+    BaseState = 0,
+    IsCheckedIn = 1,
+    IsForSale = 2,
+}
+
 
 [DynamoDBTable("UserTicketContainerState")]
 public class UserTicketContainerState
@@ -19,6 +28,7 @@ public class UserTicketContainerState
 
     public List<UserTicket> BaseStateTickets { get; set; } = new(); // todo fix ther is a 400kb size limit on the doc
 }
+
 
 
 public class UserTicketContainer(UserTicketContainerState state)
@@ -41,7 +51,7 @@ public class UserTicketContainer(UserTicketContainerState state)
             {
                 TicketId = evnt.TicketId,
                 ContractAddress = evnt.EventContractId,
-                IsCheckedIn = false
+                State = UserTicketState.BaseState
             }
         );
         return this;
@@ -60,7 +70,7 @@ public class UserTicketContainer(UserTicketContainerState state)
             {
                 TicketId = evnt.TicketId,
                 ContractAddress = evnt.ContractId,
-                IsCheckedIn = false
+                State = UserTicketState.BaseState
             });
                 
             return this;
@@ -78,7 +88,7 @@ public class UserTicketContainer(UserTicketContainerState state)
             {
                 TicketId = evnt.TicketId,
                 ContractAddress = evnt.EventContractId,
-                IsCheckedIn = true
+                State = UserTicketState.IsCheckedIn
             });
         return this;
     }
@@ -91,7 +101,20 @@ public class UserTicketContainer(UserTicketContainerState state)
         {
             TicketId = evnt.TicketId,
             ContractAddress = evnt.EventContractId,
-            IsCheckedIn = false
+            State = UserTicketState.BaseState
+        });
+        return this;
+    }
+    
+    public UserTicketContainer ApplyEvent(AskCreatedEvent evnt)
+    {
+        if (evnt.UserId != UserId) throw new InvalidOperationException("Can only create ask for tickets you own");
+        RemoveTicketStateIfExists(evnt.ContractAddress, evnt.TicketId);
+        state.BaseStateTickets.Add(new UserTicket
+        {
+            TicketId = evnt.TicketId,
+            ContractAddress = evnt.ContractAddress,
+            State = UserTicketState.IsForSale
         });
         return this;
     }
@@ -119,6 +142,8 @@ public class UserTicketContainer(UserTicketContainerState state)
         if (ticket is null) 
             return null;
 
-        return ticket.IsCheckedIn;
+        return ticket.State == UserTicketState.IsCheckedIn;
     }
+
+  
 }
