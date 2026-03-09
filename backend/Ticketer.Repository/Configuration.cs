@@ -25,7 +25,7 @@ public static class Configuration
             if (string.IsNullOrWhiteSpace(settings.AwsSecretAccessKey)) throw new Exception("AWS secret access key not set");
             if (string.IsNullOrWhiteSpace(settings.RegionEndpoint)) throw new Exception("AWS region not set");
             
-            var regionEndpoint = settings.RegionEndpoint == "EUWest1" ? RegionEndpoint.EUWest1 : throw new Exception("Unknown region");
+            var regionEndpoint = settings.RegionEndpoint == "EUWest1" ? RegionEndpoint.EUWest1 : throw new Exception($"Unknown region '{settings.RegionEndpoint}'");
             
             return new AmazonDynamoDBClient(settings.AwsAccessKeyId, settings.AwsSecretAccessKey, regionEndpoint);
             

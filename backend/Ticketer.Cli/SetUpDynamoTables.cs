@@ -10,8 +10,10 @@ public class SetUpDynamoTables
 {
     public void Execute(IOptions<DynamoDbSettings> awsOptions)
     {
-        using var client = new AmazonDynamoDBClient(
-            awsOptions.Value.AwsAccessKeyId, awsOptions.Value.AwsSecretAccessKey, RegionEndpoint.EUWest1); // todo check region
+        // using var client = new AmazonDynamoDBClient(
+        //     awsOptions.Value.AwsAccessKeyId, awsOptions.Value.AwsSecretAccessKey, RegionEndpoint.EUWest1); // todo check region
+        
+        using var client = new AmazonDynamoDBClient(RegionEndpoint.EUWest1); // todo check region
         
         var tables = new List<CreateTableRequest>
         {

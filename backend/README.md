@@ -61,3 +61,9 @@
 // todo cancel ask
 // todo accept ask
 // todo support presale - allocation to owner 
+
+
+
+## Docker
+docker build -f Ticketer.Web/Dockerfile -t ticketer-web .
+docker run -d -p 8080:8080 --env-file .test.env --name ticketer-web ticketer-web
