@@ -43,13 +43,14 @@ if (!app.Environment.IsDevelopment())
 // todo map /organizer/usher   contractId ticketId userId? secret 
 MapPostProcessUsherCheckIn(app);
 
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-app.MapRazorPages().WithStaticAssets();
+app.MapRazorPages();
 
 app.Run();
 
