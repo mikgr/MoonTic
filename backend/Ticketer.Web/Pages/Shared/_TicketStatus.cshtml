@@ -2,7 +2,8 @@
 
 @if ((Model.Action == "check-in" && Model.Status != "checked-in") 
  || (Model.Action == "check-out" && Model.Status != "not-checked-in")
- || (Model.Action == "transfer" && Model.Status == "pending"))
+ || (Model.Action == "transfer" && Model.Status == "pending")
+ || (Model.Action == "create-ask" && Model.Status == "pending"))
 {
     <div class="badge bg-warning"
           hx-get="@($"/Tickets?handler=TicketStatus&action={Model.Action}&contractAddress={Model.ContractAddress}&ticketId={Model.TicketId}")"
