@@ -8,7 +8,9 @@ public class TransferTicketHandler(
     IRepository repo)
 {
     // todo handle time of RPC CALL
-    // todo handle already seen 
+    // todo handle already seen
+    // todo handler transfer to non moontic custodial wallet
+    // todo transfer via e-mail address
     public async Task Execute(User currentUser, string eventId, int ticketId, string toAddress)
     {
         Console.WriteLine($"{nameof(TransferTicketHandler)} {nameof(Execute)}");
