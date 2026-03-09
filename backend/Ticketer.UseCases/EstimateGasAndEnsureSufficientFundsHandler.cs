@@ -59,9 +59,9 @@ public static class EstimateGasAndEnsureSufficientFundsHandler
 
     private static async Task TransferFundsFromSystemWalletTo(string toAddress, BigInteger amount)
     {
-        var systemWalletPrivateKey = TicketerOptions.SystemPrivateKey ?? throw new Exception("PRIVATE_KEY not set");
-        var systemAccount = new Account(systemWalletPrivateKey, TicketerOptions.BlockchainId);
-        var systemWeb3 = new Web3(systemAccount, TicketerOptions.BlockchainRpcUrl);
+        var systemWalletPrivateKey = BlockchainOptions.SystemPrivateKey ?? throw new Exception("PRIVATE_KEY not set");
+        var systemAccount = new Account(systemWalletPrivateKey, BlockchainOptions.BlockchainId);
+        var systemWeb3 = new Web3(systemAccount, BlockchainOptions.BlockchainRpcUrl);
             
             
         // todo store this event for the explorer

@@ -29,7 +29,7 @@ public class StableCoinContractClient(IStableCoinInfoProvider stableCoinInfoProv
                      """;
         
         // User private key
-        var liquidityWalletPrivateKey = TicketerOptions.SystemPrivateKey;
+        var liquidityWalletPrivateKey = BlockchainOptions.SystemPrivateKey;
         var functionName = "transfer";
         // Convert hex string to bytes32
         

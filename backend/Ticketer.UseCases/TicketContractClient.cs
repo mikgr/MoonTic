@@ -200,7 +200,7 @@ public class TicketContractClient(IDynamoDBContext dynamo)
     
     // todo use kms client, dont store private key in settings 
     // var kmsClient = new AmazonKeyManagementServiceClient();
-    // var kmsKeyId = TicketerOptions.KmsKeyId ?? throw new Exception("KMS_KEY_ID not set");
+    // var kmsKeyId = BlockchainOptions.KmsKeyId ?? throw new Exception("KMS_KEY_ID not set");
     private static async Task<(TransactionReceipt receipt, DateTime blockTimestamp)> ExecuteContractFunction(
         EventContract contract, 
         string userPrivateKey, 
@@ -209,10 +209,10 @@ public class TicketContractClient(IDynamoDBContext dynamo)
         object[] functionInput)
     {
         // Create an account object
-        var userAccount = new Nethereum.Web3.Accounts.Account(userPrivateKey, TicketerOptions.BlockchainId); // todo user options
+        var userAccount = new Nethereum.Web3.Accounts.Account(userPrivateKey, BlockchainOptions.BlockchainId); // todo user options
 
         // Create a Web3 instance
-        var web3 = new Web3(userAccount, TicketerOptions.BlockchainRpcUrl);
+        var web3 = new Web3(userAccount, BlockchainOptions.BlockchainRpcUrl);
                     
         
         // Get contract-instance
@@ -249,9 +249,9 @@ public class TicketContractClient(IDynamoDBContext dynamo)
         string functionName, 
         object[] functionInput)
     {
-        var executingAccount = new Nethereum.Web3.Accounts.Account(userPrivateKey, TicketerOptions.BlockchainId); // todo user options
+        var executingAccount = new Nethereum.Web3.Accounts.Account(userPrivateKey, BlockchainOptions.BlockchainId); // todo user options
         
-        var web3Instance = new Web3(executingAccount, TicketerOptions.BlockchainRpcUrl); // todo user options
+        var web3Instance = new Web3(executingAccount, BlockchainOptions.BlockchainRpcUrl); // todo user options
         
         var contractInstance = web3Instance.Eth.GetContract(abi, contractAddress);
         

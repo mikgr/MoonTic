@@ -12,11 +12,11 @@ public class MintTicketHandler
     public async Task<(int tokenId, string transactionHash)> Execute(string contractAddress, string toAddress)
     {
         // TODO just for POC, PK must not leave HSM - use AWS KMS FROM PROD
-        var systemPrivateKey = M.TicketerOptions.SystemPrivateKey
+        var systemPrivateKey = M.BlockchainOptions.SystemPrivateKey
             ?? throw new Exception("PRIVATE_KEY not set");
         
-        var web3Account = new Account(systemPrivateKey, M.TicketerOptions.BlockchainId);
-        var web3Instance = new Web3(web3Account, M.TicketerOptions.BlockchainRpcUrl);
+        var web3Account = new Account(systemPrivateKey, M.BlockchainOptions.BlockchainId);
+        var web3Instance = new Web3(web3Account, M.BlockchainOptions.BlockchainRpcUrl);
         var abi = """
                      [
                          {

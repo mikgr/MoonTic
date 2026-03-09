@@ -11,11 +11,11 @@ public class DeployContractHandler
     
     public async Task<DeployContractResult> Execute(object[] constructorArgs)
     {
-        var privateKey = TicketerOptions.SystemPrivateKey
+        var privateKey = BlockchainOptions.SystemPrivateKey
             ?? throw new Exception("PRIVATE_KEY not set");
 
         var account = new Nethereum.Web3.Accounts.Account(privateKey);
-        var web3 = new Nethereum.Web3.Web3(account, TicketerOptions.BlockchainRpcUrl);
+        var web3 = new Nethereum.Web3.Web3(account, BlockchainOptions.BlockchainRpcUrl);
 
         Console.WriteLine("Using account: " + account.Address);
         
