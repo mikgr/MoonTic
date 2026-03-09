@@ -226,7 +226,7 @@ public class TicketsPage : PageModel
         return Partial("_TicketStatus", new TicketActionStatus(contractAddress, ticketId, "pending", "cancel-ask"));
     }
     
-    
+    // todo refactor / simplify!
     public async Task<IActionResult> OnGetTicketStatus(string action, string contractAddress, int ticketId)
     {
         var userId = HttpContext.Session.GetString("UserId");
@@ -245,6 +245,7 @@ public class TicketsPage : PageModel
             ("check-out", false, _) => "not-checked-in",
             ("transfer", _, true) => "pending",
             ("transfer", _, false) => "transferred",
+            ("create-ask", _, true) => "pending",
             (_, _, _) => "unknown"
         };
 
