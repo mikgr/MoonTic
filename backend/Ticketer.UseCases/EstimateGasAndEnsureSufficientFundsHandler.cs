@@ -1,4 +1,5 @@
 using System.Numerics;
+using Microsoft.Extensions.Options;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
 using Ticketer.Model;
@@ -6,9 +7,9 @@ using Account = Nethereum.Web3.Accounts.Account;
 
 namespace Ticketer.UseCases;
 
-public static class EstimateGasAndEnsureSufficientFundsHandler
+public class EstimateGasAndEnsureSufficientFundsHandler(IOptions<BlockchainSettings> blockchainSettings)
 {
-    public static async Task<HexBigInteger> Execute(Nethereum.Contracts.Function func, object[] funcInput, string toAddress, Web3 web3)
+    public async Task<HexBigInteger> Execute(Nethereum.Contracts.Function func, object[] funcInput, string toAddress, Web3 web3)
     {
         Console.WriteLine($"{nameof(EstimateGasAndEnsureSufficientFundsHandler)}");
         // Estimate gas cost
@@ -57,11 +58,11 @@ public static class EstimateGasAndEnsureSufficientFundsHandler
         return estimatedCostWei;
     }
 
-    private static async Task TransferFundsFromSystemWalletTo(string toAddress, BigInteger amount)
+    private async Task TransferFundsFromSystemWalletTo(string toAddress, BigInteger amount)
     {
-        var systemWalletPrivateKey = BlockchainOptions.SystemPrivateKey ?? throw new Exception("PRIVATE_KEY not set");
-        var systemAccount = new Account(systemWalletPrivateKey, BlockchainOptions.BlockchainId);
-        var systemWeb3 = new Web3(systemAccount, BlockchainOptions.BlockchainRpcUrl);
+        var systemWalletPrivateKey = blockchainSettings.Value.SystemPrivateKey ?? throw new Exception("PRIVATE_KEY not set");
+        var systemAccount = new Account(systemWalletPrivateKey, blockchainSettings.Value.BlockchainId);
+        var systemWeb3 = new Web3(systemAccount, blockchainSettings.Value.BlockchainRpcUrl);
             
             
         // todo store this event for the explorer

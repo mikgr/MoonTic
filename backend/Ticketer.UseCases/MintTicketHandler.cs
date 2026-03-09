@@ -1,4 +1,5 @@
 using System.Numerics;
+using Microsoft.Extensions.Options;
 using M = Ticketer.Model;
 
 using Nethereum.Web3.Accounts;
@@ -7,16 +8,16 @@ using Nethereum.Hex.HexTypes;
 
 namespace Ticketer.UseCases;
 
-public class MintTicketHandler
+public class MintTicketHandler(IOptions<M.BlockchainSettings> blockchainSettings)
 {
     public async Task<(int tokenId, string transactionHash)> Execute(string contractAddress, string toAddress)
     {
         // TODO just for POC, PK must not leave HSM - use AWS KMS FROM PROD
-        var systemPrivateKey = M.BlockchainOptions.SystemPrivateKey
-            ?? throw new Exception("PRIVATE_KEY not set");
+        var systemPrivateKey = blockchainSettings.Value.SystemPrivateKey
+                               ?? throw new Exception("PRIVATE_KEY not set");
         
-        var web3Account = new Account(systemPrivateKey, M.BlockchainOptions.BlockchainId);
-        var web3Instance = new Web3(web3Account, M.BlockchainOptions.BlockchainRpcUrl);
+        var web3Account = new Account(systemPrivateKey, blockchainSettings.Value.BlockchainId);
+        var web3Instance = new Web3(web3Account, blockchainSettings.Value.BlockchainRpcUrl);
         var abi = """
                      [
                          {
