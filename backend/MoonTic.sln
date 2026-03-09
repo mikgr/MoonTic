@@ -1,16 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeDb", "SpikeDb\SpikeDb.csproj", "{4E449FFB-E2BD-4798-9724-1B3F65CE5645}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeDb.Test", "SpikeDb.Test\SpikeDb.Test.csproj", "{0281F6F1-1B84-46C1-99A9-B9ACD25497EB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ticketer.Cli", "Ticketer.Cli\Ticketer.Cli.csproj", "{4205ACBB-755E-401F-9CCE-A31836E42B74}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ticketer.Test", "Ticketer.Test\Ticketer.Test.csproj", "{EDA6847E-9974-4A57-B0C3-A23CDA654005}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeCli", "SpikeCli\SpikeCli.csproj", "{23BA42C8-0984-4824-A80A-F0BBCFB81A23}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeCli.Test", "SpikeCli.Test\SpikeCli.Test.csproj", "{F1B0564C-229F-40AA-9187-E9ACB581B230}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ticketer.Web", "Ticketer.Web\Ticketer.Web.csproj", "{2816BADC-A5E3-4F4E-9FE5-9A62AF6FE389}"
 EndProject
@@ -26,14 +18,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4E449FFB-E2BD-4798-9724-1B3F65CE5645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E449FFB-E2BD-4798-9724-1B3F65CE5645}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E449FFB-E2BD-4798-9724-1B3F65CE5645}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E449FFB-E2BD-4798-9724-1B3F65CE5645}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0281F6F1-1B84-46C1-99A9-B9ACD25497EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0281F6F1-1B84-46C1-99A9-B9ACD25497EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0281F6F1-1B84-46C1-99A9-B9ACD25497EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0281F6F1-1B84-46C1-99A9-B9ACD25497EB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4205ACBB-755E-401F-9CCE-A31836E42B74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4205ACBB-755E-401F-9CCE-A31836E42B74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4205ACBB-755E-401F-9CCE-A31836E42B74}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -42,14 +26,6 @@ Global
 		{EDA6847E-9974-4A57-B0C3-A23CDA654005}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDA6847E-9974-4A57-B0C3-A23CDA654005}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDA6847E-9974-4A57-B0C3-A23CDA654005}.Release|Any CPU.Build.0 = Release|Any CPU
-		{23BA42C8-0984-4824-A80A-F0BBCFB81A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23BA42C8-0984-4824-A80A-F0BBCFB81A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23BA42C8-0984-4824-A80A-F0BBCFB81A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23BA42C8-0984-4824-A80A-F0BBCFB81A23}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F1B0564C-229F-40AA-9187-E9ACB581B230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1B0564C-229F-40AA-9187-E9ACB581B230}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1B0564C-229F-40AA-9187-E9ACB581B230}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1B0564C-229F-40AA-9187-E9ACB581B230}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2816BADC-A5E3-4F4E-9FE5-9A62AF6FE389}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2816BADC-A5E3-4F4E-9FE5-9A62AF6FE389}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2816BADC-A5E3-4F4E-9FE5-9A62AF6FE389}.Release|Any CPU.ActiveCfg = Release|Any CPU
