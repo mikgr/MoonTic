@@ -1,9 +1,15 @@
+using Microsoft.Extensions.Options;
 using Nethereum.RPC.Eth.DTOs;
 using Ticketer.Model;
 
+
 namespace Ticketer.UseCases;
 
-public class StableCoinContractClient(IStableCoinInfoProvider stableCoinInfoProvider)
+
+public class StableCoinContractClient(
+    IStableCoinInfoProvider stableCoinInfoProvider,
+    IOptions<BlockchainSettings> blockchainSettings,
+    TicketContractClient ticketContractClient)
 {
     public async Task<(TransactionReceipt receipt, DateTime blockTimestamp)> TransferFromLiquidityAccount(
         string symbol, int amountInFiat, string to)
@@ -29,13 +35,13 @@ public class StableCoinContractClient(IStableCoinInfoProvider stableCoinInfoProv
                      """;
         
         // User private key
-        var liquidityWalletPrivateKey = BlockchainOptions.SystemPrivateKey;
+        var liquidityWalletPrivateKey = blockchainSettings.Value.SystemPrivateKey;
         var functionName = "transfer";
         // Convert hex string to bytes32
         
         var functionInput = new object[] {to, amountInStables };
         
-        return await TicketContractClient.ExecuteContractFunction2(
+        return await ticketContractClient.ExecuteContractFunction2(
             info.contractAddress, 
             liquidityWalletPrivateKey, 
             abi, 
@@ -69,7 +75,7 @@ public class StableCoinContractClient(IStableCoinInfoProvider stableCoinInfoProv
         var functionName = "approve";
         var functionInput = new object[] {contractAddress, amountInStables };
         
-        return await TicketContractClient.ExecuteContractFunction2(
+        return await ticketContractClient.ExecuteContractFunction2(
             stableCoinInfo.contractAddress, 
             spenderPrivateKey, 
             abi, 

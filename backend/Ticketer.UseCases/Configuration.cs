@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Ticketer.Model;
 
 namespace Ticketer.UseCases;
 
@@ -10,23 +11,29 @@ public static class Configuration
         services.Configure<Dictionary<string, StableCoinEntry>>(configuration.GetSection("StableCoins"));
         services.AddSingleton<IStableCoinInfoProvider, StableCoinInfoProvider>();
 
+        services.AddOptions<BlockchainSettings>()
+            .Bind(configuration.GetSection("Blockchain"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        
         services.AddSingleton(TimeProvider.System);
         
         return services
-            .AddScoped<TicketContractClient>()
-            .AddScoped<StableCoinContractClient>()
+            .AddSingleton<TicketContractClient>()
+            .AddSingleton<StableCoinContractClient>()
+            .AddSingleton<EstimateGasAndEnsureSufficientFundsHandler>()
      
-            .AddScoped<CreateUserHandler>()
-            .AddScoped<BuyTicketHandler>()
-            .AddScoped<CheckInTicketHandler>()
-            .AddScoped<CheckOutTicketHandler>()
-            .AddScoped<DeployContractHandler>()
-            .AddScoped<PublishEventHandler>()
-            .AddScoped<TransferTicketHandler>()
-            .AddScoped<MintTicketHandler>()
-            .AddScoped<UsherTicketHandler>()
-            .AddScoped<CreateAskHandler>()
-            .AddScoped<CancelAskHandler>()
-            .AddScoped<AcceptAskHandler>();
+            .AddSingleton<CreateUserHandler>()
+            .AddSingleton<BuyTicketHandler>()
+            .AddSingleton<CheckInTicketHandler>()
+            .AddSingleton<CheckOutTicketHandler>()
+            .AddSingleton<DeployContractHandler>()
+            .AddSingleton<PublishEventHandler>()
+            .AddSingleton<TransferTicketHandler>()
+            .AddSingleton<MintTicketHandler>()
+            .AddSingleton<UsherTicketHandler>()
+            .AddSingleton<CreateAskHandler>()
+            .AddSingleton<CancelAskHandler>()
+            .AddSingleton<AcceptAskHandler>();
     }
 }
