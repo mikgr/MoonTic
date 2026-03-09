@@ -13,7 +13,7 @@ public class AcceptAskHandler(
     public async Task Execute(string contractAddress, int ticketId, int priceInFiat, User byUser)
     {
         if (string.IsNullOrEmpty(contractAddress)) throw new ArgumentException("Contract address cannot be null or empty", nameof(contractAddress));
-        if (ticketId <= 0) throw new ArgumentException("Ticket id must be greater than 0", nameof(ticketId));
+        if (ticketId < 0) throw new ArgumentException("Ticket id must be greater than 0", nameof(ticketId));
         if (priceInFiat <= 0) throw new ArgumentException("Price must be greater than 0", nameof(priceInFiat));
         if (byUser is null) throw new ArgumentException("User cannot be null", nameof(byUser));
         

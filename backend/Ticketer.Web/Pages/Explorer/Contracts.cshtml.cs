@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-
+using Microsoft.Extensions.Options;
 using Ticketer.Model;
 
 namespace Ticketer.Web.Pages.Explorer;
 
 public record ContractCreatedViewModel(DateTime TimeStampUtc, string ContractAddress, string ContractName, string TxHash);
 
-public class Contracts : PageModel
+public class Contracts(IOptions<BlockchainSettings> blockchainSettings) : PageModel
 {
     public List<ContractCreatedViewModel> ContractCreatedEvents = [];
     public List<IContractEvent> ContractEvents = [];
@@ -18,6 +18,8 @@ public class Contracts : PageModel
     [BindProperty(SupportsGet = true)]
     public int? TicketId { get; set; }
     
+    public string? RpcUrl { get; set; }
+    
     public async Task OnGet(string? address, string? ticketSegment, int? ticketId)
     {
         if (ticketSegment != null && ticketSegment != "ticket")
@@ -25,6 +27,8 @@ public class Contracts : PageModel
         
         ContractAddress = address;
 
+        RpcUrl = blockchainSettings.Value.BlockchainRpcUrl; 
+        
         var repo = HttpContext.RequestServices.GetRequiredService<IRepository>();
         
         if (!string.IsNullOrEmpty(ContractAddress))
