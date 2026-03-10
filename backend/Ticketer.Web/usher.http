@@ -1,10 +1,10 @@
-### Check in a ticket
-POST http://localhost:5021//organizer/event/usher-ticket
+### Usher ticket
+POST https://localhost:7229/organizer/event/usher-ticket
 Content-Type: application/json
-Authorization: ada
+Authorization: bob
 
 {
-  "contractAddress": "0xfb936dd6215cc442ba9fd47f1d0a069a206a0a70",
+  "contractAddress": "0x415c9e5c9360da7a6477fd19fa3327032446645a",
   "ticketId": 0,
-  "checkInSecret": "09eb1b4a-88e9-4038-9a17-eade28b5e4b0"
+  "checkInSecret": "80a9bebd-a179-4a71-a276-a4687ef201c1"
 }

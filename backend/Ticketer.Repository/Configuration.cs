@@ -21,13 +21,13 @@ public static class Configuration
         {
             var settings = sp.GetRequiredService<IOptions<DynamoDbSettings>>().Value;
             
-            if (string.IsNullOrWhiteSpace(settings.AwsAccessKeyId)) throw new Exception("AWS access key not set");
-            if (string.IsNullOrWhiteSpace(settings.AwsSecretAccessKey)) throw new Exception("AWS secret access key not set");
-            if (string.IsNullOrWhiteSpace(settings.RegionEndpoint)) throw new Exception("AWS region not set");
+            // if (string.IsNullOrWhiteSpace(settings.AwsAccessKeyId)) throw new Exception("AWS access key not set");
+            // if (string.IsNullOrWhiteSpace(settings.AwsSecretAccessKey)) throw new Exception("AWS secret access key not set");
+            // if (string.IsNullOrWhiteSpace(settings.RegionEndpoint)) throw new Exception("AWS region not set");
+            //
+            //var regionEndpoint = settings.RegionEndpoint == "EUWest1" ? RegionEndpoint.EUWest1 : throw new Exception($"Unknown region '{settings.RegionEndpoint}'");
             
-            var regionEndpoint = settings.RegionEndpoint == "EUWest1" ? RegionEndpoint.EUWest1 : throw new Exception($"Unknown region '{settings.RegionEndpoint}'");
-            
-            return new AmazonDynamoDBClient(settings.AwsAccessKeyId, settings.AwsSecretAccessKey, regionEndpoint);
+            return new AmazonDynamoDBClient(RegionEndpoint.EUWest1);
             
         }).AddSingleton<IDynamoDBContext>(sp =>
         {
