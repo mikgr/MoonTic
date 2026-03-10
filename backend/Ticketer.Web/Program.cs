@@ -43,6 +43,8 @@ if (!app.Environment.IsDevelopment())
 // todo map /organizer/usher   contractId ticketId userId? secret 
 MapPostProcessUsherCheckIn(app);
 
+app.MapGet("/health", () => Results.Ok("Healthy"));
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

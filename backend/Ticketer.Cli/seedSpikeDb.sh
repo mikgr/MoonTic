@@ -5,7 +5,7 @@
 #./bin/Debug/net10.0/Ticketer.Cli new user Conibase coinbase@gmail.com
 ./bin/Debug/net10.0/Ticketer.Cli new user Ada ada@gmail.com
 ./bin/Debug/net10.0/Ticketer.Cli new user Bob bob@gmail.com
-./bin/Debug/net10.0/Ticketer.Cli new user Mak mak@gmail.com
+./bin/Debug/net10.0/Ticketer.Cli new user cal cal@gmail.com
 #
 ##Create Events
 #./bin/Debug/net10.0/Ticketer.Cli set user 1 + new event "Rock Concert 1" "2026-04-01 20:00" "2026-04-01 23:59" 100 50.0
