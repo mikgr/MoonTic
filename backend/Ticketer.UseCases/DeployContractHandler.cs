@@ -20,9 +20,13 @@ public class DeployContractHandler(IOptions<BlockchainSettings> blockchainSettin
 
         Console.WriteLine("Using account: " + account.Address);
         
-        // todo path to config, NB for prod hash contract and check, before publish 
-        var jsonText = await File.ReadAllTextAsync("/Users/mikkel/Code/moontic/smart-contract/out/Ticket.sol/Ticket.json"); 
+        // NB for prod hash contract and check, before publish 
+        var contractPath = Path.Combine(AppContext.BaseDirectory, "Contracts", "Ticket.json");
+        var jsonText = await File.ReadAllTextAsync(contractPath); 
 
+        // todo store CompilerVersion, runs, EvmVersion, And Optimized
+        // todo - call snowtrac / avascan apis to verify contract, and store verification status in db, for later retrieval in UI
+        
         using var doc = JsonDocument.Parse(jsonText);
         var root = doc.RootElement;
 
