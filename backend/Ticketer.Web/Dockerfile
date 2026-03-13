@@ -7,12 +7,13 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Ticketer.Web/Ticketer.Web.csproj", "Ticketer.Web/"]
-COPY ["Ticketer.Model/Ticketer.Model.csproj", "Ticketer.Model/"]
-COPY ["Ticketer.Repository/Ticketer.Repository.csproj", "Ticketer.Repository/"]
-COPY ["Ticketer.UseCases/Ticketer.UseCases.csproj", "Ticketer.UseCases/"]
+COPY ["backend/Ticketer.Web/Ticketer.Web.csproj", "Ticketer.Web/"]
+COPY ["backend/Ticketer.Model/Ticketer.Model.csproj", "Ticketer.Model/"]
+COPY ["backend/Ticketer.Repository/Ticketer.Repository.csproj", "Ticketer.Repository/"]
+COPY ["backend/Ticketer.UseCases/Ticketer.UseCases.csproj", "Ticketer.UseCases/"]
 RUN dotnet restore "Ticketer.Web/Ticketer.Web.csproj"
-COPY . .
+COPY backend/ .
+COPY ["smart-contract/out/Ticket.sol/Ticket.json", "/smart-contract/out/Ticket.sol/Ticket.json"]
 WORKDIR "/src/Ticketer.Web"
 RUN dotnet build "./Ticketer.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
