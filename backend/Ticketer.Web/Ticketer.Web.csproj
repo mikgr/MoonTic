@@ -22,6 +22,7 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+      <Content Include="Properties\launchsettings.json" />
     </ItemGroup>
 
 </Project>
