@@ -211,3 +211,4 @@ FakesAssemblies/
 
 .idea/*
 *.env
+backend/Ticketer.Web/Properties/launchSettings.json
