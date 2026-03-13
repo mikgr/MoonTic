@@ -16,12 +16,17 @@ public static class Program
 
         var config = new ConfigurationBuilder()
             .AddEnvironmentVariables()
+            .AddJsonFile("appsettings.json")
             .Build();
         
         var services = new ServiceCollection()
             .AddAllUseCases(config)
             .AddRepository(config)
             .BuildServiceProvider();
+
+        var environmentClient = services.GetRequiredService<EnvironmentClient>();
+        environmentClient.SetEnvironmentDevelopment();
+        
         
         var runner = new CliBuilder(services)
             // user crud
@@ -33,7 +38,7 @@ public static class Program
                 HandleSetUser(userId, s);
             })
             
-            .Cmd("create", "table", ()=> new SetUpDynamoTables().Execute(services.GetRequiredService<IOptions<DynamoDbSettings>>()))
+            .Cmd("create", "table", ()=> new SetUpDynamoTables().Execute(services))
             
                 
             .CmdDi("print", "secret", "contract-id", "ticket-id", (IServiceProvider s, string contractId, int ticketId) => 

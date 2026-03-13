@@ -1,10 +1,9 @@
-
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.Runtime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Ticketer.Model;
 
 namespace Ticketer.Repository;
@@ -17,28 +16,41 @@ public static class Configuration
     {
         services.Configure<DynamoDbSettings>(config.GetSection("DynamoDb"));
         
-        services.AddSingleton<IAmazonDynamoDB>(sp =>
-        {
-            var settings = sp.GetRequiredService<IOptions<DynamoDbSettings>>().Value;
+        services
+            .AddSingleton<EnvironmentClient>(x=> new EnvironmentClient(config))
+            // This is configured by eth env vars: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+            .AddSingleton<IAmazonDynamoDB>(sp => new AmazonDynamoDBClient(RegionEndpoint.EUWest1))
             
-            // if (string.IsNullOrWhiteSpace(settings.AwsAccessKeyId)) throw new Exception("AWS access key not set");
-            // if (string.IsNullOrWhiteSpace(settings.AwsSecretAccessKey)) throw new Exception("AWS secret access key not set");
-            // if (string.IsNullOrWhiteSpace(settings.RegionEndpoint)) throw new Exception("AWS region not set");
-            //
-            //var regionEndpoint = settings.RegionEndpoint == "EUWest1" ? RegionEndpoint.EUWest1 : throw new Exception($"Unknown region '{settings.RegionEndpoint}'");
+            .AddSingleton<IDynamoDBContext>(sp => {
+                var client = CreateDynamoDbClient(sp);
+                return new DynamoDBContextBuilder()
+                    .WithDynamoDBClient(() => client)
+                    .Build();
+            })
             
-            return new AmazonDynamoDBClient(RegionEndpoint.EUWest1);
-            
-        }).AddSingleton<IDynamoDBContext>(sp =>
-        {
-            var client = sp.GetRequiredService<IAmazonDynamoDB>();
-
-            return new DynamoDBContextBuilder()
-                .WithDynamoDBClient(() => client)
-                .Build();
-        })
-        .AddSingleton<IRepository,Repository>();
+            .AddSingleton<IRepository,Repository>();
         
         return services;
+    }
+
+    private static IAmazonDynamoDB CreateDynamoDbClient(IServiceProvider sp)
+    {
+        if (!sp.GetRequiredService<EnvironmentClient>().IsDevelopment())
+            return sp.GetRequiredService<IAmazonDynamoDB>();
+        
+        // local dev configuration 
+        var conf = new AmazonDynamoDBConfig
+        {
+            ServiceURL = "http://localhost:9000",
+            UseHttp = true
+        };
+
+        var credentials = new BasicAWSCredentials("dummy", "dummy");
+
+        AWSConfigs.LoggingConfig.LogResponses = ResponseLoggingOption.Always;
+        AWSConfigs.LoggingConfig.LogMetrics = true;
+        AWSConfigs.LoggingConfig.LogTo = LoggingOptions.Console;
+
+        return new AmazonDynamoDBClient(credentials, conf);
     }
 }

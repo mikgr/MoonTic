@@ -5,7 +5,7 @@ using Nethereum.Hex.HexConvertors.Extensions;
 
 namespace Ticketer.UseCases;
 
-public class CreateUserHandler(IDynamoDBContext dynamo, IRepository repo)
+public class CreateUserHandler(IRepository repo)
 {
     public async Task Execute(string username, string email)
     {
@@ -58,7 +58,7 @@ public class CreateUserHandler(IDynamoDBContext dynamo, IRepository repo)
 
     private async Task EnsureUserNameIsFree(string username)
     {
-        var userSearch = dynamo.QueryAsync<UserState>(
+        var userSearch = repo.DbContext.QueryAsync<UserState>(
             username.ToLower(),
             new QueryConfig
             {
@@ -70,7 +70,7 @@ public class CreateUserHandler(IDynamoDBContext dynamo, IRepository repo)
     }
     private async Task EnsureEmailIsFree(string email)
     {
-        var emailSearch = dynamo.QueryAsync<UserState>(
+        var emailSearch = repo.DbContext.QueryAsync<UserState>(
             email.ToLower(),
             new QueryConfig
             {

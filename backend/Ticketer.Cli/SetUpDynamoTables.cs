@@ -1,6 +1,7 @@
-using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Runtime;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Ticketer.Repository;
 
@@ -8,10 +9,11 @@ namespace Ticketer;
 
 public class SetUpDynamoTables
 {
-    public void Execute(IOptions<DynamoDbSettings> awsOptions)
+    public void Execute(IServiceProvider serviceProvider)
     {
         //NB: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set from env-vars in the AmazonDynamoDBClient by convention
-        using var client = new AmazonDynamoDBClient(RegionEndpoint.EUWest1); // todo check region
+        
+        var client = serviceProvider.GetRequiredService<IAmazonDynamoDB>();
         
         var tables = new List<CreateTableRequest>
         {
@@ -21,7 +23,8 @@ public class SetUpDynamoTables
                 AttributeDefinitions = new List<AttributeDefinition>
                 {
                     new("Id", ScalarAttributeType.S),
-                    new("UserName", ScalarAttributeType.S)
+                    new("UserName", ScalarAttributeType.S),
+                    new("Email", ScalarAttributeType.S)
                 },
                 KeySchema = new List<KeySchemaElement> { new("Id", KeyType.HASH) },
                 GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
@@ -83,7 +86,8 @@ public class SetUpDynamoTables
                 {
                     new("ContractAddress", ScalarAttributeType.S),
                     new("OwnerId", ScalarAttributeType.S),
-                    new("VenueOpenTimeUtc", ScalarAttributeType.S)
+                    new("VenueOpenTimeUtc", ScalarAttributeType.S),
+                    new("SellerId", ScalarAttributeType.S)
                 },
                 KeySchema = new List<KeySchemaElement>
                 {

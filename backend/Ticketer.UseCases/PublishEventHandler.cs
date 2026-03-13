@@ -34,6 +34,8 @@ public class PublishEventHandler(
         // todo verify uint8 usdcDecimals = IERC20Metadata(usdcAddress).decimals(); matcher stablecoininfo.decimals
         BigInteger maxResellPrice = eventContract.MaxResellPrice(stableCoinInfo.decimals);
         
+        // todo Assert that the stablecoin address is actually a stable coin address on the network as expectedt with the right symbol
+        
         var constructorArgs = new object[]
         {
             checkOutBlockedTime,

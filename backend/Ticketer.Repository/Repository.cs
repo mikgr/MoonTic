@@ -1,6 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
 using Ticketer.Model;
 
 namespace Ticketer.Repository;
@@ -144,6 +142,4 @@ public class Repository(IDynamoDBContext dynamo) : IRepository
             .OrderByDescending(e => e.TimestampUtc)
             .ToList();
     }
-
-
 }
